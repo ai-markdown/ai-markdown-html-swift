@@ -29,6 +29,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
     case InCell
     case InSelect
     case InSelectInTable
+    case InTemplate
     case AfterBody
     case InFrameset
     case AfterFrameset
@@ -43,7 +44,11 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
         static let outer3 = ParsingStrings(["body", "html"])
         static let baseEtc = ParsingStrings(["base", "basefont", "bgsound", "command", "link"])
         static let baseEtc2 = ParsingStrings(["basefont", "bgsound", "link", "meta", "noframes", "style"])
-        static let baseEtc3 = ParsingStrings(["base", "basefont", "bgsound", "link", "meta", "noframes", "script", "style", "title"])
+        static let baseEtc3 = ParsingStrings(["base", "basefont", "bgsound", "link", "meta", "noframes", "script", "style", "template", "title"])
+        // parse5 `startTagInTemplate`: start tags handled in head without changing the template insertion mode, and the
+        // table-part start tags that switch the current template insertion mode to "in table".
+        static let templateHead = ParsingStrings(["base", "basefont", "bgsound", "link", "meta", "noframes", "script", "style", "template", "title"])
+        static let templateTable = ParsingStrings(["caption", "colgroup", "tbody", "tfoot", "thead"])
         static let headNoscript = ParsingStrings(["head", "noscript"])
         static let table = ParsingStrings(["table", "tbody", "tfoot", "thead", "tr"])
         static let tableSections = ParsingStrings(["tbody", "tfoot", "thead"])
@@ -73,6 +78,85 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
 
     public func equals(_ s: HtmlTreeBuilderState) -> Bool {
         return self.hashValue == s.hashValue
+    }
+
+    /// parse5 `templateEndTagInHead`: close the innermost open <template>, drop its template insertion mode and reset.
+    static func closeTemplate(_ t: Token, _ tb: HtmlTreeBuilder) throws -> Bool {
+        guard tb.templateOnStack() else {
+            tb.error(.InHead)
+            return false
+        }
+        tb.generateImpliedEndTagsThoroughly()
+        if tb.currentElement()?.nodeNameUTF8() != UTF8Arrays.template {
+            tb.error(.InHead)
+        }
+        tb.popStackToClose(UTF8Arrays.template)
+        tb.clearFormattingElementsToLastMarker()
+        tb.popTemplateMode()
+        tb.resetInsertionMode()
+        return true
+    }
+
+    /// parse5 `eofInTemplate`: open templates are closed and EOF is re-processed in the reset mode; otherwise parsing stops.
+    static func templateEOF(_ t: Token, _ tb: HtmlTreeBuilder) throws -> Bool {
+        guard tb.templateOnStack() else { return true }
+        tb.popStackToClose(UTF8Arrays.template)
+        tb.clearFormattingElementsToLastMarker()
+        tb.popTemplateMode()
+        tb.resetInsertionMode()
+        return try tb.process(t)
+    }
+
+    /// parse5 `framesetStartTagInBody`: only a properly nested <body> (second open element) can be replaced by a
+    /// frameset; fragments and templates never have one, so the token is ignored there.
+    static func framesetStartTagInBody(_ startTag: Token.StartTag, _ tb: HtmlTreeBuilder, _ state: HtmlTreeBuilderState) throws -> Bool {
+        tb.error(state)
+        guard tb.framesetOk(), tb.stack.count > 1, tb.stack[1].nodeNameUTF8() == UTF8Arrays.body else { return false }
+        let body = tb.stack[1]
+        if body.parent() != nil { try body.remove() }
+        while tb.stack.count > 1 { tb.pop() }
+        try tb.insert(startTag)
+        tb.transition(.InFrameset)
+        return true
+    }
+
+    /// parse5 `formStartTagInBody`: inside an open <template> a form is inserted without becoming the form pointer.
+    static func insertFormInBody(_ startTag: Token.StartTag, _ tb: HtmlTreeBuilder, _ state: HtmlTreeBuilderState) throws -> Bool {
+        let inTemplate = tb.templateOnStack()
+        if tb.getFormElement() != nil && !inTemplate {
+            tb.error(state)
+            return false
+        }
+        if (try tb.inButtonScope(UTF8Arrays.p)) {
+            try tb.processEndTag(UTF8Arrays.p)
+        }
+        let previous = tb.getFormElement()
+        try tb.insertForm(startTag, true)
+        if inTemplate { tb.setFormElement(previous) }
+        tb.framesetOk(false)
+        return true
+    }
+
+    /// parse5 `formEndTagInBody`.
+    static func closeFormInBody(_ tb: HtmlTreeBuilder, _ state: HtmlTreeBuilderState) throws -> Bool {
+        let inTemplate = tb.templateOnStack()
+        let currentForm: Element? = tb.getFormElement()
+        if !inTemplate { tb.setFormElement(nil) }
+        guard currentForm != nil || inTemplate, try tb.inScope(UTF8Arrays.form) else {
+            tb.error(state)
+            return false
+        }
+        tb.generateImpliedEndTags()
+        if tb.currentElement()?.nodeNameUTF8() != UTF8Arrays.form {
+            tb.error(state)
+        }
+        if inTemplate {
+            tb.popStackToClose(UTF8Arrays.form)
+        } else if let currentForm {
+            // remove currentForm from stack. will shift anything under up.
+            tb.removeFromStack(currentForm)
+        }
+        return true
     }
 
     func process(_ t: Token, _ tb: HtmlTreeBuilder) throws -> Bool {
@@ -205,6 +289,13 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     tb.markInsertionMode()
                     tb.transition(.Text)
                     try tb.insert(start)
+                } else if start.normalNameEquals(UTF8Arrays.template) {
+                    // parse5 `startTagInHead` TEMPLATE: template children stand in for the template content fragment.
+                    try tb.insert(start)
+                    tb.insertMarkerToFormattingElements()
+                    tb.framesetOk(false)
+                    tb.transition(.InTemplate)
+                    tb.pushTemplateMode(.InTemplate)
                 } else if start.normalNameEquals(UTF8Arrays.head) {
                     tb.error(self)
                     return false
@@ -217,6 +308,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                 if end.normalNameEquals(UTF8Arrays.head) {
                     tb.pop()
                     tb.transition(.AfterHead)
+                } else if end.normalNameEquals(UTF8Arrays.template) {
+                    return try HtmlTreeBuilderState.closeTemplate(t, tb)
                 } else if TagSets.outer2.containsCaseInsensitive(end) {
                     return try anythingElse(t, tb)
                 } else {
@@ -292,6 +385,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
             } else if (t.isEndTag()) {
                 if TagSets.outer3.containsCaseInsensitive(t.asEndTag()) {
                     try anythingElse(t, tb)
+                } else if t.asEndTag().normalNameEquals(UTF8Arrays.template) {
+                    return try HtmlTreeBuilderState.closeTemplate(t, tb)
                 } else {
                     tb.error(self)
                     return false
@@ -678,18 +773,11 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     tb.framesetOk(false)
                     tb.transition(.InTable)
                 case .form:
-                    if tb.getFormElement() != nil {
-                        tb.error(self)
-                        return false
-                    }
-                    if (try tb.inButtonScope(UTF8Arrays.p)) {
-                        try tb.processEndTag(UTF8Arrays.p)
-                    }
-                    try tb.insertForm(startTag, true)
-                    tb.framesetOk(false)
+                    return try HtmlTreeBuilderState.insertFormInBody(startTag, tb, self)
                 case .html:
                     tb.error(self)
-                    if startTag.hasAnyAttributes() {
+                    // parse5 `htmlStartTagInBody`: attributes are not adopted while a <template> is open.
+                    if startTag.hasAnyAttributes(), !tb.templateOnStack() {
                         startTag.ensureAttributes()
                         if let attrs = startTag._attributes,
                            let html = tb.getFromStack(UTF8Arrays.html) {
@@ -701,7 +789,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     }
                 case .body:
                     tb.error(self)
-                    guard let body = tb.getFromStack(UTF8Arrays.body) else { return false }
+                    guard let body = tb.getFromStack(UTF8Arrays.body), !tb.templateOnStack() else { return false }
                     if startTag.hasAnyAttributes() {
                         startTag.ensureAttributes()
                         if let attrs = startTag._attributes {
@@ -722,7 +810,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     try tb.insertEmpty(startTag)
                     tb.framesetOk(false)
                 case .hr:
-                    try reconstructFormattingIfNeeded()
+                    // parse5 `hrStartTagInBody`: closes an open <p>; formatting elements are not reconstructed.
+                    try closePIfInButtonScope()
                     try tb.insertEmpty(startTag)
                     tb.framesetOk(false)
                 case .meta, .script, .style, .title:
@@ -740,9 +829,15 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     try reconstructFormattingIfNeeded()
                     try tb.insert(startTag)
                     tb.framesetOk(false)
-                    tb.transition(.InSelect)
+                    switch tb.state() {
+                    case .InTable, .InCaption, .InTableBody, .InRow, .InCell:
+                        tb.transition(.InSelectInTable)
+                    default:
+                        tb.transition(.InSelect)
+                    }
                 case .plaintext:
-                    try reconstructFormattingIfNeeded()
+                    // parse5 `plaintextStartTagInBody`: closes an open <p>; no formatting reconstruction.
+                    try closePIfInButtonScope()
                     try tb.insert(startTag)
                     tb.tokeniser.transition(.PLAINTEXT)
                 case .option, .optgroup:
@@ -788,16 +883,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     @inline(__always)
                     func handleTagIdStart(_ tagId: Token.Tag.TagId) throws -> Bool? {
                         if tagId == .form {
-                            if tb.getFormElement() != nil {
-                                tb.error(self)
-                                return false
-                            }
-                            if (try tb.inButtonScope(UTF8Arrays.p)) {
-                                try tb.processEndTag(UTF8Arrays.p)
-                            }
-                            try tb.insertForm(startTag, true)
-                            tb.framesetOk(false)
-                            return true
+                            return try HtmlTreeBuilderState.insertFormInBody(startTag, tb, self)
                         }
                         if tagId == .table {
                             if (try tb.inButtonScope(UTF8Arrays.p)) {
@@ -817,6 +903,16 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                             let el: Element = try tb.insert(startTag)
                             tb.pushActiveFormattingElements(el)
                             return true
+                        }
+                        if tagId == .hr {
+                            // parse5 `hrStartTagInBody`: closes an open <p> and does not reconstruct formatting elements.
+                            try closePIfInButtonScope()
+                            try tb.insertEmpty(startTag)
+                            tb.framesetOk(false)
+                            return true
+                        }
+                        if tagId == .frameset {
+                            return try HtmlTreeBuilderState.framesetStartTagInBody(startTag, tb, self)
                         }
                         if Constants.InBodyStartEmptyFormatters.containsTagId(tagId) {
                             try reconstructFormattingIfNeeded()
@@ -911,6 +1007,12 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                             try reconstructFormattingIfNeeded()
                             let el: Element = try tb.insert(startTag)
                             tb.pushActiveFormattingElements(el)
+                        } else if equalsSlice(UTF8Arrays.hr, nameSlice) {
+                            try closePIfInButtonScope()
+                            try tb.insertEmpty(startTag)
+                            tb.framesetOk(false)
+                        } else if equalsSlice(UTF8Arrays.frameset, nameSlice) {
+                            return try HtmlTreeBuilderState.framesetStartTagInBody(startTag, tb, self)
                         } else if Constants.InBodyStartEmptyFormatters.contains(nameSlice) {
                             try reconstructFormattingIfNeeded()
                             try tb.insertEmpty(startTag)
@@ -923,15 +1025,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                         } else if Constants.InBodyStartToHead.contains(nameSlice) {
                             return try tb.process(t, .InHead)
                         } else if equalsSlice(UTF8Arrays.form, nameSlice) {
-                            if tb.getFormElement() != nil {
-                                tb.error(self)
-                                return false
-                            }
-                            if (try tb.inButtonScope(UTF8Arrays.p)) {
-                                try tb.processEndTag(UTF8Arrays.p)
-                            }
-                            try tb.insertForm(startTag, true)
-                            tb.framesetOk(false)
+                            return try HtmlTreeBuilderState.insertFormInBody(startTag, tb, self)
                         } else if equalsSlice(UTF8Arrays.table, nameSlice) {
                             if (try tb.inButtonScope(UTF8Arrays.p)) {
                                 try tb.processEndTag(UTF8Arrays.p)
@@ -1033,6 +1127,9 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
 
             case .EndTag:
                 let endTag: Token.EndTag = t.asEndTag()
+                if endTag.tagId == .none, endTag.normalNameEquals(UTF8Arrays.template) {
+                    return try HtmlTreeBuilderState.closeTemplate(t, tb)
+                }
                 let currentTagId = tb.currentElement()?._tag.tagId
                 var adoptionName: [UInt8]? = nil
                 switch endTag.tagId {
@@ -1223,20 +1320,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                         }
                         return true
                     case .form:
-                        let currentForm: Element? = tb.getFormElement()
-                        tb.setFormElement(nil)
-                        if (try currentForm == nil || !tb.inScope(UTF8Arrays.form)) {
-                            tb.error(self)
-                            return false
-                        } else {
-                            tb.generateImpliedEndTags()
-                            if let currentTagId, currentTagId != .form {
-                                tb.error(self)
-                            }
-                            // remove currentForm from stack. will shift anything under up.
-                            tb.removeFromStack(currentForm!)
-                        }
-                        return true
+                        return try HtmlTreeBuilderState.closeFormInBody(tb, self)
                     case .p:
                         if (try !tb.inButtonScope(UTF8Arrays.p)) {
                             tb.error(self)
@@ -1354,19 +1438,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                                 return try tb.process(endTag)
                             }
                         } else if name == UTF8Arrays.form {
-                            let currentForm: Element? = tb.getFormElement()
-                            tb.setFormElement(nil)
-                            if (try currentForm == nil || !tb.inScope(name)) {
-                                tb.error(self)
-                                return false
-                            } else {
-                                tb.generateImpliedEndTags()
-                                if (tb.currentElement() != nil && !tb.currentElement()!.nodeNameUTF8().equals(name)) {
-                                    tb.error(self)
-                                }
-                                // remove currentForm from stack. will shift anything under up.
-                                tb.removeFromStack(currentForm!)
-                            }
+                            return try HtmlTreeBuilderState.closeFormInBody(tb, self)
                         } else if name == UTF8Arrays.p {
                             if (try !tb.inButtonScope(name)) {
                                 tb.error(self)
@@ -1432,7 +1504,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                 break
             case .EOF:
                 // todo: error if stack contains something not dd, dt, li, p, tbody, td, tfoot, th, thead, tr, body, html
-                // stop parsing
+                // parse5 `eofInBody`: with template insertion modes, open templates are closed first; otherwise stop parsing.
+                if tb.hasTemplateModes() { return try HtmlTreeBuilderState.templateEOF(t, tb) }
                 break
             }
             return true
@@ -1526,7 +1599,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                         return true
                     case .form:
                         tb.error(self)
-                        if (tb.getFormElement() != nil) {
+                        // parse5 `formStartTagInTable`: no form pointer and no open <template>.
+                        if (tb.getFormElement() != nil || tb.templateOnStack()) {
                             return false
                         } else {
                             try tb.insertForm(startTag, false)
@@ -1561,7 +1635,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                         let processed: Bool = try tb.processEndTag(UTF8Arrays.table)
                         if (processed) // only ignored if in fragment
                         {return try tb.process(t)}
-                    } else if name == UTF8Arrays.style || name == UTF8Arrays.script {
+                    } else if name == UTF8Arrays.style || name == UTF8Arrays.script || name == UTF8Arrays.template {
                         return try tb.process(t, .InHead)
                     } else if name == UTF8Arrays.input {
                         let isHidden: Bool
@@ -1579,7 +1653,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                         }
                     } else if name == UTF8Arrays.form {
                         tb.error(self)
-                        if (tb.getFormElement() != nil) {
+                        if (tb.getFormElement() != nil || tb.templateOnStack()) {
                             return false
                         } else {
                             try tb.insertForm(startTag, false)
@@ -1618,6 +1692,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                             tb.popStackToClose(UTF8Arrays.table)
                         }
                         tb.resetInsertionMode()
+                    } else if name == UTF8Arrays.template {
+                        return try HtmlTreeBuilderState.closeTemplate(t, tb)
                     } else if TagSets.tableMix.contains(name) {
                         tb.error(self)
                         return false
@@ -1790,12 +1866,16 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
             }
             return true
         case .InColumnGroup:
-            func anythingElse(_ t: Token, _ tb: TreeBuilder)throws->Bool {
-                let processed: Bool = try tb.processEndTag(UTF8Arrays.colgroup)
-                if (processed) { // only ignored in frag case
-                    return try tb.process(t)
+            // parse5 `tokenInColumnGroup`: only an open <colgroup> is closed; otherwise (fragment root or an open
+            // <template>) the token is ignored.
+            func anythingElse(_ t: Token, _ tb: HtmlTreeBuilder)throws->Bool {
+                guard tb.currentElement()?.nodeNameUTF8() == UTF8Arrays.colgroup else {
+                    tb.error(self)
+                    return false
                 }
-                return true
+                tb.pop()
+                tb.transition(.InTable)
+                return try tb.process(t)
             }
 
             if (HtmlTreeBuilderState.isWhitespace(t)) {
@@ -1816,6 +1896,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     return try tb.process(t, .InBody)
                 } else if UTF8Arrays.col == name {
                     try tb.insertEmpty(startTag)
+                } else if UTF8Arrays.template == name {
+                    return try tb.process(t, .InHead)
                 } else {
                     return try anythingElse(t, tb)
                 }
@@ -1824,23 +1906,26 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                 let endTag: Token.EndTag = t.asEndTag()
                 let name = endTag.normalName()
                 if UTF8Arrays.colgroup == name {
-                    if UTF8Arrays.html == tb.currentElement()?.nodeNameUTF8() { // frag case
+                    if UTF8Arrays.colgroup != tb.currentElement()?.nodeNameUTF8() { // frag case or open template
                         tb.error(self)
                         return false
                     } else {
                         tb.pop()
                         tb.transition(.InTable)
                     }
+                } else if UTF8Arrays.template == name {
+                    return try HtmlTreeBuilderState.closeTemplate(t, tb)
+                } else if UTF8Arrays.col == name {
+                    tb.error(self)
+                    return false
                 } else {
                     return try anythingElse(t, tb)
                 }
                 break
             case .EOF:
-                if UTF8Arrays.html == tb.currentElement()?.nodeNameUTF8() {
-                    return true // stop parsing; frag case
-                } else {
-                    return try anythingElse(t, tb)
-                }
+                // parse5 routes EOF in column group to `eofInBody`.
+                if tb.hasTemplateModes() { return try HtmlTreeBuilderState.templateEOF(t, tb) }
+                return true // stop parsing
             default:
                 return try anythingElse(t, tb)
             }
@@ -2165,7 +2250,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                         try tb.processEndTag(UTF8Arrays.select)
                         return try tb.process(start)
                     }
-                    if start.normalNameEquals(UTF8Arrays.script) {
+                    if start.normalNameEquals(UTF8Arrays.script) || start.normalNameEquals(UTF8Arrays.template) {
                         return try tb.process(t, .InHead)
                     }
                     if start.normalNameEquals(UTF8Arrays.html) {
@@ -2242,6 +2327,9 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     _ = end.normalNameSlice()
                 }
                 if end.tagId == .none {
+                    if end.normalNameEquals(UTF8Arrays.template) {
+                        return try HtmlTreeBuilderState.closeTemplate(t, tb)
+                    }
                     if end.normalNameEquals(UTF8Arrays.optgroup) {
                         if currentTagId == .option && current != nil && tb.aboveOnStack(current!) != nil && tb.aboveOnStack(current!)?._tag.tagId == .optgroup {
                             try tb.processEndTag(UTF8Arrays.option)
@@ -2351,6 +2439,49 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                 return try tb.process(t, .InSelect)
             }
             return try tb.process(t, .InSelect)
+        case .InTemplate:
+            // parse5 "in template" insertion mode (also the initial mode of the <template> fragment context used by
+            // hast-util-raw). Characters, comments and the in-head start tags do not change the mode; the first other
+            // start tag replaces the current template insertion mode and is re-processed there.
+            switch (t.type) {
+            case .Char:
+                return try tb.process(t, .InBody)
+            case .Comment:
+                try tb.insert(t.asComment())
+                return true
+            case .Doctype:
+                tb.error(self)
+                return false
+            case .StartTag:
+                let startTag: Token.StartTag = t.asStartTag()
+                let name = startTag.normalName() ?? []
+                if TagSets.templateHead.contains(name) {
+                    return try tb.process(t, .InHead)
+                }
+                let mode: HtmlTreeBuilderState
+                if TagSets.templateTable.contains(name) {
+                    mode = .InTable
+                } else if name == UTF8Arrays.col {
+                    mode = .InColumnGroup
+                } else if name == UTF8Arrays.tr {
+                    mode = .InTableBody
+                } else if name == UTF8Arrays.td || name == UTF8Arrays.th {
+                    mode = .InRow
+                } else {
+                    mode = .InBody
+                }
+                tb.setCurrentTemplateMode(mode)
+                tb.transition(mode)
+                return try tb.process(t)
+            case .EndTag:
+                if t.asEndTag().normalNameEquals(UTF8Arrays.template) {
+                    return try HtmlTreeBuilderState.closeTemplate(t, tb)
+                }
+                tb.error(self)
+                return false
+            case .EOF:
+                return try HtmlTreeBuilderState.templateEOF(t, tb)
+            }
         case .AfterBody:
             if (HtmlTreeBuilderState.isWhitespace(t)) {
                 return try tb.process(t, .InBody)
@@ -2568,7 +2699,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
     // lists of tags to search through. A little harder to read here, but causes less GC than dynamic varargs.
     // was contributing around 10% of parse GC load.
     fileprivate final class Constants {
-        fileprivate static let InBodyStartToHead = ParsingStrings(["base", "basefont", "bgsound", "command", "link", "meta", "noframes", "script", "style", "title"])
+        fileprivate static let InBodyStartToHead = ParsingStrings(["base", "basefont", "bgsound", "command", "link", "meta", "noframes", "script", "style", "template", "title"])
         fileprivate static let InBodyStartPClosers = ParsingStrings(["address", "article", "aside", "blockquote", "center", "details", "dir", "div", "dl",
                                                                 "fieldset", "figcaption", "figure", "footer", "header", "hgroup", "menu", "nav", "ol",
                                                                 "p", "section", "summary", "ul"])

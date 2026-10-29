@@ -365,6 +365,18 @@ import Foundation
 		return try Parser.parseBodyFragment(bodyHtml, "")
 	}
 
+    /**
+     Parse a fragment of HTML in parse5's default fragment context (a detached `<template>`), as hast-util-raw does.
+     See ``Parser/parseTemplateFragment(_:_:)-(String,String)``.
+
+     - parameter fragmentHtml: HTML fragment
+     - parameter baseUri: URL to resolve relative URLs against.
+     - returns: the parsed top-level nodes
+    */
+    public func parseTemplateFragment(_ fragmentHtml: String, _ baseUri: String = "") throws -> Array<Node> {
+        return try Parser.parseTemplateFragment(fragmentHtml, baseUri)
+    }
+
 //	/**
 //	Fetch a URL, and parse it as HTML. Provided for compatibility; in most cases use {@link #connect(String)} instead.
 //	<p>

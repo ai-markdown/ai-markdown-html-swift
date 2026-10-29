@@ -180,6 +180,28 @@ public class Parser {
         return try parseFragment(fragmentHtml.utf8Array, context, baseUri)
     }
 
+    /**
+     Parse a fragment of HTML the way parse5 7.3 `Parser.getFragmentParser(undefined)` does (used by hast-util-raw):
+     the context element is a detached `<template>`, so tree construction starts in the "in template" insertion mode
+     and the template insertion mode stack decides the mode after the first decisive start tag (table parts such as
+     `<td>` switch it permanently to the table modes; anything else switches to "in body"). Template children stand in
+     for parse5's template content fragment.
+
+     Ordinary `parseBodyFragment`/`parseFragment` calls keep the `<body>`/caller context behavior.
+
+     - parameter fragmentHtml: the fragment of HTML to parse
+     - parameter baseUri: base URI of document (i.e. original fetch location), for resolving relative URLs.
+     - returns: the children of the fragment root, in document order.
+    */
+    public static func parseTemplateFragment(_ fragmentHtml: [UInt8], _ baseUri: [UInt8] = []) throws -> Array<Node> {
+        let context = try Element(Tag.valueOf(UTF8Arrays.template, ParseSettings.htmlDefault), baseUri)
+        return try parseFragment(fragmentHtml, context, baseUri)
+    }
+
+    public static func parseTemplateFragment(_ fragmentHtml: String, _ baseUri: String = "") throws -> Array<Node> {
+        return try parseTemplateFragment(fragmentHtml.utf8Array, baseUri.utf8Array)
+    }
+
 	/**
 	 Parse a fragment of XML into a list of nodes.
 	 

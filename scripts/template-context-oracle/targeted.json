@@ -1,0 +1,352 @@
+{
+ "cases": [
+  {
+   "id": "td-first",
+   "html": "<td>orphan</td><h1>heading</h1>"
+  },
+  {
+   "id": "th-first-text",
+   "html": "<th>x</th>a</s>b"
+  },
+  {
+   "id": "td-cell-merge",
+   "html": "<td>x</td>a</s>b"
+  },
+  {
+   "id": "tr-first",
+   "html": "<tr>a</s>b"
+  },
+  {
+   "id": "tr-first-cells",
+   "html": "<tr><td>a</td><td>b</td></tr>text<p>after</p>"
+  },
+  {
+   "id": "col-first",
+   "html": "<col>a</s>b"
+  },
+  {
+   "id": "col-first-then-elements",
+   "html": "<col><p>after</p><col>more</col>"
+  },
+  {
+   "id": "colgroup-first",
+   "html": "<colgroup><col>a<p>b</p>"
+  },
+  {
+   "id": "colgroup-first-closed",
+   "html": "<colgroup></colgroup>text<p>p</p>"
+  },
+  {
+   "id": "caption-first",
+   "html": "<caption>cap<p>in</p></caption>after<td>c</td>"
+  },
+  {
+   "id": "tbody-first",
+   "html": "<tbody>text<tr><td>a</td></tr></tbody>b<p>c</p>"
+  },
+  {
+   "id": "thead-tfoot-first",
+   "html": "<thead>a<tr><th>h</th></tr></thead><tfoot><tr><td>f</td></tr></tfoot>z"
+  },
+  {
+   "id": "table-mode-then-table",
+   "html": "<tr><td>a</td></tr><table><tr><td>b</td></tr></table>c"
+  },
+  {
+   "id": "table-mode-close-table",
+   "html": "<td>a</td></table>b</td>c"
+  },
+  {
+   "id": "table-mode-select",
+   "html": "<td><select><option>a</select>b</td>c"
+  },
+  {
+   "id": "table-mode-form",
+   "html": "<td><form>a</form>b</td><form>c"
+  },
+  {
+   "id": "table-mode-input-hidden",
+   "html": "<tr><input type=hidden><input type=text>x"
+  },
+  {
+   "id": "table-mode-script-style",
+   "html": "<tr><script>s</script><style>t</style>x"
+  },
+  {
+   "id": "table-mode-comment",
+   "html": "<!-- c --><tr><!-- d -->x<td>y</td>"
+  },
+  {
+   "id": "table-mode-whitespace",
+   "html": "  \n<tr>\n <td> a </td>\n</tr>\n b"
+  },
+  {
+   "id": "table-mode-nested-template",
+   "html": "<tr><template><td>in</td></template><td>out</td>"
+  },
+  {
+   "id": "row-mode-end-tags",
+   "html": "<td>a</td></tr></tbody></thead>b"
+  },
+  {
+   "id": "cells-then-body-tags",
+   "html": "<td>a</td><div>b</div><p>c</p>"
+  },
+  {
+   "id": "caption-then-cells",
+   "html": "<caption>a</caption><td>b</td>"
+  },
+  {
+   "id": "col-then-text-then-tag",
+   "html": "<col>ignored<b>also</b>ignored"
+  },
+  {
+   "id": "col-then-colgroup-close",
+   "html": "<col></colgroup><col>x"
+  },
+  {
+   "id": "head-tags-before-td",
+   "html": "<meta content=\"<p>\"><link href=x><base href=y><td>x</td>"
+  },
+  {
+   "id": "title-before-td",
+   "html": "<title><p></title><td>x</td>"
+  },
+  {
+   "id": "style-before-tr",
+   "html": "<style>a{}</style><tr>x"
+  },
+  {
+   "id": "script-before-body",
+   "html": "<script>x</script><p>y</p><td>z</td>"
+  },
+  {
+   "id": "noframes-before",
+   "html": "<noframes><p></noframes><td>x</td>"
+  },
+  {
+   "id": "template-before-td",
+   "html": "<template><p></template></td><th>x</th>"
+  },
+  {
+   "id": "text-then-td",
+   "html": "x<td>y"
+  },
+  {
+   "id": "comment-stray-end-then-para",
+   "html": "<!-- c --> </s>\n\n<p>para</p>"
+  },
+  {
+   "id": "end-tag-then-td",
+   "html": "</p><td>x"
+  },
+  {
+   "id": "whitespace-then-tr",
+   "html": "\n\n<tr><td>x"
+  },
+  {
+   "id": "p-then-td",
+   "html": "<p>x</p><td>y</td>"
+  },
+  {
+   "id": "table-then-td",
+   "html": "<table><td>x</td></table>"
+  },
+  {
+   "id": "div-td",
+   "html": "<div><td>x</td></div>"
+  },
+  {
+   "id": "template-text",
+   "html": "<template>x</template>y"
+  },
+  {
+   "id": "template-nested",
+   "html": "<template><template>a</template>b</template>c"
+  },
+  {
+   "id": "template-table-parts",
+   "html": "<template><tr><td>a</td></tr></template>b"
+  },
+  {
+   "id": "template-table-foster",
+   "html": "<template><table>x<tr><td>a</td></tr>y</table></template>z"
+  },
+  {
+   "id": "template-foster-in-table",
+   "html": "<table><template>x<tr><td>a</td></tr></template><tr><td>b</td></tr></table>"
+  },
+  {
+   "id": "template-in-table-cell",
+   "html": "<table><tr><td><template><p>a</p></template>b</td></tr></table>"
+  },
+  {
+   "id": "template-in-select",
+   "html": "<select><template><option>a</option></template><option>b</option></select>"
+  },
+  {
+   "id": "template-in-colgroup",
+   "html": "<table><colgroup><template><col></template><col></colgroup></table>"
+  },
+  {
+   "id": "template-unclosed",
+   "html": "<template><p>a<p>b"
+  },
+  {
+   "id": "template-unclosed-table",
+   "html": "<template><table><tr><td>a"
+  },
+  {
+   "id": "template-form",
+   "html": "<form><template><form>inner</form></template>outer</form>"
+  },
+  {
+   "id": "template-form-pointer",
+   "html": "<template><form>a</form></template><form>b</form>"
+  },
+  {
+   "id": "template-body-html-attrs",
+   "html": "<template><html lang=x><body class=y>t</template>u"
+  },
+  {
+   "id": "template-end-no-open",
+   "html": "</template><p>a</p></template>"
+  },
+  {
+   "id": "template-closes-implied",
+   "html": "<template><p>a<li>b<td>c</template>d"
+  },
+  {
+   "id": "template-scope",
+   "html": "<div><template></div>x</template>y</div>z"
+  },
+  {
+   "id": "template-formatting",
+   "html": "<b><template>x</template>y</b>z"
+  },
+  {
+   "id": "template-formatting-inside",
+   "html": "<template><b>x</template>y"
+  },
+  {
+   "id": "template-attributes",
+   "html": "<template id=\"t\" data-x='1'>c</template>"
+  },
+  {
+   "id": "template-in-head-like-chain",
+   "html": "<template><meta><title>t</title><style>s</style></template>"
+  },
+  {
+   "id": "template-select-in-table",
+   "html": "<table><tr><td><select><template><table><tr><td>a</td></tr></table></template></select></td></tr></table>"
+  },
+  {
+   "id": "template-after-head-markers",
+   "html": "<template><tr><td>a</td></tr></template><template><col></template><p>b</p>"
+  },
+  {
+   "id": "select-in-table-reset",
+   "html": "<table><tr><td><select><option>a</option></select></td></tr></table>"
+  },
+  {
+   "id": "select-template-table-reset",
+   "html": "<template><table><tr><td><select><option>a</select>b"
+  },
+  {
+   "id": "select-reset-after-caption",
+   "html": "<table><caption><select><option>a</caption>b</table>"
+  },
+  {
+   "id": "unfinished-tag",
+   "html": "<p>a<div"
+  },
+  {
+   "id": "unfinished-comment",
+   "html": "<p>a</p><!-- b"
+  },
+  {
+   "id": "unfinished-pi",
+   "html": "<p>a</p><?x"
+  },
+  {
+   "id": "rcdata-unclosed",
+   "html": "<title>x<p>y"
+  },
+  {
+   "id": "entity-at-end",
+   "html": "a &amp"
+  },
+  {
+   "id": "empty",
+   "html": ""
+  },
+  {
+   "id": "only-whitespace",
+   "html": " \n\t "
+  },
+  {
+   "id": "doctype-ignored",
+   "html": "<!DOCTYPE html><p>a</p>"
+  },
+  {
+   "id": "html-body-tags",
+   "html": "<html lang=x><body class=y><p>a</p></body></html>"
+  },
+  {
+   "id": "frameset-ignored",
+   "html": "<frameset><frame></frameset><p>a</p>"
+  },
+  {
+   "id": "head-tag-ignored",
+   "html": "<head><meta></head><p>a</p>"
+  },
+  {
+   "id": "nested-tables-foster",
+   "html": "<table><tr><td><table>x<tr><td>a</td></tr></table>y</td></tr>z</table>"
+  },
+  {
+   "id": "br-end-tag",
+   "html": "a</br>b"
+  },
+  {
+   "id": "p-end-no-open",
+   "html": "</p>a"
+  },
+  {
+   "id": "li-dd-implied",
+   "html": "<ul><li>a<li>b</ul><dl><dt>c<dd>d</dl>"
+  },
+  {
+   "id": "adoption-agency",
+   "html": "<p>1<b>2<i>3</b>4</i>5</p>"
+  },
+  {
+   "id": "form-nested-ignored",
+   "html": "<form><form>a</form>b</form>"
+  },
+  {
+   "id": "input-in-table",
+   "html": "<table><input type=hidden><input>x</table>"
+  },
+  {
+   "id": "ruby",
+   "html": "<ruby>a<rt>b<rp>c</ruby>"
+  },
+  {
+   "id": "void-elements",
+   "html": "<p>a<br>b<hr>c<img src=x>d<wbr>e</p>"
+  },
+  {
+   "id": "cjk-and-emoji",
+   "html": "<td>中文😀</td>文"
+  },
+  {
+   "id": "crlf",
+   "html": "<tr>\r\n<td>a\r\nb</td>\r\n</tr>"
+  },
+  {
+   "id": "null-char",
+   "html": "<p>a\u0000b</p>"
+  }
+ ]
+}

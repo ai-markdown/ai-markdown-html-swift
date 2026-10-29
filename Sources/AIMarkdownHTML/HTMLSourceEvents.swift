@@ -443,14 +443,21 @@ private struct HTMLRawInputNormalization {
     }
 }
 
+/// Fragment context for `HTMLSourceParser`: `<body>` keeps the historical SwiftSoup behavior; `<template>` reproduces
+/// parse5 7.3 `Parser.getFragmentParser(undefined)` as used by hast-util-raw (see `Parser.parseTemplateFragment`).
+public enum HTMLFragmentContext: String, Sendable {
+    case body
+    case template
+}
+
 /// Parse a complete fragment in one call; caller-supplied emission records remain separate from author HTML attributes.
 public enum HTMLSourceParser {
-    public static func parseFragment(_ emissions: [SourceInputEmission], tracking: Bool = false) throws -> HTMLSourceParseResult {
-        try parse(emissions, tracking: tracking)
+    public static func parseFragment(_ emissions: [SourceInputEmission], tracking: Bool = false, context: HTMLFragmentContext = .body) throws -> HTMLSourceParseResult {
+        try parse(emissions, tracking: tracking, context: context)
     }
 
     // document/fast/copy are module-test helpers and do not expand the production fragment entry point.
-    static func parse(_ emissions: [SourceInputEmission], tracking: Bool = false, document: Bool = false, trackRanges: Bool = true, copyControl: Bool = false) throws -> HTMLSourceParseResult {
+    static func parse(_ emissions: [SourceInputEmission], tracking: Bool = false, context: HTMLFragmentContext = .body, document: Bool = false, trackRanges: Bool = true, copyControl: Bool = false) throws -> HTMLSourceParseResult {
         var offset = 0
         var ids = Set<String>()
         for emission in emissions {
@@ -475,8 +482,8 @@ public enum HTMLSourceParser {
             let document = try builder.parse(normalized.bytes, [], ParseErrorList.noTracking(), settings)
             roots = document.getChildNodes()
         } else {
-            let context = try Element(Tag.valueOf("body"), "")
-            roots = try builder.parseFragment(normalized.bytes, context, [], ParseErrorList.noTracking(), settings)
+            let contextElement = try Element(Tag.valueOf(context == .template ? "template" : "body"), "")
+            roots = try builder.parseFragment(normalized.bytes, contextElement, [], ParseErrorList.noTracking(), settings)
         }
         if !builder.sourceEventInjections.isEmpty { throw Exception.Error(type: .IllegalArgumentException, Message: "Uncovered character injection boundary") }
         recorder?.activeToken = nil

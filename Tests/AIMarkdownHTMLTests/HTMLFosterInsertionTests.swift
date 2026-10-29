@@ -31,12 +31,6 @@ struct HTMLFosterInsertionTests {
         }
     }
 
-    @Test func unsupportedTemplateContentModelKeepsExplicitGap() throws {
-        let raw = "<template><table>x</table></template>"
-        let input = [SourceInputEmission(id: "raw", kind: "raw", role: "author-raw", value: raw, rawUTF8Start: 0, rawUTF8End: raw.utf8.count)]
-        let parsed = try HTMLSourceParser.parseFragment(input, tracking: true)
-        #expect(parsed.trace?.gaps.contains("template-foster-location-not-supported") == true)
-    }
 
     @Test func actualBeforeTableCommentBoundaryAndDiscontinuousPiecesArePreserved() throws {
         let raw = "L<!--outside--><table>x<tr><td>A</td></tr>y</table>"

@@ -19,7 +19,7 @@ class HtmlTreeBuilder: TreeBuilder {
     
     private enum TagSets {
         // tag searches
-        static let inScope = ParsingStrings(["applet", "caption", "html", "table", "td", "th", "marquee", "object"])
+        static let inScope = ParsingStrings(["applet", "caption", "html", "table", "td", "th", "marquee", "object", "template"])
         static let list = ParsingStrings(["ol", "ul"])
         static let button = ParsingStrings(["button"])
         static let tableScope = ParsingStrings(["html", "table"])
@@ -34,14 +34,15 @@ class HtmlTreeBuilder: TreeBuilder {
                                              "frame", "frameset", "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html",
                                              "iframe", "img", "input", "isindex", "li", "link", "listing", "marquee", "menu", "meta", "nav",
                                              "noembed", "noframes", "noscript", "object", "ol", "p", "param", "plaintext", "pre", "script",
-                                             "section", "select", "style", "summary", "table", "tbody", "td", "textarea", "tfoot", "th", "thead",
+                                             "section", "select", "style", "summary", "table", "tbody", "td", "template", "textarea", "tfoot", "th", "thead",
                                              "title", "tr", "ul", "wbr", "xmp"])
     }
     
     private enum StackContexts {
-        static let table = ParsingStrings(["table"])
-        static let tableBody = ParsingStrings(["tbody", "tfoot", "thead"])
-        static let tableRow = ParsingStrings(["tr"])
+        // Like parse5's TABLE_CONTEXT sets, an open <template> stops the table context clears (html is implicit).
+        static let table = ParsingStrings(["table", "template"])
+        static let tableBody = ParsingStrings(["tbody", "tfoot", "thead", "template"])
+        static let tableRow = ParsingStrings(["tr", "template"])
     }
     
     private var _state: HtmlTreeBuilderState = HtmlTreeBuilderState.Initial // the current state
@@ -58,6 +59,9 @@ class HtmlTreeBuilder: TreeBuilder {
     private var _framesetOk: Bool = true // if ok to go into frameset
     private var fosterInserts: Bool = false // if next inserts should be fostered
     private var fragmentParsing: Bool = false // if parsing a fragment of html
+    /// Stack of template insertion modes (parse5 `tmplInsertionModeStack`; the last element is the current one).
+    /// A `<template>` fragment context seeds it with `.InTemplate` before the insertion mode is reset.
+    private var templateModes: [HtmlTreeBuilderState] = []
     // Only true inside the private fragment parse loop, not manual token processing.
     private var constructingFragment: Bool = false
 
@@ -90,6 +94,7 @@ class HtmlTreeBuilder: TreeBuilder {
         fosterInserts = false
         fragmentParsing = false
         constructingFragment = false
+        templateModes.removeAll(keepingCapacity: true)
         currentToken = nil
     }
 
@@ -143,6 +148,10 @@ class HtmlTreeBuilder: TreeBuilder {
             try Validate.notNull(obj: root)
             try doc.appendChild(root!)
             push(root!)
+            // parse5 `getFragmentParser`: a <template> context starts the template insertion mode stack with "in template".
+            if contextTagName == UTF8Arrays.template {
+                templateModes = [.InTemplate]
+            }
             resetInsertionMode()
             
             // setup form element to nearest form on context (up ancestor chain). ensures form controls are associated
@@ -1090,8 +1099,22 @@ class HtmlTreeBuilder: TreeBuilder {
             }
             let name: String = String(decoding: node.nodeNameUTF8(), as: UTF8.self)
             if ("select".equals(name)) {
-                transition(HtmlTreeBuilderState.InSelect)
+                // parse5 `_resetInsertionModeForSelect`: a table between the select and the nearest template puts the
+                // parser back into "in select in table".
+                var mode = HtmlTreeBuilderState.InSelect
+                if pos > 0 {
+                    for above in (1 ..< pos).reversed() {
+                        let aboveName = stack[above].nodeNameUTF8()
+                        if aboveName == UTF8Arrays.template { break }
+                        if aboveName == UTF8Arrays.table { mode = .InSelectInTable; break }
+                    }
+                }
+                transition(mode)
                 break // frag
+            } else if ("template".equals(name)) {
+                // The template insertion mode stack decides the mode, including for the <template> fragment context.
+                transition(currentTemplateMode() ?? HtmlTreeBuilderState.InBody)
+                break
             } else if (("td".equals(name) || "th".equals(name) && !last)) {
                 transition(HtmlTreeBuilderState.InCell)
                 break
@@ -1371,6 +1394,51 @@ class HtmlTreeBuilder: TreeBuilder {
      process, then the UA must perform the above steps as if that element was not in the above list.
      */
     
+    // MARK: Template insertion modes (parse5 `tmplInsertionModeStack`)
+
+    func pushTemplateMode(_ state: HtmlTreeBuilderState) {
+        templateModes.append(state)
+    }
+
+    @discardableResult
+    func popTemplateMode() -> HtmlTreeBuilderState? {
+        templateModes.popLast()
+    }
+
+    /// Replaces the current template insertion mode (parse5 `tmplInsertionModeStack[0] = mode`).
+    func setCurrentTemplateMode(_ state: HtmlTreeBuilderState) {
+        if templateModes.isEmpty { templateModes.append(state) } else { templateModes[templateModes.count - 1] = state }
+    }
+
+    func currentTemplateMode() -> HtmlTreeBuilderState? {
+        templateModes.last
+    }
+
+    func hasTemplateModes() -> Bool {
+        !templateModes.isEmpty
+    }
+
+    /// parse5 `openElements.tmplCount > 0`: whether an HTML <template> element is open.
+    func templateOnStack() -> Bool {
+        stack.contains { $0.nodeNameUTF8() == UTF8Arrays.template }
+    }
+
+    private static let impliedEndTagsThoroughly = ParsingStrings(["caption", "colgroup", "dd", "dt", "li", "optgroup", "option", "p", "rb", "rp", "rt", "rtc", "tbody", "td", "tfoot", "th", "thead", "tr"])
+
+    /// parse5 `generateImpliedEndTagsThoroughly`, used by `</template>`.
+    func generateImpliedEndTagsThoroughly() {
+        markStructuralChange(currentElement())
+        while let current = currentElement() {
+            let tagId = current._tag.tagId
+            if tagId != .none {
+                guard HtmlTreeBuilder.impliedEndTagsThoroughly.containsTagId(tagId) else { return }
+            } else {
+                guard HtmlTreeBuilder.impliedEndTagsThoroughly.contains(current.nodeNameUTF8()) else { return }
+            }
+            pop()
+        }
+    }
+
     func generateImpliedEndTags(_ excludeTag: [UInt8]? = nil) {
         // Is this correct? I get the sense that something is supposed to happen here
         // even if excludeTag == nil. But the original code doesn't seem to do that. -GS
@@ -1539,19 +1607,23 @@ class HtmlTreeBuilder: TreeBuilder {
         formattingElements.append(nil)
     }
     
+    /// parse5 `_findFosterParentingLocation`: the nearest open <template> wins over an outer <table>; template children
+    /// stand in for parse5's template content fragment. Returns the parent and the element to insert before, if any.
+    func fosterParentingLocation() -> (parent: Element, before: Element?) {
+        for element in stack.reversed() {
+            let name = element.nodeNameUTF8()
+            if name == UTF8Arrays.template { return (element, nil) }
+            if name == UTF8Arrays.table {
+                if let actual = element.parent() { return (actual, element) }
+                return (aboveOnStack(element) ?? stack.first ?? doc, nil)
+            }
+        }
+        return (stack.first ?? doc, nil)
+    }
+
     @usableFromInline
     func insertFosteredCharacters(_ token: Token.Char) throws -> Bool {
-        // SwiftSoup has no template-content/namespace model; do not fabricate the corresponding parse5 branch.
-        if stack.contains(where: { $0.nodeNameUTF8() == Array("template".utf8) }) {
-            sourceEvents?.gaps.append("template-foster-location-not-supported")
-            return false
-        }
-        let parent: Element
-        let before: Element?
-        if let table = getFromStack(UTF8Arrays.table) {
-            if let actual = table.parent() { parent = actual; before = table }
-            else { parent = aboveOnStack(table) ?? stack.first ?? doc; before = nil }
-        } else { parent = stack.first ?? doc; before = nil }
+        let (parent, before) = fosterParentingLocation()
         // Moved bytes no longer belong to these containers' actual subtrees; do not replay HTML using their stale source envelopes.
         let lastTableIndex = stack.lastIndex(where: { $0.nodeNameUTF8() == UTF8Arrays.table }) ?? stack.startIndex
         for container in stack.dropFirst(lastTableIndex) where ["table", "tbody", "thead", "tfoot", "tr"].contains(container.nodeName()) {
@@ -1585,25 +1657,11 @@ class HtmlTreeBuilder: TreeBuilder {
     }
 
     func insertInFosterParent(_ input: Node) throws {
-        let fosterParent: Element?
-        let lastTable: Element? = getFromStack(UTF8Arrays.table)
-        var isLastTableParent: Bool = false
-        if let lastTable = lastTable {
-            if (lastTable.parent() != nil) {
-                fosterParent = lastTable.parent()!
-                isLastTableParent = true
-            } else {
-                fosterParent = aboveOnStack(lastTable)
-            }
-        } else { // no table == frag
-            fosterParent = stack[0]
-        }
-        
-        if (isLastTableParent) {
-            try Validate.notNull(obj: lastTable) // last table cannot be null by this point.
-            try lastTable!.before(input)
+        let (parent, before) = fosterParentingLocation()
+        if let before {
+            try before.before(input)
         } else {
-            try fosterParent?.appendChild(input)
+            try parent.appendChild(input)
         }
     }
 }

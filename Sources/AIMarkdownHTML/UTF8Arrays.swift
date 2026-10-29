@@ -134,6 +134,7 @@ public enum UTF8Arrays {
     public static let script = "script".utf8Array
     public static let br = "br".utf8Array
     public static let frameset = "frameset".utf8Array
+    public static let template = "template".utf8Array
     public static let blobColon = "blob:".utf8Array
     public static let absPrefix = "abs:".utf8Array
     public static let true_ = "true".utf8Array
@@ -398,6 +399,7 @@ public enum UTF8ArraySlices {
     public static let script = UTF8Arrays.script[...]
     public static let br = UTF8Arrays.br[...]
     public static let frameset = UTF8Arrays.frameset[...]
+    public static let template = UTF8Arrays.template[...]
     public static let blobColon = UTF8Arrays.blobColon[...]
     public static let true_ = UTF8Arrays.true_[...]
 }
