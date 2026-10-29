@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CssTagEscapeTest: XCTestCase {
     private func assertMatches(_ root: Element, _ query: String, _ expected: [Element],
@@ -17,7 +17,7 @@ final class CssTagEscapeTest: XCTestCase {
     }
 
     func testEscapedTypeSelectorsInCompoundsAndCombinators() throws {
-        let doc = try SwiftSoup.parseXML("<root><my.tag class='hit'><leaf /></my.tag><my class='tag' /><my.tag /></root>")
+        let doc = try AIMarkdownHTML.parseXML("<root><my.tag class='hit'><leaf /></my.tag><my class='tag' /><my.tag /></root>")
         let root = try XCTUnwrap(doc.children().first())
         let target = root.child(0)
         try assertMatches(doc, #"my\.tag"#, [target, root.child(2)])
@@ -81,7 +81,7 @@ final class CssTagEscapeTest: XCTestCase {
     }
 
     func testCachedEscapedTagSelectorsObserveMutation() throws {
-        let doc = try SwiftSoup.parseXML("<root><my.tag /><other /></root>")
+        let doc = try AIMarkdownHTML.parseXML("<root><my.tag /><other /></root>")
         let root = try XCTUnwrap(doc.children().first())
         let first = root.child(0)
         let second = root.child(1)

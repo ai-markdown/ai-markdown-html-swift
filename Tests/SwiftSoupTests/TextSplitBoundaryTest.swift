@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class TextSplitBoundaryTest: XCTestCase {
     func testCharacterOffsetsUseCharactersRatherThanBytes() throws {
@@ -70,7 +70,7 @@ final class TextSplitBoundaryTest: XCTestCase {
     func testInvalidBoundsAreAtomicInAttachedNodes() throws {
         for byteOffset in [false,true] {
             for offset in [-1, Int.min, 100, Int.max] {
-                let doc = try SwiftSoup.parse("<p>日本語</p>")
+                let doc = try AIMarkdownHTML.parse("<p>日本語</p>")
                 let parent = try XCTUnwrap(doc.select("p").first())
                 let node = try XCTUnwrap(parent.textNodes().first)
                 let before = try doc.outerHtml()
@@ -85,7 +85,7 @@ final class TextSplitBoundaryTest: XCTestCase {
         }
     }
     func testSplitKeepsSiblingIdentityOrderAndWarmedSelectionCurrent() throws {
-        let doc = try SwiftSoup.parse("<p>日本語<i>suffix</i></p>")
+        let doc = try AIMarkdownHTML.parse("<p>日本語<i>suffix</i></p>")
         let parent = try XCTUnwrap(doc.select("p").first())
         let node = try XCTUnwrap(parent.textNodes().first)
         let suffix = parent.childNode(1)

@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class EntityEscapeRunTest: XCTestCase {
     private let modes = [Entities.EscapeMode.base, .extended, .xhtml]

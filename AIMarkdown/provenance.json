@@ -1,0 +1,16 @@
+{
+  "upstreamRepository": "https://github.com/scinfu/SwiftSoup.git",
+  "upstreamRevision": "e7f85f4d3dd91ca9a1e94d3328aa1ed5120a8c0f",
+  "upstreamVersion": "2.14.3",
+  "sourceRepository": "https://github.com/ai-markdown/ai-markdown-swift.git",
+  "sourceRevision": "42cc391c9d95d6c0b36c7ae1f43e64d57340264d",
+  "implementationSources": {
+    "scripts/html-source-probe/swift-soup-events.patch": "a4078f85fac75b32f1725320ef4e4d40fc9a0d178376a2b1728b24da1cf551fb",
+    "scripts/html-vendor/lifecycle.patch": "48cbccd74f9b3d23c42e8c3002d0dcdf6ae2021d8c84a60ca74172fe15ee41fc",
+    "scripts/html-vendor/source-character-coalescing.patch": "20a9017816d3b70fb360039db792436b8f4c10a631325042ccc374be5b30a3ce",
+    "scripts/html-vendor/foster-characters.patch": "4abbb3e05d76a6e72c8561f0020078a056e36865643941c6389c5a686059d37a",
+    "scripts/html-vendor/HTMLSourceEvents.swift": "54adaa3f4e4dd4bdd9be7dc9a4c220eb4485993ce069d412e53aa073a55aaaa5",
+    "scripts/vendor-html.py": "5ca1dc01b1737686d2b956d328a6d51f5e4a00cdf328bcc69eebb322bd590b05"
+  },
+  "description": "Original implementation sources and SHA256 digests. Paths refer to the pinned source repository. Semantic changes are maintained directly in this fork, not reapplied during builds."
+}

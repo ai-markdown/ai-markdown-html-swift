@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class DeferredLookupRefinementTest: XCTestCase {
     private func pending(_ keys: [String], bytes: Bool = false) -> Attributes {
@@ -127,7 +127,7 @@ final class DeferredLookupRefinementTest: XCTestCase {
     }
 
     func testColdNegativeLookupDoesNotDirtySourceOrSelectors() throws {
-        let doc = try SwiftSoup.parse("<p id='a' data-x='v'>日本</p>")
+        let doc = try AIMarkdownHTML.parse("<p id='a' data-x='v'>日本</p>")
         let p = try XCTUnwrap(doc.body()?.getChildNodes().first as? Element)
         let attrs = try XCTUnwrap(p.getAttributes())
         let before = p.sourceRangeDirty
@@ -199,8 +199,8 @@ final class DeferredLookupRefinementTest: XCTestCase {
     func testNegativeReadThenSharedMutationStillNotifiesBothOwners() throws {
         let attrs = pending(["id", "class"])
         XCTAssertFalse(attrs.hasKey(key: "missing"))
-        let a = try SwiftSoup.parse("<p></p>")
-        let b = try SwiftSoup.parse("<p></p>")
+        let a = try AIMarkdownHTML.parse("<p></p>")
+        let b = try AIMarkdownHTML.parse("<p></p>")
         let pa = try XCTUnwrap(a.select("p").first())
         let pb = try XCTUnwrap(b.select("p").first())
         pa.getAttributes()!.addAll(incoming: attrs)

@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class BlankTextBytesTest: XCTestCase {
     // The original public Character predicate is the compatibility oracle.
@@ -121,7 +121,7 @@ final class BlankTextBytesTest: XCTestCase {
     }
 
     func testBlankReadDoesNotDirtySourceOrWarmedSelectors() throws {
-        let doc = try SwiftSoup.parse("<main><p> \t </p><p>日本 &amp; text</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p> \t </p><p>日本 &amp; text</p></main>")
         let queries = ["p", "p:contains(日本)", "p:empty", "p:matches(text)"]
         let before = try queries.map { try doc.select($0).array().map(ObjectIdentifier.init) }
         let html = try doc.outerHtmlUTF8()
@@ -143,7 +143,7 @@ final class BlankTextBytesTest: XCTestCase {
     }
 
     func testPublicHasTextEachTextAndSerialization() throws {
-        let doc = try SwiftSoup.parse("<main><p> \r\n </p><p>日本</p><p>&nbsp;</p><p>e&#x301;</p><p>\u{b}</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p> \r\n </p><p>日本</p><p>&nbsp;</p><p>e&#x301;</p><p>\u{b}</p></main>")
         let paragraphs = try doc.select("p")
         XCTAssertEqual(paragraphs.array().map { $0.hasText() }, [false, true, true, true, true])
         XCTAssertEqual(try paragraphs.eachText().count, 4)

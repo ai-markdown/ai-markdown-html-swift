@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 class DocumentTest: XCTestCase {
 
@@ -52,7 +52,7 @@ class DocumentTest: XCTestCase {
 
 	func testSetTextPreservesDocumentStructure() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p>Hello</p>")
+			let doc: Document = try AIMarkdownHTML.parse("<p>Hello</p>")
 			try doc.text("Replaced")
 			XCTAssertEqual("Replaced", try doc.text())
 			XCTAssertEqual("Replaced", try doc.body()!.text())
@@ -64,8 +64,8 @@ class DocumentTest: XCTestCase {
 
 	func testTitles() {
 		do {
-			let noTitle: Document = try SwiftSoup.parse("<p>Hello</p>")
-			let withTitle: Document = try SwiftSoup.parse("<title>First</title><title>Ignore</title><p>Hello</p>")
+			let noTitle: Document = try AIMarkdownHTML.parse("<p>Hello</p>")
+			let withTitle: Document = try AIMarkdownHTML.parse("<title>First</title><title>Ignore</title><p>Hello</p>")
 
 			XCTAssertEqual("", try noTitle.title())
 			try noTitle.title("Hello")
@@ -77,7 +77,7 @@ class DocumentTest: XCTestCase {
 			XCTAssertEqual("Hello", try withTitle.title())
 			XCTAssertEqual("Hello", try withTitle.select("title").first()?.text())
 
-			let normaliseTitle: Document = try SwiftSoup.parse("<title>   Hello\nthere   \n   now   \n")
+			let normaliseTitle: Document = try AIMarkdownHTML.parse("<title>   Hello\nthere   \n   now   \n")
 			XCTAssertEqual("Hello there now", try normaliseTitle.title())
 		} catch {
 
@@ -87,7 +87,7 @@ class DocumentTest: XCTestCase {
 
 	func testOutputEncoding() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p title=π>π & < > </p>")
+			let doc: Document = try AIMarkdownHTML.parse("<p title=π>π & < > </p>")
 			// default is utf-8
 			XCTAssertEqual("<p title=\"π\">π &amp; &lt; &gt; </p>", try doc.body()?.html())
 			XCTAssertEqual("UTF-8", doc.outputSettings().charset().displayName())
@@ -104,18 +104,18 @@ class DocumentTest: XCTestCase {
 	}
 
 	func testXhtmlReferences() {
-		let doc: Document = try! SwiftSoup.parse("&lt; &gt; &amp; &quot; &apos; &times;")
+		let doc: Document = try! AIMarkdownHTML.parse("&lt; &gt; &amp; &quot; &apos; &times;")
 		doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml)
 		XCTAssertEqual("&lt; &gt; &amp; \" ' ×", try! doc.body()?.html())
 	}
 
 	func testNormalisesStructure() {
-		let doc: Document = try! SwiftSoup.parse("<html><head><script>one</script><noscript><p>two</p></noscript></head><body><p>three</p></body><p>four</p></html>")
+		let doc: Document = try! AIMarkdownHTML.parse("<html><head><script>one</script><noscript><p>two</p></noscript></head><body><p>three</p></body><p>four</p></html>")
 		XCTAssertEqual("<html><head><script>one</script><noscript>&lt;p&gt;two</noscript></head><body><p>three</p><p>four</p></body></html>", TextUtil.stripNewlines(try! doc.html()))
 	}
 
 	func testClone() {
-		let doc: Document = try! SwiftSoup.parse("<title>Hello</title> <p>One<p>Two")
+		let doc: Document = try! AIMarkdownHTML.parse("<title>Hello</title> <p>One<p>Two")
 		let clone: Document = doc.copy() as! Document
 
 		XCTAssertEqual("<html><head><title>Hello</title> </head><body><p>One</p><p>Two</p></body></html>", try! TextUtil.stripNewlines(clone.html()))
@@ -126,7 +126,7 @@ class DocumentTest: XCTestCase {
 	}
 
 	func testClonesDeclarations() {
-		let doc: Document = try! SwiftSoup.parse("<!DOCTYPE html><html><head><title>Doctype test")
+		let doc: Document = try! AIMarkdownHTML.parse("<!DOCTYPE html><html><head><title>Doctype test")
 		let clone: Document = doc.copy() as! Document
 
 		XCTAssertEqual(try! doc.html(), try! clone.html())
@@ -152,7 +152,7 @@ class DocumentTest: XCTestCase {
 
 	func testHtmlAndXmlSyntax() {
 		let h: String = "<!DOCTYPE html><body><img async checked='checked' src='&<>\"'>&lt;&gt;&amp;&quot;<foo />bar"
-		let doc: Document = try! SwiftSoup.parse(h)
+		let doc: Document = try! AIMarkdownHTML.parse(h)
 
 		doc.outputSettings().syntax(syntax: OutputSettings.Syntax.html)
 		XCTAssertEqual("<!doctype html>\n" +
@@ -176,13 +176,13 @@ class DocumentTest: XCTestCase {
 	}
 
 	func testHtmlParseDefaultsToHtmlOutputSyntax() {
-		let doc: Document = try! SwiftSoup.parse("x")
+		let doc: Document = try! AIMarkdownHTML.parse("x")
 		XCTAssertEqual(OutputSettings.Syntax.html, doc.outputSettings().syntax())
 	}
 
 	func testHtmlAppendable() {
 		let htmlContent: String = "<html><head><title>Hello</title></head><body><p>One</p><p>Two</p></body></html>"
-		let document: Document = try! SwiftSoup.parse(htmlContent)
+		let document: Document = try! AIMarkdownHTML.parse(htmlContent)
 		let outputSettings: OutputSettings = OutputSettings()
 
 		outputSettings.prettyPrint(pretty: false)
@@ -203,9 +203,9 @@ class DocumentTest: XCTestCase {
 	//	}
 
 	func testDocumentsWithSameContentAreEqual() throws {
-		let docA: Document = try SwiftSoup.parse("<div/>One")
-		let docB: Document = try SwiftSoup.parse("<div/>One")
-		_ = try SwiftSoup.parse("<div/>Two")
+		let docA: Document = try AIMarkdownHTML.parse("<div/>One")
+		let docB: Document = try AIMarkdownHTML.parse("<div/>One")
+		_ = try AIMarkdownHTML.parse("<div/>Two")
 
 		XCTAssertFalse(docA.equals(docB))
 		XCTAssertTrue(docA.equals(docA))
@@ -215,9 +215,9 @@ class DocumentTest: XCTestCase {
 	}
 
 	func testDocumentsWithSameContentAreVerifialbe() throws {
-		let docA: Document = try SwiftSoup.parse("<div/>One")
-		let docB: Document = try SwiftSoup.parse("<div/>One")
-		let docC: Document = try SwiftSoup.parse("<div/>Two")
+		let docA: Document = try AIMarkdownHTML.parse("<div/>One")
+		let docB: Document = try AIMarkdownHTML.parse("<div/>One")
+		let docC: Document = try AIMarkdownHTML.parse("<div/>Two")
 
 		XCTAssertTrue(try docA.hasSameValue(docB))
 		XCTAssertFalse(try docA.hasSameValue(docC))
@@ -431,7 +431,7 @@ class DocumentTest: XCTestCase {
 
 	func testThai() {
 		let str = "บังคับ"
-		guard let doc = try? SwiftSoup.parse(str) else {
+		guard let doc = try? AIMarkdownHTML.parse(str) else {
 			XCTFail()
 			return}
 		guard let txt = try? doc.html() else {
@@ -466,14 +466,14 @@ class DocumentTest: XCTestCase {
 	func testNewLine() {
 		let h = "<html><body><div>\r\n<div dir=\"ltr\">\r\n<div id=\"divtagdefaultwrapper\"><font face=\"Calibri,Helvetica,sans-serif\" size=\"3\" color=\"black\"><span style=\"font-size:12pt;\" id=\"divtagdefaultwrapper\">\r\n<div style=\"margin-top:0;margin-bottom:0;\">&nbsp;TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\"><br>\r\n\r\n</div>\r\n<div style=\"margin-top:0;margin-bottom:0;\">TEST</div>\r\n</span></font></div>\r\n</div>\r\n</div>\r\n</body></html>"
 
-		let doc: Document = try! SwiftSoup.parse(h)
+		let doc: Document = try! AIMarkdownHTML.parse(h)
 		let text = try! doc.text()
 		XCTAssertEqual(text, "TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST")
 	}
 
 	func testRawSourceSerializationFastPath() throws {
 		let input = "<html><head></head><body><div id=\"a\">hello</div></body></html>"
-		let doc = try SwiftSoup.parse(input)
+		let doc = try AIMarkdownHTML.parse(input)
 		doc.outputSettings().prettyPrint(pretty: false)
 		XCTAssertEqual(input, try doc.outerHtml())
 
@@ -486,7 +486,7 @@ class DocumentTest: XCTestCase {
 
 	func testRawSourceSerializationRegistersAlreadyDirtyParentMutation() throws {
 		let input = "<html><head></head><body><div><span>hello</span></div></body></html>"
-		let doc = try SwiftSoup.parse(input)
+		let doc = try AIMarkdownHTML.parse(input)
 		doc.outputSettings().prettyPrint(pretty: false)
 
 		let span = try XCTUnwrap(doc.select("span").first())
@@ -500,7 +500,7 @@ class DocumentTest: XCTestCase {
 
 	func testRawSourceSerializationRegistersAlreadyDirtyElementMutation() throws {
 		let input = "<html><head></head><body><div><span>hello</span></div></body></html>"
-		let doc = try SwiftSoup.parse(input)
+		let doc = try AIMarkdownHTML.parse(input)
 		doc.outputSettings().prettyPrint(pretty: false)
 
 		let span = try XCTUnwrap(doc.select("span").first())
@@ -513,7 +513,7 @@ class DocumentTest: XCTestCase {
 
 	func testRawSourceSerializationRegistersAlreadyDirtyAncestorAfterSerialization() throws {
 		let input = "<html><head></head><body><div><span>hello</span></div></body></html>"
-		let doc = try SwiftSoup.parse(input)
+		let doc = try AIMarkdownHTML.parse(input)
 		doc.outputSettings().prettyPrint(pretty: false)
 
 		let div = try XCTUnwrap(doc.select("div").first())
@@ -530,7 +530,7 @@ class DocumentTest: XCTestCase {
 
 	func testRawSourceXmlParsedDocument() throws {
 		let input = "<root><br/></root>"
-		let doc = try SwiftSoup.parse(input, "", Parser.xmlParser())
+		let doc = try AIMarkdownHTML.parse(input, "", Parser.xmlParser())
 		doc.outputSettings().prettyPrint(pretty: false)
 		doc.outputSettings().syntax(syntax: .xml)
 		XCTAssertEqual(input, try doc.outerHtml())
@@ -538,7 +538,7 @@ class DocumentTest: XCTestCase {
 
 	func testRawSourceDisabledForHtmlParsedXmlOutput() throws {
 		let input = "<br>"
-		let doc = try SwiftSoup.parse(input)
+		let doc = try AIMarkdownHTML.parse(input)
 		doc.outputSettings().prettyPrint(pretty: false)
 		doc.outputSettings().syntax(syntax: .xml)
 		let output = try doc.outerHtml()
@@ -548,9 +548,9 @@ class DocumentTest: XCTestCase {
 
 	func testRawSourceSurvivesMoveAcrossDocuments() throws {
 		let input = "<html><body><div id=\"a\">hello</div></body></html>"
-		let original = try SwiftSoup.parse(input)
+		let original = try AIMarkdownHTML.parse(input)
 		original.outputSettings().prettyPrint(pretty: false)
-		let moved = try SwiftSoup.parse("<html><body></body></html>")
+		let moved = try AIMarkdownHTML.parse("<html><body></body></html>")
 		moved.outputSettings().prettyPrint(pretty: false)
 		if let div = try original.select("div").first(),
 		   let body = moved.body() {

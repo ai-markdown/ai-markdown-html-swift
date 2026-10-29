@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 private func emit(_ value: Any) throws {
     let data = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
@@ -18,7 +18,7 @@ private func verification() throws {
     var records: [[String: Any]] = []
     for width in [0, 1, 8, 63, 64, 65, 128, 512] {
         for descendants in [0, 3] {
-            let document = try SwiftSoup.parse(markup(width, descendants: descendants))
+            let document = try AIMarkdownHTML.parse(markup(width, descendants: descendants))
             let roots = try document.select("section").array()
             let input = roots + roots.reversed()
             let list = Elements(input)
@@ -52,7 +52,7 @@ private func main() throws {
     if name == "parse-control" || name == "parse-not" {
         let html = markup(512)
         operation = {
-            let document = try SwiftSoup.parse(html)
+            let document = try AIMarkdownHTML.parse(html)
             let list = try document.select("section")
             return UInt64(try (name == "parse-not" ? list.not(".drop").size() : document.text().utf8.count))
         }
@@ -70,7 +70,7 @@ private func main() throws {
         case "descendant-control": (width, dropEvery, descendants) = (64, 2, 64)
         default: throw NSError(domain: "benchmark", code: 2, userInfo: [NSLocalizedDescriptionKey: "unknown workload"])
         }
-        let document = try SwiftSoup.parse(markup(width, dropEvery: dropEvery, descendants: descendants))
+        let document = try AIMarkdownHTML.parse(markup(width, dropEvery: dropEvery, descendants: descendants))
         let list = try document.select("section")
         let expected = list.array().filter { !$0.hasClass("drop") }
         let check = try list.not(".drop").array()

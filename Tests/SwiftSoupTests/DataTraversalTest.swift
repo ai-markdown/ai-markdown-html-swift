@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class DataTraversalTest: XCTestCase {
     private func assertSelection(_ root: Element, _ query: String, _ expected: [Element],
@@ -32,7 +32,7 @@ final class DataTraversalTest: XCTestCase {
     }
 
     func testDataIncludesCommentsInDocumentOrder() throws {
-        let doc = try SwiftSoup.parse("<main><!--a--><script>b</script><section><!--c--><style>d</style>ignored</section><!--e--></main>")
+        let doc = try AIMarkdownHTML.parse("<main><!--a--><script>b</script><section><!--c--><style>d</style>ignored</section><!--e--></main>")
         let main = try XCTUnwrap(doc.select("main").first())
         XCTAssertEqual(main.data(), "abcde")
         XCTAssertEqual(try doc.select("section").first()?.data(), "cd")
@@ -40,14 +40,14 @@ final class DataTraversalTest: XCTestCase {
     }
 
     func testOrdinaryTextAndDeclarationAreNotData() throws {
-        let doc = try SwiftSoup.parse("<!doctype html><html><head></head><body><p>ignored</p><!--kept--></body></html>")
+        let doc = try AIMarkdownHTML.parse("<!doctype html><html><head></head><body><p>ignored</p><!--kept--></body></html>")
         XCTAssertEqual(doc.data(), "kept")
         XCTAssertEqual(try doc.select("p").first()?.data(), "")
         XCTAssertEqual(try doc.text(), "ignored")
     }
 
     func testContainsDataIsCaseInsensitiveWithoutNormalizingWhitespace() throws {
-        let doc = try SwiftSoup.parse("<main><!--MiX\n  Ed--></main>")
+        let doc = try AIMarkdownHTML.parse("<main><!--MiX\n  Ed--></main>")
         let main = try XCTUnwrap(doc.select("main").first())
         XCTAssertEqual(main.data(), "MiX\n  Ed")
         try assertSelection(doc, "main:containsData(mix\n  ed)", [main])
@@ -56,14 +56,14 @@ final class DataTraversalTest: XCTestCase {
 
     func testUnicodeCommentBytesArePreserved() throws {
         let value = "日本e\u{301}👩‍💻 &amp;"
-        let doc = try SwiftSoup.parse("<main><!--" + value + "--></main>")
+        let doc = try AIMarkdownHTML.parse("<main><!--" + value + "--></main>")
         let main = try XCTUnwrap(doc.select("main").first())
         XCTAssertEqual(Array(main.data().utf8), Array(value.utf8))
         try assertSelection(doc, "main:containsData(日本)", [main])
     }
 
     func testTraversalDoesNotMaterializeSingleSliceData() throws {
-        let doc = try SwiftSoup.parse("<script>one</script>")
+        let doc = try AIMarkdownHTML.parse("<script>one</script>")
         let script = try XCTUnwrap(doc.select("script").first())
         let data = try XCTUnwrap(script.childNodes.first as? DataNode)
         XCTAssertNil(data.attributes)
@@ -76,7 +76,7 @@ final class DataTraversalTest: XCTestCase {
     }
 
     func testFragmentedDataDoesNotDirtySourceOnRead() throws {
-        let doc = try SwiftSoup.parse("<script></script>")
+        let doc = try AIMarkdownHTML.parse("<script></script>")
         let script = try XCTUnwrap(doc.select("script").first())
         let data = DataNode(slice: ByteSlice.fromArray(Array("one".utf8)), baseUri: [])
         data.appendSlice(ByteSlice.fromArray(Array("two".utf8)))
@@ -107,7 +107,7 @@ final class DataTraversalTest: XCTestCase {
     }
 
     func testCommentRemovalAndReparentingInvalidatesBothRoots() throws {
-        let doc = try SwiftSoup.parse("<main><!--kept--></main><aside></aside>")
+        let doc = try AIMarkdownHTML.parse("<main><!--kept--></main><aside></aside>")
         let main = try XCTUnwrap(doc.select("main").first())
         let aside = try XCTUnwrap(doc.select("aside").first())
         let comment = try XCTUnwrap(main.childNodes.first as? Comment)
@@ -122,11 +122,11 @@ final class DataTraversalTest: XCTestCase {
     }
 
     func testEmptyCommentAndDataAddNoSeparators() throws {
-        let doc = try SwiftSoup.parse("<main><!----><script>a</script><!----><script></script><!--b--></main>")
+        let doc = try AIMarkdownHTML.parse("<main><!----><script>a</script><!----><script></script><!--b--></main>")
         XCTAssertEqual(try doc.select("main").first()?.data(), "ab")
     }
     func testCommentObjectMutationUpdatesSourceReuseAndDataSelectors() throws {
-        let doc = try SwiftSoup.parse("<html><head></head><body><main><!--before--></main></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head></head><body><main><!--before--></main></body></html>")
         doc.outputSettings().prettyPrint(pretty: false)
         let main = try XCTUnwrap(doc.select("main").first())
         let comment = try XCTUnwrap(main.getChildNodes().first as? Comment)

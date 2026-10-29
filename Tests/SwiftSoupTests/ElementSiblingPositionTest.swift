@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 private final class PositionProjectedElements: Elements {
     var view: [Element] = []
@@ -52,7 +52,7 @@ final class ElementSiblingPositionTest: XCTestCase {
     }
 
     func testStalePublicSiblingIndexDoesNotChangePosition() throws {
-        let document = try SwiftSoup.parse("<main>text<p>a</p><!--gap--><i>b</i>text<p>c</p></main>")
+        let document = try AIMarkdownHTML.parse("<main>text<p>a</p><!--gap--><i>b</i>text<p>c</p></main>")
         let parent = try XCTUnwrap(document.select("main").first())
         for element in parent.children() {
             let original = element.siblingIndex
@@ -134,7 +134,7 @@ final class ElementSiblingPositionTest: XCTestCase {
     }
 
     func testMutationAndDeepCopyPositions() throws {
-        let document = try SwiftSoup.parse("<main><p>a</p>t<p>b</p><!--c--><p>c</p></main><aside><b>d</b></aside>")
+        let document = try AIMarkdownHTML.parse("<main><p>a</p>t<p>b</p><!--c--><p>c</p></main><aside><b>d</b></aside>")
         let main = try XCTUnwrap(document.select("main").first())
         let aside = try XCTUnwrap(document.select("aside").first())
         for iteration in 0..<96 {
@@ -153,7 +153,7 @@ final class ElementSiblingPositionTest: XCTestCase {
     }
 
     func testPositionalSelectorsBeforeAndAfterMutation() throws {
-        let document = try SwiftSoup.parse("<main>t<p>A</p><!--gap--><p>B</p><span>C</span>t<p>D</p></main>")
+        let document = try AIMarkdownHTML.parse("<main>t<p>A</p><!--gap--><p>B</p><span>C</span>t<p>D</p></main>")
         let root = try XCTUnwrap(document.select("main").first())
         for _ in 0..<8 {
             let children = root.children().array()

@@ -46,7 +46,7 @@ def main():
     if not observed: raise RuntimeError('Empty verification output')
     manifest={'arguments':{k:str(v) if isinstance(v,Path) else v for k,v in vars(a).items()},'platform':platform.platform(),
               'client_sha256':{k:hashlib.sha256(v.read_bytes()).hexdigest() for k,v in clients.items()},
-              'library_sha256':{k:hashlib.sha256((v/('libSwiftSoup.dylib' if platform.system()=='Darwin' else 'libSwiftSoup.so')).read_bytes()).hexdigest() for k,v in paths.items()},
+              'library_sha256':{k:hashlib.sha256((v/('libAIMarkdownHTML.dylib' if platform.system()=='Darwin' else 'libAIMarkdownHTML.so')).read_bytes()).hexdigest() for k,v in paths.items()},
               'output_sha256':hashlib.sha256(verify['A'].encode()).hexdigest(),'verification_records':len(observed),'created_unix':time.time()}
     (a.output/'manifest.json').write_text(json.dumps(manifest,indent=2))
     names=a.workloads or WORKLOADS[a.suite]

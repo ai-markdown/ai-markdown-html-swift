@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SourceReuseOutputPolicyTest: XCTestCase {
     func testCharsetAndEscapeModesApplyToCleanNodesAndSparseEdits() throws {
@@ -8,7 +8,7 @@ final class SourceReuseOutputPolicyTest: XCTestCase {
         for charset in [String.Encoding.ascii, .utf8] {
             for mode in [Entities.EscapeMode.base, .extended, .xhtml] {
                 if charset == .utf8 && mode == .base { continue }
-                let doc = try SwiftSoup.parse(source)
+                let doc = try AIMarkdownHTML.parse(source)
                 doc.outputSettings().prettyPrint(pretty: false).charset(charset).escapeMode(mode)
                 for mutate in [false, true] {
                     if mutate { try doc.select("b").first()?.text("変更") }
@@ -63,7 +63,7 @@ final class SourceReuseOutputPolicyTest: XCTestCase {
 
     func testRestoringDefaultPolicyRestoresExactSourceReuse() throws {
         let source = "<html><head></head><body><p title='source'>&copy; 日本</p></body></html>"
-        let doc = try SwiftSoup.parse(source)
+        let doc = try AIMarkdownHTML.parse(source)
         doc.outputSettings().prettyPrint(pretty: false)
         XCTAssertEqual(try doc.outerHtmlUTF8(), Array(source.utf8))
         doc.outputSettings().charset(.ascii).escapeMode(.xhtml)

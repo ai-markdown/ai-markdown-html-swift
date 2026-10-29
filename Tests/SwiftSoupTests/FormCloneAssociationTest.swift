@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class FormCloneAssociationTest: XCTestCase {
     private func form(_ root: Element, _ query: String = "form") throws -> FormElement {
@@ -7,7 +7,7 @@ final class FormCloneAssociationTest: XCTestCase {
     }
 
     func testDocumentCloneUsesClonedControlsAndPreservesIndependentMutations() throws {
-        let original = try SwiftSoup.parse("<form id=f><input name=a value=original><div><textarea name=b>text</textarea></div></form>")
+        let original = try AIMarkdownHTML.parse("<form id=f><input name=a value=original><div><textarea name=b>text</textarea></div></form>")
         let clone = original.copy() as! Document
         let oldForm = try form(original)
         let newForm = try form(clone)
@@ -27,7 +27,7 @@ final class FormCloneAssociationTest: XCTestCase {
     }
 
     func testStandaloneFormCloneKeepsItsControlList() throws {
-        let doc = try SwiftSoup.parse("<form><input name=a><button name=b>Submit</button></form>")
+        let doc = try AIMarkdownHTML.parse("<form><input name=a><button name=b>Submit</button></form>")
         let original = try form(doc)
         for clone in [original.copy() as! FormElement, original.copy(with: nil) as! FormElement] {
             XCTAssertNil(clone.parent())
@@ -38,7 +38,7 @@ final class FormCloneAssociationTest: XCTestCase {
     }
 
     func testLeafFormsAndAssociationsOutsideTheFormSubtreeAreReboundInDocumentCopies() throws {
-        let doc = try SwiftSoup.parse("<input id=before><form id=a></form><form id=b></form><input id=after>")
+        let doc = try AIMarkdownHTML.parse("<input id=before><form id=a></form><form id=b></form><input id=after>")
         let a = try form(doc, "#a")
         let b = try form(doc, "#b")
         let before = try XCTUnwrap(doc.getElementById("before"))
@@ -55,7 +55,7 @@ final class FormCloneAssociationTest: XCTestCase {
     }
 
     func testExternalAssociationsRetainTheirIdentityWhenNotPartOfTheCopiedTree() throws {
-        let doc = try SwiftSoup.parse("<form id=f><input id=inside></form><input id=outside>")
+        let doc = try AIMarkdownHTML.parse("<form id=f><input id=inside></form><input id=outside>")
         let original = try form(doc)
         let outside = try XCTUnwrap(doc.getElementById("outside"))
         original.addElement(outside)
@@ -68,7 +68,7 @@ final class FormCloneAssociationTest: XCTestCase {
     }
 
     func testCopiesPreserveManualMembershipAndEmptyAssociations() throws {
-        let doc = try SwiftSoup.parse("<section><form id=f></form><div id=manual></div></section>")
+        let doc = try AIMarkdownHTML.parse("<section><form id=f></form><div id=manual></div></section>")
         let original = try form(doc)
         original.addElement(try XCTUnwrap(doc.getElementById("manual")))
         // Membership comes from the form's association list, not a tag-name scan.

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 private final class ChildReadTrace {
     var events: [String] = []
@@ -149,7 +149,7 @@ final class ChildIndexedReadTest: XCTestCase {
     }
 
     func testReadsKeepSourceAndWarmedSelection() throws {
-        let document = try SwiftSoup.parse("<main>x<p id='a'>日</p><!--c--><p id='b'>語</p></main>")
+        let document = try AIMarkdownHTML.parse("<main>x<p id='a'>日</p><!--c--><p id='b'>語</p></main>")
         let parent = try XCTUnwrap(document.select("main").first())
         let expected = parent.children().array()
         let html = try document.outerHtml().utf8.map { $0 }

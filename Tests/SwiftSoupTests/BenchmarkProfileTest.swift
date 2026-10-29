@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class BenchmarkProfileTest: XCTestCase {
     private func envInt(_ key: String, _ defaultValue: Int) -> Int {
@@ -1267,7 +1267,7 @@ final class BenchmarkProfileTest: XCTestCase {
             }
 
             let insertAfter = try content.getElementsByClass("manabi-tracking-section").last() ?? content
-            let trackingFooter = try SwiftSoup.parseBodyFragment(
+            let trackingFooter = try AIMarkdownHTML.parseBodyFragment(
                 "<div id='manabi-tracking-footer'></div>"
             ).getElementsByTag("div").first()!
             try insertAfter.after(node: trackingFooter)
@@ -1671,7 +1671,7 @@ final class BenchmarkProfileTest: XCTestCase {
                 if let parser {
                     doc = try parser.parseInput(input.bytes, "")
                 } else {
-                    doc = try SwiftSoup.parse(input.data, "")
+                    doc = try AIMarkdownHTML.parse(input.data, "")
                 }
                 if !skipSelectors {
                     if selectorRepeat > 1 {
@@ -1709,7 +1709,7 @@ final class BenchmarkProfileTest: XCTestCase {
                 }
             }
             for htmlString in inputStrings {
-                let doc = try SwiftSoup.parse(htmlString, "")
+                let doc = try AIMarkdownHTML.parse(htmlString, "")
                 if !skipSelectors {
                     if selectorRepeat > 1 {
                         for _ in 0..<selectorRepeat {
@@ -1756,7 +1756,7 @@ final class BenchmarkProfileTest: XCTestCase {
                         if let parser {
                             doc = try parser.parseInput(input.bytes, "")
                         } else {
-                            doc = try SwiftSoup.parse(input.data, "")
+                            doc = try AIMarkdownHTML.parse(input.data, "")
                         }
                         if !skipSelectors {
                             if selectorRepeat > 1 {
@@ -1794,7 +1794,7 @@ final class BenchmarkProfileTest: XCTestCase {
                         }
                     }
                     for htmlString in inputStrings {
-                        let doc = try SwiftSoup.parse(htmlString, "")
+                        let doc = try AIMarkdownHTML.parse(htmlString, "")
                         if !skipSelectors {
                             if selectorRepeat > 1 {
                                 for _ in 0..<selectorRepeat {

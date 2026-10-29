@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class OfTypeTagIdentityTest: XCTestCase {
     func testMixedSelfClosingSyntaxUsesTheSameElementType() throws {
@@ -21,7 +21,7 @@ final class OfTypeTagIdentityTest: XCTestCase {
     }
 
     func testOnlyOfTypeDoesNotDependOnSelfClosingSyntax() throws {
-        let doc = try SwiftSoup.parseXML("<root><item id='first' /><item id='second'></item><other id='only' /></root>")
+        let doc = try AIMarkdownHTML.parseXML("<root><item id='first' /><item id='second'></item><other id='only' /></root>")
         XCTAssertEqual(try doc.select("root > :only-of-type").array().map { $0.id() }, ["only"])
     }
 }

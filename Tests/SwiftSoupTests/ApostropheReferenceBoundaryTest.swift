@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class ApostropheReferenceBoundaryTest: XCTestCase {
     func testUnterminatedApostropheReferenceAgreesWithEntityTable() throws {
@@ -29,14 +29,14 @@ final class ApostropheReferenceBoundaryTest: XCTestCase {
     func testDocumentAndAttributeParsingAcrossStorageEntryPoints() throws {
         let html = "<p title=\"&apos! &apos;\">&apos! &apos;</p><textarea>&apos! &apos;</textarea>"
         let bytes = Array(html.utf8)
-        let documents = try [SwiftSoup.parse(html), SwiftSoup.parse(Data(bytes)),
-            SwiftSoup.parse(withBytes: { parse in try bytes.withUnsafeBufferPointer { try parse($0) } })]
+        let documents = try [AIMarkdownHTML.parse(html), AIMarkdownHTML.parse(Data(bytes)),
+            AIMarkdownHTML.parse(withBytes: { parse in try bytes.withUnsafeBufferPointer { try parse($0) } })]
         for doc in documents {
             let p = try XCTUnwrap(doc.select("p").first())
             XCTAssertEqual(try p.attr("title"), "&apos! '")
             XCTAssertEqual(try p.text(), "&apos! '")
             XCTAssertEqual(try doc.select("textarea").text(), "&apos! '")
-            let reparsed = try SwiftSoup.parse(String(decoding: doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self))
+            let reparsed = try AIMarkdownHTML.parse(String(decoding: doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self))
             XCTAssertEqual(try reparsed.select("p").text(), "&apos! '")
         }
     }

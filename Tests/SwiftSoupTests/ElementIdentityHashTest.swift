@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class ElementIdentityHashTest: XCTestCase {
     func testHashRemainsStableWhenTagChanges() throws {
@@ -15,7 +15,7 @@ final class ElementIdentityHashTest: XCTestCase {
     }
 
     func testElementAndNodeCollectionsKeepRenamedKeys() throws {
-        let document = try SwiftSoup.parse("<main><p>one</p><p>two</p></main>")
+        let document = try AIMarkdownHTML.parse("<main><p>one</p><p>two</p></main>")
         let elements = try document.getElementsByTag("p").array()
         let elementSet = Set(elements)
         let nodeSet = Set(elements.map { $0 as Node })

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CustomEvaluatorOrderTest: XCTestCase {
     private final class Stateful: Evaluator, @unchecked Sendable {

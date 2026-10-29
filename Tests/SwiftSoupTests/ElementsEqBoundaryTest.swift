@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class ElementsEqBoundaryTest: XCTestCase {
     private final class LookupProbe: Elements {
@@ -27,7 +27,7 @@ final class ElementsEqBoundaryTest: XCTestCase {
     }
 
     func testNegativeIndexesAreEmptyForOrdinaryLists() throws {
-        let document = try SwiftSoup.parse("<p>one</p><p>two</p>")
+        let document = try AIMarkdownHTML.parse("<p>one</p><p>two</p>")
         let selected = try document.select("p")
         for elements in [Elements(), selected] {
             for index in [Int.min, -2, -1] {
@@ -41,7 +41,7 @@ final class ElementsEqBoundaryTest: XCTestCase {
     }
 
     func testValidIndexesRetainIdentityAndVirtualLookup() throws {
-        let document = try SwiftSoup.parse("<p>one</p><p>two</p>")
+        let document = try AIMarkdownHTML.parse("<p>one</p><p>two</p>")
         let selected = try document.select("p")
         for index in 0..<selected.size() {
             let result = selected.eq(index)
@@ -54,7 +54,7 @@ final class ElementsEqBoundaryTest: XCTestCase {
     }
 
     func testUpperBoundsAndEmptyListsReturnEmptyResults() throws {
-        let selected = try SwiftSoup.parse("<p>one</p>").select("p")
+        let selected = try AIMarkdownHTML.parse("<p>one</p>").select("p")
         for index in [1, 2, Int.max] {
             XCTAssertTrue(selected.eq(index).isEmpty())
         }

@@ -14,5 +14,5 @@ if [[ "$has_iterations" == "false" ]]; then
     ARGS+=(--iterations 5000000)
 fi
 
-echo "Benchmark: SwiftSoupProfile"
-swift run -c release SwiftSoupProfile "${ARGS[@]}"
+echo "Benchmark: AIMarkdownHTMLProfile"
+swift run -c release AIMarkdownHTMLProfile "${ARGS[@]}"

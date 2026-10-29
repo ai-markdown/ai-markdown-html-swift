@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class FragmentSourceAppendTest: XCTestCase {
     private func append(_ node: Node, to parent: Element, builder: HtmlTreeBuilder, fast: Bool) throws {
@@ -108,7 +108,7 @@ final class FragmentSourceAppendTest: XCTestCase {
             ("div", "<b><i>一</b>二</i><table>三<tr><td>四</td></tr></table>")
         ]
         for (tag, markup) in cases {
-            let doc = try SwiftSoup.parse("<main></main>")
+            let doc = try AIMarkdownHTML.parse("<main></main>")
             let root = try Element(Tag.valueOf(tag), "")
             try root.attr("id", "target")
             try doc.getElementsByTag("main").first()!.appendChild(root)
@@ -126,7 +126,7 @@ final class FragmentSourceAppendTest: XCTestCase {
     }
 
     func testSourceBackedFragmentInsertionDoesNotReturnStaleMarkup() throws {
-        let doc = try SwiftSoup.parse("<html><head><title>original</title></head><body><main></main></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head><title>original</title></head><body><main></main></body></html>")
         doc.outputSettings().prettyPrint(pretty: false)
         let main = try XCTUnwrap(doc.getElementsByTag("main").first())
         try main.html("<p id='new' class='before'>日本&amp;語</p><ruby>漢<rt>かん</rt></ruby>")
@@ -135,7 +135,7 @@ final class FragmentSourceAppendTest: XCTestCase {
         try p.attr("class", "after").text("変更後")
         try doc.select("rt").remove()
         let html = String(decoding: try doc.outerHtmlUTF8ReusingSourceOutsideBody(), as: UTF8.self)
-        let reparsed = try SwiftSoup.parse(html)
+        let reparsed = try AIMarkdownHTML.parse(html)
         XCTAssertEqual(try reparsed.getElementById("new")?.text(), "変更後")
         XCTAssertEqual(try reparsed.select(".before, rt").size(), 0)
         XCTAssertEqual(try reparsed.select(".after").size(), 1)
@@ -208,7 +208,7 @@ final class FragmentSourceAppendTest: XCTestCase {
         let parser = Parser.htmlParser()
         let document = try parser.parseInput("<p>initial</p>", "")
         let builder = parser.getTreeBuilder()
-        let foreign = try SwiftSoup.parse("<main></main>")
+        let foreign = try AIMarkdownHTML.parse("<main></main>")
         let node = try RedirectedElement(Tag.valueOf("p"), "")
         node.redirectedOwner = foreign
         let parent = try XCTUnwrap(foreign.body())

@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class PerformanceTest: XCTestCase {
 
@@ -20,7 +20,7 @@ final class PerformanceTest: XCTestCase {
     }
 
     func testSelectPerformanceIndexedAnd() throws {
-        let doc = try SwiftSoup.parse(buildManyElements(count: 2000))
+        let doc = try AIMarkdownHTML.parse(buildManyElements(count: 2000))
         measure {
             do {
                 _ = try doc.select("p.lead[href=one]")
@@ -31,7 +31,7 @@ final class PerformanceTest: XCTestCase {
     }
 
     func testTextCachePerformance() throws {
-        let doc = try SwiftSoup.parse(buildManyElements(count: 2000))
+        let doc = try AIMarkdownHTML.parse(buildManyElements(count: 2000))
         _ = try doc.text() // warm cache
         measure {
             do {

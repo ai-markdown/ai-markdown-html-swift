@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class StackOverflow463Test: XCTestCase {
     private func deepHTML(depth: Int) -> String {
@@ -30,7 +30,7 @@ final class StackOverflow463Test: XCTestCase {
     func testDeepSerializationWithoutSourceReuseOnSmallStack() throws {
         let inner = deepHTML(depth: 3_000)
         // Build the fixture on the caller's stack to isolate serialization.
-        nonisolated(unsafe) let document = try SwiftSoup.parse(inner)
+        nonisolated(unsafe) let document = try AIMarkdownHTML.parse(inner)
         document.outputSettings().prettyPrint(pretty: false)
         runOnSmallStack {
             let body = try XCTUnwrap(document.body())
@@ -43,7 +43,7 @@ final class StackOverflow463Test: XCTestCase {
 
     func testDeepMutationAndSourceReuseSerializationOnSmallStack() throws {
         let depth = 3_000
-        nonisolated(unsafe) let document = try SwiftSoup.parse(
+        nonisolated(unsafe) let document = try AIMarkdownHTML.parse(
             "<html><head></head><body>" + deepHTML(depth: depth) + "</body></html>"
         )
         document.outputSettings().prettyPrint(pretty: false)
@@ -159,7 +159,7 @@ final class StackOverflow463Test: XCTestCase {
 
     func testWideTreePreservesAllSiblings() throws {
         let inner = "<section>" + String(repeating: "<i>x</i><b>y</b>", count: 1_024) + "</section>"
-        let document = try SwiftSoup.parse(inner)
+        let document = try AIMarkdownHTML.parse(inner)
         document.outputSettings().prettyPrint(pretty: false)
         XCTAssertEqual(try document.body()?.htmlUTF8WithoutSourceReuse(), Array(inner.utf8))
     }
@@ -219,7 +219,7 @@ final class StackOverflow463Test: XCTestCase {
 
     func testForcedDirtyPropagationBypassesBulkBuildSuppression() throws {
         let source = "<html><head></head><body><p>value</p></body></html>"
-        let document = try SwiftSoup.parse(source)
+        let document = try AIMarkdownHTML.parse(source)
         document.outputSettings().prettyPrint(pretty: false)
         let paragraph = try XCTUnwrap(document.select("p").first())
         let builder = TreeBuilder()
@@ -275,7 +275,7 @@ final class StackOverflow463Test: XCTestCase {
     }
 
     func testAlreadyDirtyNodeCanRegisterAfterRegistrationWasSuppressed() throws {
-        let document = try SwiftSoup.parse(
+        let document = try AIMarkdownHTML.parse(
             "<html><head></head><body><p title='source'>value</p></body></html>")
         let paragraph = try XCTUnwrap(document.select("p").first())
         let range = try XCTUnwrap(paragraph.sourceRange)

@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class URLProtocolValidationTest: XCTestCase {
     func testFailedResolutionDoesNotFallBackToBaseURI() {
@@ -21,7 +21,7 @@ final class URLProtocolValidationTest: XCTestCase {
         for control in ["&#x09;", "&#10;", "&#x0D;"] {
             let html = "<a href='java\(control)script:alert(1)'>link</a>"
             XCTAssertEqual(
-                try SwiftSoup.clean(html, "https://example.test/", Whitelist.basic()),
+                try AIMarkdownHTML.clean(html, "https://example.test/", Whitelist.basic()),
                 "<a rel=\"nofollow\">link</a>",
                 control
             )
@@ -48,7 +48,7 @@ final class URLProtocolValidationTest: XCTestCase {
                     let cleaner = Cleaner(headWhitelist: nil, bodyWhitelist: whitelist)
                     for value in values {
                         let html = "<a href=\"\(value)\">link</a><img src=\"\(value)\">"
-                        let dirty = try SwiftSoup.parse(html, baseURI)
+                        let dirty = try AIMarkdownHTML.parse(html, baseURI)
                         XCTAssertFalse(try cleaner.isValid(dirty), value.debugDescription)
                         let clean = try cleaner.clean(dirty)
                         let link = try XCTUnwrap(clean.select("a").first())
@@ -68,7 +68,7 @@ final class URLProtocolValidationTest: XCTestCase {
             .addProtocols(":all", "href", "https")
             .preserveRelativeLinks(true)
         let html = "<a href='java&#x09;script:alert(1)'>link</a>"
-        XCTAssertEqual(try SwiftSoup.clean(html, "https://example.test/", whitelist), "<a>link</a>")
+        XCTAssertEqual(try AIMarkdownHTML.clean(html, "https://example.test/", whitelist), "<a>link</a>")
     }
 
     func testValidRelativeAndAbsoluteLinksKeepConfiguredOutput() throws {
@@ -86,8 +86,8 @@ final class URLProtocolValidationTest: XCTestCase {
                     .urlWhitespace(mode)
                 for (value, resolved) in values {
                     let html = "<a href='\(value)'>link</a>"
-                    let clean = try XCTUnwrap(SwiftSoup.clean(html, "https://example.test/path/", whitelist))
-                    let link = try XCTUnwrap(SwiftSoup.parse(clean).select("a").first())
+                    let clean = try XCTUnwrap(AIMarkdownHTML.clean(html, "https://example.test/path/", whitelist))
+                    let link = try XCTUnwrap(AIMarkdownHTML.parse(clean).select("a").first())
                     XCTAssertEqual(try link.attr("href"), preserve ? value : resolved)
                 }
             }
@@ -99,8 +99,8 @@ final class URLProtocolValidationTest: XCTestCase {
         let modes: [Whitelist.URLWhitespaceMode] = [.strict, .trim, .allow]
         for mode in modes {
             let whitelist = try Whitelist.basic().urlWhitespace(mode)
-            let clean = try XCTUnwrap(SwiftSoup.clean(html, whitelist))
-            let link = try XCTUnwrap(SwiftSoup.parse(clean).select("a").first())
+            let clean = try XCTUnwrap(AIMarkdownHTML.clean(html, whitelist))
+            let link = try XCTUnwrap(AIMarkdownHTML.parse(clean).select("a").first())
             switch mode {
             case .strict:
                 XCTAssertFalse(link.hasAttr("href"))

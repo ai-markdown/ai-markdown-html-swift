@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 func writeStderr(_ message: String) {
     if let data = message.data(using: .utf8) {
@@ -200,7 +200,7 @@ case .fixtures:
                 do {
                     let data = try Data(contentsOf: url)
                     totalBytes += data.count
-                    let doc = try SwiftSoup.parse(data, "")
+                    let doc = try AIMarkdownHTML.parse(data, "")
                     if options.includeText {
                         _ = try doc.text()
                     }
@@ -222,7 +222,7 @@ case .trimHeavy:
         }
     }
 case .selectorParse:
-    let doc = try SwiftSoup.parse("<div id='root'><p class='a b'>Hello</p><span data-x='1'></span></div>")
+    let doc = try AIMarkdownHTML.parse("<div id='root'><p class='a b'>Hello</p><span data-x='1'></span></div>")
     let selectors = [
         "div > p.a",
         "div > p.a.b",
@@ -238,7 +238,7 @@ case .selectorParse:
         }
     }
 case .selectorCacheHeavy:
-    let doc = try SwiftSoup.parseBodyFragment("<div id='root'><span data-x='1'></span></div>")
+    let doc = try AIMarkdownHTML.parseBodyFragment("<div id='root'><span data-x='1'></span></div>")
     let selectors = (0..<512).map { "div[data-x='\($0)'] span" }
     for _ in 0..<options.repeatCount {
         var idx = 0
@@ -251,7 +251,7 @@ case .attributeParse:
     let html = "<div id='root' data-a='1' data-b='2' class='a b c' title='hello world' aria-label='x'></div>"
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            let doc = try SwiftSoup.parse(html)
+            let doc = try AIMarkdownHTML.parse(html)
             _ = try doc.select("div").first()?.getAttributes()
         }
     }
@@ -259,7 +259,7 @@ case .attributeParseNoSelect:
     let html = "<div id='root' data-a='1' data-b='2' class='a b c' title='hello world' aria-label='x'></div>"
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            let doc = try SwiftSoup.parse(html)
+            let doc = try AIMarkdownHTML.parse(html)
             if let body = doc.body(), body.children().size() > 0 {
                 _ = body.child(0).getAttributes()
             }
@@ -269,7 +269,7 @@ case .attributeParseDoubleQuoted:
     let html = "<div id=\"root\" data-a=\"1\" data-b=\"2\" class=\"a b c\" title=\"hello world\" aria-label=\"x\"></div>"
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            let doc = try SwiftSoup.parse(html)
+            let doc = try AIMarkdownHTML.parse(html)
             if let body = doc.body(), body.children().size() > 0 {
                 _ = body.child(0).getAttributes()
             }
@@ -280,7 +280,7 @@ case .parseClosureBasedData:
     let data = Data(html.utf8)
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            _ = try SwiftSoup.parse(data)
+            _ = try AIMarkdownHTML.parse(data)
         }
     }
 case .parseClosureBasedLargeNoCopy:
@@ -290,7 +290,7 @@ case .parseClosureBasedLargeNoCopy:
     let loops = max(1, options.iterations / 100)
     for _ in 0..<options.repeatCount {
         for _ in 0..<loops {
-            _ = try SwiftSoup.parse(withBytes: { parse in
+            _ = try AIMarkdownHTML.parse(withBytes: { parse in
                 return try data.withUnsafeBytes { raw -> Document in
                     let buf = raw.bindMemory(to: UInt8.self)
                     guard let base = buf.baseAddress else {
@@ -323,7 +323,7 @@ case .entitiesHeavy:
     let html = "<div>\(payload)</div>"
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            _ = try SwiftSoup.parseBodyFragment(html)
+            _ = try AIMarkdownHTML.parseBodyFragment(html)
         }
     }
 case .consumeToAnySingleByte:
@@ -344,7 +344,7 @@ case .manabiInjectionParse:
     """
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            _ = try SwiftSoup.parseBodyFragment(html)
+            _ = try AIMarkdownHTML.parseBodyFragment(html)
         }
     }
 case .manabiInjectionTraverse:
@@ -355,7 +355,7 @@ case .manabiInjectionTraverse:
     """
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            let doc = try SwiftSoup.parseBodyFragment(html)
+            let doc = try AIMarkdownHTML.parseBodyFragment(html)
             guard let body = doc.body() else { continue }
             let ruby = try body.getElementsByTag("ruby")
             _ = ruby.size()
@@ -369,7 +369,7 @@ case .manabiTagLookup:
     <p class='line'>彼は「テスト」を受けた。</p>
     <span data-manabi-considered-inline='true'>サンプル</span>
     """
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -388,7 +388,7 @@ case .manabiSelect:
       <manabi-sentence>仮名<manabi-surface>仮名</manabi-surface></manabi-sentence>
     </manabi-container>
     """
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -403,7 +403,7 @@ case .manabiOuterHtml:
     <p class='line'>彼は「テスト」を受けた。</p>
     <span data-manabi-considered-inline='true'>サンプル</span>
     """
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -412,7 +412,7 @@ case .manabiOuterHtml:
     }
 case .textRawSingle:
     let html = "単純なテキストだけ"
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -424,7 +424,7 @@ case .textRawTraverse:
     <div>単純なテキストだけ</div>
     <p>複数ノードのテキスト<span>断片</span>を含む</p>
     """
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -438,7 +438,7 @@ case .manabiOuterHtmlLarge:
     <span data-manabi-considered-inline='true'>サンプル</span>
     """
     let html = String(repeating: chunk, count: 200)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -452,7 +452,7 @@ case .manabiOuterHtmlLargeNoPretty:
     <span data-manabi-considered-inline='true'>サンプル</span>
     """
     let html = String(repeating: chunk, count: 200)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     doc.outputSettings().prettyPrint(pretty: false)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
@@ -468,7 +468,7 @@ case .manabiScriptStyleOuterHtmlNoPretty:
     <div>text &amp; more</div>
     """
     let html = String(repeating: chunk, count: 200)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     doc.outputSettings().prettyPrint(pretty: false)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
@@ -483,7 +483,7 @@ case .manabiReaderCandidateLines:
     <div class="line"><a href="#">リンク</a>と<span>テキスト</span>が混在。</div>
     """
     let html = String(repeating: chunk, count: 200)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     doc.outputSettings().prettyPrint(pretty: false)
     guard let body = doc.body() else { break }
     let lines = try body.select("div.line, p.line")
@@ -510,7 +510,7 @@ case .manabiReaderCandidateLinesLarge:
     <div class="line"><span>長い</span>文章で<sup>上</sup><sub>下</sub>や<span class="a b">class</span>を含む。</div>
     """
     let html = String(repeating: chunk, count: 150)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     doc.outputSettings().prettyPrint(pretty: false)
     guard let body = doc.body() else { break }
     let lines = try body.select("div.line, p.line")
@@ -536,7 +536,7 @@ case .manabiReaderPipeline:
     <div class="line"><a href="#">リンク</a>と<span>テキスト</span>が混在。<ruby>漢字<rt>かんじ</rt></ruby>多め。</div>
     """
     let html = String(repeating: chunk, count: 150)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     doc.outputSettings().prettyPrint(pretty: false)
     guard let body = doc.body() else { break }
     let lines = try body.select("div.line, p.line")
@@ -551,7 +551,7 @@ case .manabiReaderPipeline:
                     }
                     return try? node.outerHtml()
                 }.joined()
-                let fragment = try SwiftSoup.parseBodyFragment(candidateHTML)
+                let fragment = try AIMarkdownHTML.parseBodyFragment(candidateHTML)
                 if let fragmentBody = fragment.body() {
                     _ = try fragmentBody.text(trimAndNormaliseWhitespace: false)
                     _ = try fragmentBody.select("ruby, a, span")
@@ -569,7 +569,7 @@ case .manabiReaderParseOnly:
     let html = String(repeating: chunk, count: 150)
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
-            _ = try SwiftSoup.parseBodyFragment(html)
+            _ = try AIMarkdownHTML.parseBodyFragment(html)
         }
     }
 case .manabiTextLarge:
@@ -578,7 +578,7 @@ case .manabiTextLarge:
     <p class='line'>複数ノードのテキスト<span>断片</span>を含む</p>
     """
     let html = String(repeating: chunk, count: 200)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -589,7 +589,7 @@ case .attributeLookup:
     let html = """
     <a id="link-id" class="link primary" href="https://example.com" title="Example" data-x="y">Link</a>
     """
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body(), let link = try body.select("a").first() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -605,7 +605,7 @@ case .selectorTagLookup:
     let html = """
     <div><p>One</p><span>Two</span><div>Three</div></div>
     """
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -621,7 +621,7 @@ case .manabiSelectLarge:
     <span data-manabi-considered-inline='true'>サンプル</span>
     """
     let html = String(repeating: chunk, count: 200)
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     for _ in 0..<options.repeatCount {
         for _ in 0..<options.iterations {
@@ -638,7 +638,7 @@ case .elementsAttributeLookup:
       <a class="secondary" href="/rel">Rel</a>
     </div>
     """
-    let doc = try SwiftSoup.parseBodyFragment(html)
+    let doc = try AIMarkdownHTML.parseBodyFragment(html)
     guard let body = doc.body() else { break }
     let links = try body.getElementsByTag("a")
     for _ in 0..<options.repeatCount {
@@ -655,7 +655,7 @@ case .fixturesOuterHtml:
                 do {
                     let data = try Data(contentsOf: url)
                     totalBytes += data.count
-                    let doc = try SwiftSoup.parse(data, "")
+                    let doc = try AIMarkdownHTML.parse(data, "")
                     _ = try doc.body()?.outerHtml()
                     parsedCount += 1
                 } catch {
@@ -690,7 +690,7 @@ case .fixturesInnerHtmlNoPretty:
                 do {
                     let data = try Data(contentsOf: url)
                     totalBytes += data.count
-                    let doc = try SwiftSoup.parse(data, "")
+                    let doc = try AIMarkdownHTML.parse(data, "")
                     doc.outputSettings().prettyPrint(pretty: false)
                     _ = try doc.body()?.html()
                     parsedCount += 1
@@ -707,7 +707,7 @@ case .fixturesText:
                 do {
                     let data = try Data(contentsOf: url)
                     totalBytes += data.count
-                    let doc = try SwiftSoup.parse(data, "")
+                    let doc = try AIMarkdownHTML.parse(data, "")
                     _ = try doc.body()?.text()
                     parsedCount += 1
                 } catch {
@@ -723,7 +723,7 @@ case .fixturesSelect:
                 do {
                     let data = try Data(contentsOf: url)
                     totalBytes += data.count
-                    let doc = try SwiftSoup.parse(data, "")
+                    let doc = try AIMarkdownHTML.parse(data, "")
                     if let body = doc.body() {
                         _ = try body.select("p")
                         _ = try body.select("a")
@@ -743,7 +743,7 @@ case .fixturesSelectLoop:
             withAutoreleasepool {
                 do {
                     let data = try Data(contentsOf: url)
-                    let doc = try SwiftSoup.parse(data, "")
+                    let doc = try AIMarkdownHTML.parse(data, "")
                     if let body = doc.body() {
                         var i = 0
                         while i < iterations {

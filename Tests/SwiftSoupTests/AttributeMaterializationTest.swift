@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeMaterializationTest: XCTestCase {
     private func pending(_ key: String, _ value: String? = nil) -> Attributes.PendingAttribute {
@@ -48,7 +48,7 @@ final class AttributeMaterializationTest: XCTestCase {
     }
 
     func testMaterializationInvalidatesWarmedOwnerIndexes() throws {
-        let doc = try SwiftSoup.parse("<html><head></head><body><div id='old' class='before' data-x='one' title='t'></div></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head></head><body><div id='old' class='before' data-x='one' title='t'></div></body></html>")
         doc.outputSettings().prettyPrint(pretty: false)
         let element = try XCTUnwrap(doc.body()?.children().first())
         let attrs = try XCTUnwrap(element.getAttributes())
@@ -64,7 +64,7 @@ final class AttributeMaterializationTest: XCTestCase {
         attrs.ensureMaterialized()
         XCTAssertEqual(try doc.select(".before, #old, [data-x=one]").size(), 0)
         XCTAssertTrue(try doc.select(".after#new[data-x=two][data-new]").first() === element)
-        let reparsed = try SwiftSoup.parse(String(decoding: doc.outerHtmlUTF8(), as: UTF8.self))
+        let reparsed = try AIMarkdownHTML.parse(String(decoding: doc.outerHtmlUTF8(), as: UTF8.self))
         XCTAssertEqual(try reparsed.select(".after#new[data-x=two][data-new]").size(), 1)
         try attrs.put("class", "again")
         XCTAssertEqual(try doc.select(".after").size(), 0)

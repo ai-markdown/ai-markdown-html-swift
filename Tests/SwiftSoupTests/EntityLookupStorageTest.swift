@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class EntityLookupStorageTest: XCTestCase {
     // Parse the repository's declarative entity table without any lookup routine.
@@ -66,9 +66,9 @@ final class EntityLookupStorageTest: XCTestCase {
     func testPublicStringDataAndBufferParsing() throws {
         let input = "<p title='&NotEqualTilde; &CounterClockwiseContourIntegral;'>&NotSquareSubset; &NotARealLongEntity;</p>"
         let bytes = Array(input.utf8)
-        let string = try SwiftSoup.parse(input)
-        let data = try SwiftSoup.parse(Data(bytes))
-        let pointer = try SwiftSoup.parse(withBytes: { parse in try bytes.withUnsafeBufferPointer { try parse($0) } })
+        let string = try AIMarkdownHTML.parse(input)
+        let data = try AIMarkdownHTML.parse(Data(bytes))
+        let pointer = try AIMarkdownHTML.parse(withBytes: { parse in try bytes.withUnsafeBufferPointer { try parse($0) } })
         for document in [string, data, pointer] {
             let p = try XCTUnwrap(document.select("p").first())
             XCTAssertEqual(try p.attr("title"), "\u{2242}\u{338} \u{2233}")

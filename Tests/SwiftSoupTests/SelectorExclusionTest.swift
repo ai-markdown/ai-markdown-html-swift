@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SelectorExclusionTest: XCTestCase {
     private func nodes(_ count: Int) throws -> [Element] {
@@ -38,7 +38,7 @@ final class SelectorExclusionTest: XCTestCase {
     }
 
     func testStructurallyEqualNodesAndClonesAreNotExcluded() throws {
-        let document = try SwiftSoup.parse("<main>" + String(repeating: "<p>日本語</p>", count: 80) + "</main>")
+        let document = try AIMarkdownHTML.parse("<main>" + String(repeating: "<p>日本語</p>", count: 80) + "</main>")
         let input = try document.select("p").array()
         let clones = input.map { $0.copy() as! Element }
         assertSame(CssSelector.filterOut(input, clones).array(), input)
@@ -76,7 +76,7 @@ final class SelectorExclusionTest: XCTestCase {
     }
 
     func testPublicStringAndEvaluatorPathsWithOverlappingRoots() throws {
-        let document = try SwiftSoup.parse("<main>" + (0..<96).map { i in
+        let document = try AIMarkdownHTML.parse("<main>" + (0..<96).map { i in
             "<section class='\(i % 3 == 0 ? "drop" : "keep")'><p class='drop'>日本語 \(i)</p><span>text</span></section>"
         }.joined() + "</main>")
         let sections = try document.select("section").array()
@@ -92,7 +92,7 @@ final class SelectorExclusionTest: XCTestCase {
     }
 
     func testWarmedSelectionsAfterClassChangesReparentingAndRemoval() throws {
-        let document = try SwiftSoup.parse("<main>" + (0..<128).map { i in
+        let document = try AIMarkdownHTML.parse("<main>" + (0..<128).map { i in
             "<p class='\(i % 2 == 0 ? "drop" : "keep")'>\(i)</p>"
         }.joined() + "</main>")
         let input = try document.select("p").array()

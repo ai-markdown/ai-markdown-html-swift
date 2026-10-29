@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class QueryParserConcurrencyTest: XCTestCase {
     func testQueryParserCacheThreadSafety() {

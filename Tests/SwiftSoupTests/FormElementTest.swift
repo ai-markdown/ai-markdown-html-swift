@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class FormElementTest: XCTestCase {
 
@@ -14,7 +14,7 @@ class FormElementTest: XCTestCase {
 		//"button", "fieldset", "input", "keygen", "object", "output", "select", "textarea"
 		let html = "<form id=1><button id=1><fieldset id=2 /><input id=3><keygen id=4><object id=5><output id=6>" +
 		"<select id=7><option></select><textarea id=8><p id=9>"
-		let doc: Document = try SwiftSoup.parse(html)
+		let doc: Document = try AIMarkdownHTML.parse(html)
 
 		let form: FormElement = try doc.select("form").first()! as! FormElement
 		XCTAssertEqual(8, form.elements().size())
@@ -91,7 +91,7 @@ class FormElementTest: XCTestCase {
 //	}
 
 	func testFormsAddedAfterParseAreFormElements() throws {
-		let doc: Document = try SwiftSoup.parse("<body />")
+		let doc: Document = try AIMarkdownHTML.parse("<body />")
 		try doc.body()?.html("<form action='http://example.com/search'><input name='q' value='search'>")
 		let formEl: Element = try doc.select("form").first()!
 		XCTAssertNotNil(formEl as? FormElement)
@@ -101,7 +101,7 @@ class FormElementTest: XCTestCase {
 	}
 
 	func testControlsAddedAfterParseAreLinkedWithForms() throws {
-		let doc: Document = try SwiftSoup.parse("<body />")
+		let doc: Document = try AIMarkdownHTML.parse("<body />")
 		try doc.body()?.html("<form />")
 
 		let formEl: Element = try doc.select("form").first()!
@@ -160,7 +160,7 @@ class FormElementTest: XCTestCase {
 			</form>
 			</body></html>
 			"""
-		let doc = try SwiftSoup.parse(html)
+		let doc = try AIMarkdownHTML.parse(html)
 
 		// Input elements should be direct children of form
 		let directInputs = try doc.select("form[name=FORM0] > input")
@@ -173,7 +173,7 @@ class FormElementTest: XCTestCase {
 
 	func testFormChildrenTreeStructure() throws {
 		let html = "<form id='f'><div><input name='a'></div><input name='b'></form>"
-		let doc = try SwiftSoup.parse(html)
+		let doc = try AIMarkdownHTML.parse(html)
 
 		// input 'a' is inside a div, so not a direct child of form
 		let directInputs = try doc.select("form#f > input")
@@ -193,7 +193,7 @@ class FormElementTest: XCTestCase {
 				<input name="in" value="val">
 			</form>
 			"""
-		let doc = try SwiftSoup.parse(html)
+		let doc = try AIMarkdownHTML.parse(html)
 
 		let form = try doc.select("form[name=test]").first()!
 		// All form controls should be direct children (or descendants) of the form

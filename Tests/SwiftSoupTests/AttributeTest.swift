@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 class AttributeTest: XCTestCase {
     func testHtml() throws {
         let attr = try Attribute(key: "key", value: "value &")
@@ -63,7 +63,7 @@ class AttributeTest: XCTestCase {
     func testCrossoriginWithoutValueCollapsesInOutput() throws {
         // <script crossorigin> is parsed as a BooleanAttribute and should round-trip without =""
         let html = "<script crossorigin src=\"app.js\"></script>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let script = try doc.select("script").first()!
 
         XCTAssertTrue(try script.hasAttr("crossorigin"))
@@ -76,7 +76,7 @@ class AttributeTest: XCTestCase {
         // <script crossorigin=""> should also collapse to <script crossorigin> because
         // crossorigin is in the boolean attributes list
         let html = "<script crossorigin=\"\" src=\"app.js\"></script>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let script = try doc.select("script").first()!
 
         let output = try script.outerHtml()
@@ -86,14 +86,14 @@ class AttributeTest: XCTestCase {
 
     func testCrossoriginWithValuePreservesValue() throws {
         let html = "<script crossorigin=\"use-credentials\" src=\"app.js\"></script>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let script = try doc.select("script").first()!
 
         XCTAssertEqual("use-credentials", try script.attr("crossorigin"))
     }
 
     func testCrossoriginSetProgrammaticallyCollapsesWhenEmpty() throws {
-        let doc = try SwiftSoup.parse("<script src=\"app.js\"></script>")
+        let doc = try AIMarkdownHTML.parse("<script src=\"app.js\"></script>")
         let script = try doc.select("script").first()!
         try script.attr("crossorigin", "")
 

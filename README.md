@@ -1,3 +1,22 @@
+# AI Markdown HTML Swift
+
+A custom SwiftSoup fork providing the `AIMarkdownHTML` Swift Package product and module for [ai-markdown-swift](https://github.com/ai-markdown/ai-markdown-swift). The package supports iOS 26+ (including iPadOS) and macOS 26+, requires Swift tools 6.2, and preserves the upstream MIT license and Git history.
+
+```swift
+import AIMarkdownHTML
+
+let document = try AIMarkdownHTML.parse("<p>Hello</p>")
+let text = try document.text()
+```
+
+Implementation changes are maintained directly in `Sources/AIMarkdownHTML/`. Ordinary builds do not depend on the workspace, JavaScript, submodules, or build-time generators. Source tracking remains opt-in; the fork also includes the existing fostered-text placement fix. These changes do not establish full equivalence with Web HTML parsing.
+
+See [AIMarkdown/README.md](AIMarkdown/README.md) for the repository purpose, supported package layout, and maintenance workflow. `AIMarkdownHTMLProfile` is a development executable and is not a runtime dependency of the library.
+
+The original upstream README is retained below as reference material. Its official module names, platform range, and CocoaPods/Carthage/Xcode framework distribution instructions do not define this fork's supported distribution contract. This fork is distributed through its root `Package.swift`.
+
+---
+
 <p align="center" >
   <img src="https://raw.githubusercontent.com/scinfu/SwiftSoup/master/swiftsoup.png" alt="SwiftSoup" title="SwiftSoup">
 </p>

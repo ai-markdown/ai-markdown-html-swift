@@ -16,6 +16,9 @@ public class TreeBuilder {
     public var currentToken: Token? // currentToken is used only for error tracking.
     public var errors: ParseErrorList // null when not tracking errors
     public var settings: ParseSettings
+    @usableFromInline var sourceEvents: SourceEventRecorder?
+    var sourceEventInjections: [SourceInputEmission] = []
+    @usableFromInline var coalescesSourceCharacters = false
     public var tracksSourceRanges: Bool = false
     public var tracksErrors: Bool = false
     @usableFromInline
@@ -73,6 +76,9 @@ public class TreeBuilder {
         tokeniser = Tokeniser(reader, tracksErrors ? errors : nil, settings,
                               isXmlParser: self is XmlTreeBuilder,
                               normalizesHtmlNumericReferences: !(self is XmlTreeBuilder))
+        sourceEvents?.created(doc, token: nil, generated: "parser-document")
+        tokeniser.sourceEvents = sourceEvents
+        tokeniser.sourceEventCapturesCharacters = sourceEvents != nil || !sourceEventInjections.isEmpty
         stack = Array<Element>()
         self.baseUri = baseUri
         pendingAttributeElements.removeAll(keepingCapacity: true)
@@ -96,6 +102,9 @@ public class TreeBuilder {
         tokeniser = Tokeniser(reader, tracksErrors ? errors : nil, settings,
                               isXmlParser: self is XmlTreeBuilder,
                               normalizesHtmlNumericReferences: !(self is XmlTreeBuilder))
+        sourceEvents?.created(doc, token: nil, generated: "parser-document")
+        tokeniser.sourceEvents = sourceEvents
+        tokeniser.sourceEventCapturesCharacters = sourceEvents != nil || !sourceEventInjections.isEmpty
         stack = Array<Element>()
         self.baseUri = baseUri
         pendingAttributeElements.removeAll(keepingCapacity: true)
@@ -152,7 +161,21 @@ public class TreeBuilder {
     public func runParser() throws {
         while (true) {
             let token: Token = try tokeniser.read()
+            let position = token.sourceRange?.start ?? token.sourceEventPieces.compactMap { $0.range?.first }.first ?? (token.isEOF() ? reader.pos : nil)
+            while let emission = sourceEventInjections.first, emission.rawUTF8Start == position {
+                sourceEventInjections.removeFirst()
+                let generated = Token.Char().data(Array(emission.value.utf8))
+                generated.sourceCharacterInjection = true
+                generated.sourceEventPieces = [SourceEventPiece(bytes: Array(emission.value.utf8), range: nil, kind: "hast-generated-text", emissions: [emission.id])]
+                sourceEvents?.token(generated, generated: true)
+                let before = stack
+                try process(generated)
+                sourceEvents?.stackChanged(before: before, after: stack)
+            }
+            sourceEvents?.token(token)
+            let before = stack
             try process(token)
+            sourceEvents?.stackChanged(before: before, after: stack)
             if (token.type == Token.TokenType.EOF) {
                 break
             }

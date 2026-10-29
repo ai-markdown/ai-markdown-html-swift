@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 final class CustomParent: Element, @unchecked Sendable {}
 
@@ -10,7 +10,7 @@ struct Workload {
     let html: String?
     func run() throws -> Int {
         if let html {
-            let doc=try SwiftSoup.parse(html)
+            let doc=try AIMarkdownHTML.parse(html)
             let nodes=try doc.select("section").array()
             if name=="parse-control" { return nodes.count + (try doc.select("p").size()) }
             return nodes.reduce(0) { result,node in result + (node.firstElementSibling()?.siblingIndex ?? -1) + (node.lastElementSibling()?.siblingIndex ?? -1) }

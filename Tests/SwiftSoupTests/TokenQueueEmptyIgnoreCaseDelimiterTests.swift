@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 final class TokenQueueEmptyIgnoreCaseDelimiterTests: XCTestCase {
     func testConsumeToIgnoreCaseEmptyDelimiterIsNoOp() {
         let q=TokenQueue("AbC"); XCTAssertEqual(q.consumeToIgnoreCase(""), ""); XCTAssertEqual(q.remainder(), "AbC")

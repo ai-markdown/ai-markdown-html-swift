@@ -1,10 +1,10 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class ContainsTextParityTest: XCTestCase {
     private func assertParity(_ html: String, needles: [String],
                               file: StaticString = #filePath, line: UInt = #line) throws {
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let elements = try doc.getAllElements().array()
         for own in [false, true] {
             for needle in needles {
@@ -67,7 +67,7 @@ final class ContainsTextParityTest: XCTestCase {
     }
 
     func testCachedContainsResultsUpdateAfterTextMutation() throws {
-        let doc = try SwiftSoup.parse("<p>a</p>")
+        let doc = try AIMarkdownHTML.parse("<p>a</p>")
         let p = try XCTUnwrap(doc.select("p").first())
         for text in ["a", "K", "e\u{301}", "a ", "A"] {
             try p.text(text)

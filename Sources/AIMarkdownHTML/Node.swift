@@ -50,10 +50,15 @@ open class Node: Equatable, Hashable {
     @usableFromInline
     internal var sourceBuffer: SourceBuffer? = nil
     
+    @usableFromInline weak var sourceEventRecorder: SourceEventRecorder?
+    @usableFromInline var sourceEventIdentity: HTMLSourceIdentity?
+    /// Identity is valid only within one source scope; it is neither an author attribute nor a stable key across parses.
+    public var htmlSourceIdentity: HTMLSourceIdentity? { sourceEventIdentity }
     @usableFromInline
     weak var parentNode: Node? {
         @inline(__always)
         didSet {
+            if oldValue !== parentNode { sourceEventRecorder?.moved(self, from: oldValue, to: parentNode) }
             guard let element = self as? Element, oldValue !== parentNode else { return }
             if element.suppressQueryIndexDirty {
                 return
@@ -581,6 +586,7 @@ open class Node: Equatable, Hashable {
     @inline(__always)
     @usableFromInline
     internal func setSourceRangeEnd(_ end: Int) {
+        sourceEventRecorder?.legacyEnd(self, end)
         guard var range = sourceRange else { return }
         range.end = end
         sourceRange = range
@@ -1305,6 +1311,10 @@ open class Node: Equatable, Hashable {
         rebuildIndexes: Bool,
         suppressQueryIndexDirty: Bool
     ) -> Node {
+        // copy(clone:) may reuse an existing target; do not inherit the old identity of either the target or source.
+        clone.sourceEventRecorder?.endedIdentity(clone, reason: "copy-target-reset")
+        clone.sourceEventRecorder = nil
+        clone.sourceEventIdentity = nil
         if suppressQueryIndexDirty, let element = clone as? Element {
             element.suppressQueryIndexDirty = true
         }
@@ -1337,6 +1347,7 @@ open class Node: Equatable, Hashable {
             cloneElement.rebuildQueryIndexesForThisNodeOnly()
         }
 
+        sourceEventRecorder?.cloned(self, clone, reason: "api-copy")
         return clone
     }
 

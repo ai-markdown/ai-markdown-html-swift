@@ -7,7 +7,7 @@
 
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class EntitiesTest: XCTestCase {
 
@@ -114,7 +114,7 @@ class EntitiesTest: XCTestCase {
 
 	func testLetterDigitEntities() throws {
 		let html: String = "<p>&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;</p>"
-		let doc: Document = try SwiftSoup.parse(html)
+		let doc: Document = try AIMarkdownHTML.parse(html)
 		doc.outputSettings().charset(.ascii)
 		let p: Element = try doc.select("p").first()!
 		XCTAssertEqual("&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;", try p.html())
@@ -132,7 +132,7 @@ class EntitiesTest: XCTestCase {
 		// https://github.com/jhy/jsoup/issues/528 - < is OK in HTML attribute values, but not in XML
 
 		let docHtml: String = "<a title='<p>One</p>'>One</a>"
-		let doc: Document = try SwiftSoup.parse(docHtml)
+		let doc: Document = try AIMarkdownHTML.parse(docHtml)
 		let element: Element = try doc.select("a").first()!
 
 		doc.outputSettings().escapeMode(Entities.EscapeMode.base)
@@ -167,7 +167,7 @@ class EntitiesTest: XCTestCase {
 		// Round-trip: parse HTML containing &nbsp;, then serialize back.
 		// The output must contain the &nbsp; entity, not raw U+00A0 bytes.
 		let html = "<p>hello&nbsp;world</p>"
-		let doc = try SwiftSoup.parse(html)
+		let doc = try AIMarkdownHTML.parse(html)
 		let p = try doc.select("p").first()!
 		let output = try p.html()
 

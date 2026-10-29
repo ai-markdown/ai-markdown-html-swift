@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 func reference(_ text: String) -> Bool { text.allSatisfy { StringUtil.isWhitespace($0) } }
 
@@ -32,7 +32,7 @@ func verify() throws -> [[String: Any]] {
         records.append(["input": bytes, "blank": result, "retained": node.getWholeTextUTF8()])
     }
     for shape in 0..<16 {
-        let doc = try SwiftSoup.parse("<main><p> \r\n </p><p>日本 &amp; text</p><p>&nbsp;</p><pre> \r\n </pre></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p> \r\n </p><p>日本 &amp; text</p><p>&nbsp;</p><pre> \r\n </pre></main>")
         doc.outputSettings().prettyPrint(pretty: shape % 2 == 0)
         let nodes = try doc.select("p")
         if shape % 3 == 0 { try nodes.first()!.text(shape % 2 == 0 ? "" : "changed") }
@@ -72,7 +72,7 @@ func workload(_ name: String) throws -> () throws -> Int {
         let paragraph = name == "parse-control" ? "<p>日本語 &amp; ordinary text <em>強調</em></p>" : "<p> \t\r\n </p>"
         let html = "<main>" + String(repeating: paragraph, count: 128) + "</main>"
         return {
-            let doc = try SwiftSoup.parse(html)
+            let doc = try AIMarkdownHTML.parse(html)
             if name == "parse-hastext" { return try doc.select("p").array().reduce(0) { $0 + ($1.hasText() ? 1 : 2) } }
             return try doc.select("p").size()
         }

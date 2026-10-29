@@ -1,0 +1,1536 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "only-generated-CRLF",
+      "source": "",
+      "rawSource": "",
+      "segments": [
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "A\r\nB\rC",
+          "id": "only-generated-CRLF-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 0
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "A\r\nB\rC",
+          "id": "only-generated-CRLF-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 6
+        }
+      ],
+      "encodedRawSource": "A\r\nB\rC",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "text",
+            "value": "A\r\nB\rC"
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "text",
+            "value": "A\r\nB\rC"
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "A\r\nB\rC",
+            "location": {}
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "text",
+            "value": "A\r\nB\rC"
+          }
+        ]
+      },
+      "rawSourceSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "encodedRawSourceSHA256": "f6f2c2de70e2c2c52a37b25caabfdeed834a11574d9f3bd346a1f4ad3b8db94e"
+    },
+    {
+      "id": "generated-code-escaped-CR",
+      "source": "",
+      "rawSource": "<pre><code></code></pre>",
+      "segments": [
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "<pre>",
+          "id": "generated-code-escaped-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 5
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "<code>",
+          "id": "generated-code-escaped-CR-emission-1",
+          "rawUTF8Start": 5,
+          "rawUTF8End": 11
+        },
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "a\r\n<&\"😀b\r",
+          "id": "generated-code-escaped-CR-emission-2",
+          "rawUTF8Start": 11,
+          "rawUTF8End": 11
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "</code>",
+          "id": "generated-code-escaped-CR-emission-3",
+          "rawUTF8Start": 11,
+          "rawUTF8End": 18
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "</pre>",
+          "id": "generated-code-escaped-CR-emission-4",
+          "rawUTF8Start": 18,
+          "rawUTF8End": 24
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "<pre>",
+          "id": "generated-code-escaped-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 5
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "<code>",
+          "id": "generated-code-escaped-CR-emission-1",
+          "rawUTF8Start": 5,
+          "rawUTF8End": 11
+        },
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "a\r\n&lt;&amp;&quot;😀b\r",
+          "id": "generated-code-escaped-CR-emission-2",
+          "rawUTF8Start": 11,
+          "rawUTF8End": 35
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "</code>",
+          "id": "generated-code-escaped-CR-emission-3",
+          "rawUTF8Start": 35,
+          "rawUTF8End": 42
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "</pre>",
+          "id": "generated-code-escaped-CR-emission-4",
+          "rawUTF8Start": 42,
+          "rawUTF8End": 48
+        }
+      ],
+      "encodedRawSource": "<pre><code>a\r\n&lt;&amp;&quot;😀b\r</code></pre>",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "pre",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "code",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "a\r\n<&\"😀b\r"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "pre",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "code",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "a\r\n<&\"😀b\r"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "a\r\n<&\"😀b\r",
+            "location": {}
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "code",
+            "tagID": 19,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {}
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "pre",
+            "tagID": 86,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {}
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "pre",
+            "attributes": {},
+            "children": [
+              {
+                "type": "element",
+                "name": "code",
+                "attributes": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "a\r\n<&\"😀b\r"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "rawSourceSHA256": "eac2c71d1408cba1ad239b864ef5d38a7b75e2dfc216e497b00949d32e17d633",
+      "encodedRawSourceSHA256": "8f455cfbefc35f330eae732d086df44d226fde3929ae3c5876457413468fad90"
+    },
+    {
+      "id": "generated-attribute-and-text-CR",
+      "source": "",
+      "rawSource": "<div title=\"A\r\nB\"></div>",
+      "segments": [
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "<div title=\"A\r\nB\">",
+          "id": "generated-attribute-and-text-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 18
+        },
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "C\r\nD\r",
+          "id": "generated-attribute-and-text-CR-emission-1",
+          "rawUTF8Start": 18,
+          "rawUTF8End": 18
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "</div>",
+          "id": "generated-attribute-and-text-CR-emission-2",
+          "rawUTF8Start": 18,
+          "rawUTF8End": 24
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "<div title=\"A\r\nB\">",
+          "id": "generated-attribute-and-text-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 18
+        },
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "C\r\nD\r",
+          "id": "generated-attribute-and-text-CR-emission-1",
+          "rawUTF8Start": 18,
+          "rawUTF8End": 23
+        },
+        {
+          "kind": "raw",
+          "role": "hast-generated-tag",
+          "value": "</div>",
+          "id": "generated-attribute-and-text-CR-emission-2",
+          "rawUTF8Start": 23,
+          "rawUTF8End": 29
+        }
+      ],
+      "encodedRawSource": "<div title=\"A\r\nB\">C\r\nD\r</div>",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "div",
+            "properties": {
+              "title": "A\r\nB"
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "C\r\nD\r"
+              }
+            ]
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "div",
+            "properties": {
+              "title": "A\r\nB"
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "C\r\nD\r"
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "C\r\nD\r",
+            "location": {}
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "div",
+            "tagID": 27,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {}
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "div",
+            "attributes": {
+              "title": "A\r\nB"
+            },
+            "children": [
+              {
+                "type": "text",
+                "value": "C\r\nD\r"
+              }
+            ]
+          }
+        ]
+      },
+      "rawSourceSHA256": "0471e1fdffc5f4ca6e098b252c819a4b081b05e175bcb785e16b70b11f901909",
+      "encodedRawSourceSHA256": "b04c777e36b2ab0df547478b4277b0db6bfc7ae65e54a5a50a8a6132674a5bbd"
+    },
+    {
+      "id": "author-CRLF-before-generated-CR",
+      "source": "",
+      "rawSource": "<p>author\r\n</p>",
+      "segments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>author\r\n",
+          "id": "author-CRLF-before-generated-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 11
+        },
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "generated\r\n<&\"😀\r",
+          "id": "author-CRLF-before-generated-CR-emission-1",
+          "rawUTF8Start": 11,
+          "rawUTF8End": 11
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "</p>",
+          "id": "author-CRLF-before-generated-CR-emission-2",
+          "rawUTF8Start": 11,
+          "rawUTF8End": 15
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>author\r\n",
+          "id": "author-CRLF-before-generated-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 11
+        },
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "generated\r\n&lt;&amp;&quot;😀\r",
+          "id": "author-CRLF-before-generated-CR-emission-1",
+          "rawUTF8Start": 11,
+          "rawUTF8End": 42
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "</p>",
+          "id": "author-CRLF-before-generated-CR-emission-2",
+          "rawUTF8Start": 42,
+          "rawUTF8End": 46
+        }
+      ],
+      "encodedRawSource": "<p>author\r\ngenerated\r\n&lt;&amp;&quot;😀\r</p>",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "raw",
+            "value": "<p>author\r\n"
+          },
+          {
+            "type": "text",
+            "value": "generated\r\n<&\"😀\r"
+          },
+          {
+            "type": "raw",
+            "value": "</p>"
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "p",
+            "properties": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "author\ngenerated\r\n<&\"😀\r",
+                "position": {
+                  "start": {
+                    "line": 1,
+                    "column": 4,
+                    "offset": 3
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              },
+              "end": {
+                "line": 2,
+                "column": -6,
+                "offset": 4
+              }
+            }
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        },
+        "position": {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          }
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onStartTag",
+          "token": {
+            "type": 3,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 1,
+              "startCol": 1,
+              "startOffset": 0,
+              "endLine": 1,
+              "endCol": 4,
+              "endOffset": 3
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "author",
+            "location": {
+              "startLine": 1,
+              "startCol": 4,
+              "startOffset": 3,
+              "endLine": 1,
+              "endCol": 10,
+              "endOffset": 9
+            }
+          }
+        },
+        {
+          "handler": "onWhitespaceCharacter",
+          "token": {
+            "type": 2,
+            "chars": "\n",
+            "location": {
+              "startLine": 1,
+              "startCol": 10,
+              "startOffset": 9,
+              "endLine": 2,
+              "endCol": 0,
+              "endOffset": 11
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "generated\r\n<&\"😀\r",
+            "location": {}
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 2,
+              "startCol": -10,
+              "startOffset": 0,
+              "endLine": 2,
+              "endCol": -6,
+              "endOffset": 4
+            }
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "attributes": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "author\ngenerated\r\n<&\"😀\r"
+              }
+            ]
+          }
+        ]
+      },
+      "rawSourceSHA256": "ad74ac8ebf34090e7e66514c0a55df7cb15e3127078c3164cf41437e336aadf9",
+      "encodedRawSourceSHA256": "b40a52d9af2f04d32e4778cd840de1fc76c0e1bd26ce313e48f7a18f53213210"
+    },
+    {
+      "id": "author-CR-before-generated-LF",
+      "source": "",
+      "rawSource": "<p>A\r</p>",
+      "segments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>A\r",
+          "id": "author-CR-before-generated-LF-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 5
+        },
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "\nB\r",
+          "id": "author-CR-before-generated-LF-emission-1",
+          "rawUTF8Start": 5,
+          "rawUTF8End": 5
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "</p>",
+          "id": "author-CR-before-generated-LF-emission-2",
+          "rawUTF8Start": 5,
+          "rawUTF8End": 9
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>A\r",
+          "id": "author-CR-before-generated-LF-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 5
+        },
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "\nB\r",
+          "id": "author-CR-before-generated-LF-emission-1",
+          "rawUTF8Start": 5,
+          "rawUTF8End": 8
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "</p>",
+          "id": "author-CR-before-generated-LF-emission-2",
+          "rawUTF8Start": 8,
+          "rawUTF8End": 12
+        }
+      ],
+      "encodedRawSource": "<p>A\r\nB\r</p>",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "raw",
+            "value": "<p>A\r"
+          },
+          {
+            "type": "text",
+            "value": "\nB\r"
+          },
+          {
+            "type": "raw",
+            "value": "</p>"
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "p",
+            "properties": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "A\n\nB\r",
+                "position": {
+                  "start": {
+                    "line": 1,
+                    "column": 4,
+                    "offset": 3
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              }
+            }
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        },
+        "position": {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          }
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onStartTag",
+          "token": {
+            "type": 3,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 1,
+              "startCol": 1,
+              "startOffset": 0,
+              "endLine": 1,
+              "endCol": 4,
+              "endOffset": 3
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "A",
+            "location": {
+              "startLine": 1,
+              "startCol": 4,
+              "startOffset": 3,
+              "endLine": 1,
+              "endCol": 5,
+              "endOffset": 4
+            }
+          }
+        },
+        {
+          "handler": "onWhitespaceCharacter",
+          "token": {
+            "type": 2,
+            "chars": "\n",
+            "location": {
+              "startLine": 1,
+              "startCol": 5,
+              "startOffset": 4,
+              "endLine": 2,
+              "endCol": 1,
+              "endOffset": 5
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "\nB\r",
+            "location": {}
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 2,
+              "startCol": -4,
+              "startOffset": 0,
+              "endLine": 2,
+              "endCol": 0,
+              "endOffset": 4
+            }
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "attributes": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "A\n\nB\r"
+              }
+            ]
+          }
+        ]
+      },
+      "rawSourceSHA256": "d07e1a39e49df1b851a4cca9c9df152f5276eb693db5680abac53d3a20410a8d",
+      "encodedRawSourceSHA256": "4605d8df49aa922948c5bfcb537e64468f39134f6cd8cf010e79999336a6925f"
+    },
+    {
+      "id": "generated-CR-before-author-LF",
+      "source": "",
+      "rawSource": "<p>\nB</p>",
+      "segments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>",
+          "id": "generated-CR-before-author-LF-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 3
+        },
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "A\r",
+          "id": "generated-CR-before-author-LF-emission-1",
+          "rawUTF8Start": 3,
+          "rawUTF8End": 3
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "\nB</p>",
+          "id": "generated-CR-before-author-LF-emission-2",
+          "rawUTF8Start": 3,
+          "rawUTF8End": 9
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>",
+          "id": "generated-CR-before-author-LF-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 3
+        },
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "A\r",
+          "id": "generated-CR-before-author-LF-emission-1",
+          "rawUTF8Start": 3,
+          "rawUTF8End": 5
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "\nB</p>",
+          "id": "generated-CR-before-author-LF-emission-2",
+          "rawUTF8Start": 5,
+          "rawUTF8End": 11
+        }
+      ],
+      "encodedRawSource": "<p>A\r\nB</p>",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "raw",
+            "value": "<p>"
+          },
+          {
+            "type": "text",
+            "value": "A\r"
+          },
+          {
+            "type": "raw",
+            "value": "\nB</p>"
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "p",
+            "properties": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "A\r\nB",
+                "position": {
+                  "end": {
+                    "line": 2,
+                    "column": 2,
+                    "offset": 2
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 6,
+                "offset": 6
+              }
+            }
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        },
+        "position": {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          }
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onStartTag",
+          "token": {
+            "type": 3,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 1,
+              "startCol": 1,
+              "startOffset": 0,
+              "endLine": 1,
+              "endCol": 4,
+              "endOffset": 3
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "A\r",
+            "location": {}
+          }
+        },
+        {
+          "handler": "onWhitespaceCharacter",
+          "token": {
+            "type": 2,
+            "chars": "\n",
+            "location": null
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "B",
+            "location": {
+              "startLine": 2,
+              "startCol": 1,
+              "startOffset": 1,
+              "endLine": 2,
+              "endCol": 2,
+              "endOffset": 2
+            }
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 2,
+              "startCol": 2,
+              "startOffset": 2,
+              "endLine": 2,
+              "endCol": 6,
+              "endOffset": 6
+            }
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "attributes": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "A\r\nB"
+              }
+            ]
+          }
+        ]
+      },
+      "rawSourceSHA256": "30f49f6fc9842da5c8fc25d7d5c55ab026e67f9d150aa706ea2bca4eafda7876",
+      "encodedRawSourceSHA256": "d5c680d5bcefd88459c23c4e0c3cc5cc2e40c563a0e5ef2fb66e6ba6b2cb86d8"
+    },
+    {
+      "id": "author-comment-CRLF-before-generated",
+      "source": "",
+      "rawSource": "<!--author\r\n--><p>after</p>",
+      "segments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<!--author\r\n-->",
+          "id": "author-comment-CRLF-before-generated-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 15
+        },
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "X\r\n",
+          "id": "author-comment-CRLF-before-generated-emission-1",
+          "rawUTF8Start": 15,
+          "rawUTF8End": 15
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>after</p>",
+          "id": "author-comment-CRLF-before-generated-emission-2",
+          "rawUTF8Start": 15,
+          "rawUTF8End": 27
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<!--author\r\n-->",
+          "id": "author-comment-CRLF-before-generated-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 15
+        },
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "X\r\n",
+          "id": "author-comment-CRLF-before-generated-emission-1",
+          "rawUTF8Start": 15,
+          "rawUTF8End": 18
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>after</p>",
+          "id": "author-comment-CRLF-before-generated-emission-2",
+          "rawUTF8Start": 18,
+          "rawUTF8End": 30
+        }
+      ],
+      "encodedRawSource": "<!--author\r\n-->X\r\n<p>after</p>",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "raw",
+            "value": "<!--author\r\n-->"
+          },
+          {
+            "type": "text",
+            "value": "X\r\n"
+          },
+          {
+            "type": "raw",
+            "value": "<p>after</p>"
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "comment",
+            "value": "author\n",
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 4,
+                "offset": 15
+              }
+            }
+          },
+          {
+            "type": "text",
+            "value": "X\r\n"
+          },
+          {
+            "type": "element",
+            "tagName": "p",
+            "properties": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "after",
+                "position": {
+                  "start": {
+                    "line": 2,
+                    "column": -8,
+                    "offset": 3
+                  },
+                  "end": {
+                    "line": 2,
+                    "column": -3,
+                    "offset": 8
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 2,
+                "column": -11,
+                "offset": 0
+              },
+              "end": {
+                "line": 2,
+                "column": 1,
+                "offset": 12
+              }
+            }
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        },
+        "position": {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          }
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onComment",
+          "token": {
+            "type": 5,
+            "data": "author\n",
+            "location": {
+              "startLine": 1,
+              "startCol": 1,
+              "startOffset": 0,
+              "endLine": 2,
+              "endCol": 4,
+              "endOffset": 15
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "X\r\n",
+            "location": {}
+          }
+        },
+        {
+          "handler": "onStartTag",
+          "token": {
+            "type": 3,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 2,
+              "startCol": -11,
+              "startOffset": 0,
+              "endLine": 2,
+              "endCol": -8,
+              "endOffset": 3
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "after",
+            "location": {
+              "startLine": 2,
+              "startCol": -8,
+              "startOffset": 3,
+              "endLine": 2,
+              "endCol": -3,
+              "endOffset": 8
+            }
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 2,
+              "startCol": -3,
+              "startOffset": 8,
+              "endLine": 2,
+              "endCol": 1,
+              "endOffset": 12
+            }
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "comment",
+            "value": "author\n"
+          },
+          {
+            "type": "text",
+            "value": "X\r\n"
+          },
+          {
+            "type": "element",
+            "name": "p",
+            "attributes": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "after"
+              }
+            ]
+          }
+        ]
+      },
+      "rawSourceSHA256": "4b5ac6cec034e2aadfebc0f47fd92014303600a8ceab644d31c65064f4cc651c",
+      "encodedRawSourceSHA256": "c88eb776a938450befb9ea57f895f335ba98b1e72df9ee3872d2a66125bde391"
+    },
+    {
+      "id": "author-entity-versus-generated-CR",
+      "source": "",
+      "rawSource": "<p>&#13;\r\n</p>",
+      "segments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>&#13;\r\n",
+          "id": "author-entity-versus-generated-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 10
+        },
+        {
+          "kind": "characters",
+          "role": "hast-generated-text",
+          "value": "&#13;\r\n",
+          "id": "author-entity-versus-generated-CR-emission-1",
+          "rawUTF8Start": 10,
+          "rawUTF8End": 10
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "</p>",
+          "id": "author-entity-versus-generated-CR-emission-2",
+          "rawUTF8Start": 10,
+          "rawUTF8End": 14
+        }
+      ],
+      "encodedSegments": [
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "<p>&#13;\r\n",
+          "id": "author-entity-versus-generated-CR-emission-0",
+          "rawUTF8Start": 0,
+          "rawUTF8End": 10
+        },
+        {
+          "kind": "raw",
+          "role": "serialized-generated-text",
+          "value": "&amp;#13;\r\n",
+          "id": "author-entity-versus-generated-CR-emission-1",
+          "rawUTF8Start": 10,
+          "rawUTF8End": 21
+        },
+        {
+          "kind": "raw",
+          "role": "author-raw",
+          "value": "</p>",
+          "id": "author-entity-versus-generated-CR-emission-2",
+          "rawUTF8Start": 21,
+          "rawUTF8End": 25
+        }
+      ],
+      "encodedRawSource": "<p>&#13;\r\n&amp;#13;\r\n</p>",
+      "inputHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "raw",
+            "value": "<p>&#13;\r\n"
+          },
+          {
+            "type": "text",
+            "value": "&#13;\r\n"
+          },
+          {
+            "type": "raw",
+            "value": "</p>"
+          }
+        ]
+      },
+      "hast": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "p",
+            "properties": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "\r\n&#13;\r\n",
+                "position": {
+                  "start": {
+                    "line": 1,
+                    "column": 4,
+                    "offset": 3
+                  }
+                }
+              }
+            ],
+            "position": {
+              "start": {
+                "line": 1,
+                "column": 1,
+                "offset": 0
+              },
+              "end": {
+                "line": 2,
+                "column": -5,
+                "offset": 4
+              }
+            }
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        },
+        "position": {
+          "start": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 1,
+            "offset": 0
+          }
+        }
+      },
+      "parse5Events": [
+        {
+          "handler": "onStartTag",
+          "token": {
+            "type": 3,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 1,
+              "startCol": 1,
+              "startOffset": 0,
+              "endLine": 1,
+              "endCol": 4,
+              "endOffset": 3
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "\r",
+            "location": {
+              "startLine": 1,
+              "startCol": 4,
+              "startOffset": 3,
+              "endLine": 1,
+              "endCol": 9,
+              "endOffset": 8
+            }
+          }
+        },
+        {
+          "handler": "onWhitespaceCharacter",
+          "token": {
+            "type": 2,
+            "chars": "\n",
+            "location": {
+              "startLine": 1,
+              "startCol": 9,
+              "startOffset": 8,
+              "endLine": 2,
+              "endCol": 0,
+              "endOffset": 10
+            }
+          }
+        },
+        {
+          "handler": "onCharacter",
+          "token": {
+            "type": 0,
+            "chars": "&#13;\r\n",
+            "location": {}
+          }
+        },
+        {
+          "handler": "onEndTag",
+          "token": {
+            "type": 4,
+            "tagName": "p",
+            "tagID": 83,
+            "selfClosing": false,
+            "ackSelfClosing": false,
+            "attrs": [],
+            "location": {
+              "startLine": 2,
+              "startCol": -9,
+              "startOffset": 0,
+              "endLine": 2,
+              "endCol": -5,
+              "endOffset": 4
+            }
+          }
+        }
+      ],
+      "semantic": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "name": "p",
+            "attributes": {},
+            "children": [
+              {
+                "type": "text",
+                "value": "\r\n&#13;\r\n"
+              }
+            ]
+          }
+        ]
+      },
+      "rawSourceSHA256": "213b21bd66d991117b63742eafe1959a38bbd6724ff0393aa56f7fb29e195e8d",
+      "encodedRawSourceSHA256": "abc8da1648118359269c2e59ea6ec2c8cae3c6912ef7697739dd5ac11afc3c84"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class OrderedSetGenericBoundaryTest: XCTestCase {
     private final class Stream<Value>: Sequence, IteratorProtocol {

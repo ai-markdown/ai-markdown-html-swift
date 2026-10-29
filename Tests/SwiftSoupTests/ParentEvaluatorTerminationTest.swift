@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class ParentEvaluatorTerminationTest: XCTestCase {
     private final class Recorder: Evaluator, @unchecked Sendable {
@@ -20,7 +20,7 @@ final class ParentEvaluatorTerminationTest: XCTestCase {
     }
 
     func testForeignDocumentMissVisitsEachExistingAncestorOnce() throws {
-        let doc = try SwiftSoup.parse("<article><section><p>x</p></section></article>")
+        let doc = try AIMarkdownHTML.parse("<article><section><p>x</p></section></article>")
         let leaf = try XCTUnwrap(doc.select("p").first())
         let foreign = Document("")
         let recorder = Recorder()
@@ -29,7 +29,7 @@ final class ParentEvaluatorTerminationTest: XCTestCase {
     }
 
     func testRootStillIncludedAndAncestorsAboveItAreNotVisited() throws {
-        let doc = try SwiftSoup.parse("<article><section><p>x</p></section></article>")
+        let doc = try AIMarkdownHTML.parse("<article><section><p>x</p></section></article>")
         let root = try XCTUnwrap(doc.select("section").first())
         let leaf = root.child(0)
         let recorder = Recorder()
@@ -44,7 +44,7 @@ final class ParentEvaluatorTerminationTest: XCTestCase {
     }
 
     func testForeignRootDoesNotSuppressAnExistingAncestorMatch() throws {
-        let doc = try SwiftSoup.parse("<article><section><p>x</p></section></article>")
+        let doc = try AIMarkdownHTML.parse("<article><section><p>x</p></section></article>")
         let leaf = try XCTUnwrap(doc.select("p").first())
         let recorder = Recorder()
         recorder.result = { $0.tagName() == "article" }
@@ -54,7 +54,7 @@ final class ParentEvaluatorTerminationTest: XCTestCase {
 
     func testThrowingPredicatesStillContinueAndTerminate() throws {
         enum Probe: Error { case failure }
-        let doc = try SwiftSoup.parse("<section><p>x</p></section>")
+        let doc = try AIMarkdownHTML.parse("<section><p>x</p></section>")
         let leaf = try XCTUnwrap(doc.select("p").first())
         let recorder = Recorder()
         recorder.result = { _ in throw Probe.failure }
@@ -63,7 +63,7 @@ final class ParentEvaluatorTerminationTest: XCTestCase {
     }
 
     func testPredicateDetachmentDuringWalkTerminates() throws {
-        let doc = try SwiftSoup.parse("<section><p>x</p></section>")
+        let doc = try AIMarkdownHTML.parse("<section><p>x</p></section>")
         let leaf = try XCTUnwrap(doc.select("p").first())
         let recorder = Recorder()
         recorder.result = { element in try element.remove(); return false }

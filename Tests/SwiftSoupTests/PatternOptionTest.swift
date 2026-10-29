@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class PatternOptionTest: XCTestCase {
     func testCaseInsensitiveOptionMatchesAndPreservesCaptures() throws {
@@ -49,7 +49,7 @@ final class PatternOptionTest: XCTestCase {
     }
 
     func testCaseInsensitivePatternWorksThroughElementQueryAPIs() throws {
-        let document = try SwiftSoup.parse("<main><p id='upper' data-code='ABC'>ABC</p><p id='lower' data-code='abc'>abc</p><p id='other' data-code='xyz'>xyz</p></main>")
+        let document = try AIMarkdownHTML.parse("<main><p id='upper' data-code='ABC'>ABC</p><p id='lower' data-code='abc'>abc</p><p id='other' data-code='xyz'>xyz</p></main>")
         let pattern = Pattern.compile("^abc$", Pattern.CASE_INSENSITIVE)
         XCTAssertEqual(try document.getElementsByAttributeValueMatching("data-code", pattern).array().map { $0.id() }, ["upper", "lower"])
         XCTAssertEqual(try document.getElementsMatchingText(pattern).array().map { $0.id() }, ["upper", "lower"])

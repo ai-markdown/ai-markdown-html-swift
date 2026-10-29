@@ -1,25 +1,29 @@
-// swift-tools-version:6.0
+// swift-tools-version:6.2
 
 import PackageDescription
 
 let package = Package(
-    name: "SwiftSoup",
-    // Xcode 27's macOS SDK supports deployment targets starting at macOS 12.
-    platforms: [.macOS(.v12), .iOS(.v13), .tvOS(.v13), .watchOS(.v6)],
+    name: "AIMarkdownHTML",
+    platforms: [.macOS(.v26), .iOS(.v26)],
     products: [
-        .library(name: "SwiftSoup", targets: ["SwiftSoup"]),
-        .executable(name: "SwiftSoupProfile", targets: ["SwiftSoupProfile"])
+        .library(name: "AIMarkdownHTML", targets: ["AIMarkdownHTML"]),
+        .executable(name: "AIMarkdownHTMLProfile", targets: ["AIMarkdownHTMLProfile"])
     ],
     targets: [
         .target(
-            name: "SwiftSoup",
-            path: "Sources"),
+            name: "AIMarkdownHTML",
+            exclude: ["SwiftSoup.h"]),
         .executableTarget(
-            name: "SwiftSoupProfile",
-            dependencies: ["SwiftSoup"],
+            name: "AIMarkdownHTMLProfile",
+            dependencies: ["AIMarkdownHTML"],
             path: "Tools/SwiftSoupProfile"),
         .testTarget(
-            name: "SwiftSoupTests",
-            dependencies: ["SwiftSoup"])
+            name: "AIMarkdownHTMLUpstreamTests",
+            dependencies: ["AIMarkdownHTML"],
+            path: "Tests/SwiftSoupTests"),
+        .testTarget(
+            name: "AIMarkdownHTMLTests",
+            dependencies: ["AIMarkdownHTML"],
+            resources: [.copy("Fixtures")])
     ]
 )

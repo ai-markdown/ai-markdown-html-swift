@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class XmlTreeBuilderTest: XCTestCase {
     private let issue309Xml = """
@@ -59,12 +59,12 @@ class XmlTreeBuilderTest: XCTestCase {
 
 	func testSupplyParserToJsoupClass() throws {
 		let xml = "<doc><val>One<val>Two</val></bar>Three</doc>"
-		let doc = try SwiftSoup.parse(xml, "http://foo.com/", Parser.xmlParser())
+		let doc = try AIMarkdownHTML.parse(xml, "http://foo.com/", Parser.xmlParser())
 		try XCTAssertEqual("<doc><val>One<val>Two</val>Three</val></doc>", TextUtil.stripNewlines(doc.html()))
 	}
 
     func testIssue309ParseXmlConvenienceParsesXmlSpecificTags() throws {
-        let doc = try SwiftSoup.parseXML(issue309Xml)
+        let doc = try AIMarkdownHTML.parseXML(issue309Xml)
 
         XCTAssertEqual("Default", try doc.select("title").first()?.text())
         XCTAssertEqual("I'm link", try doc.select("link").first()?.text())
@@ -77,8 +77,8 @@ class XmlTreeBuilderTest: XCTestCase {
     }
 
     func testIssue309ParseXmlConvenienceMatchesExplicitXmlParser() throws {
-        let convenienceDoc = try SwiftSoup.parseXML(issue309Xml)
-        let explicitDoc = try SwiftSoup.parse(issue309Xml, "", Parser.xmlParser())
+        let convenienceDoc = try AIMarkdownHTML.parseXML(issue309Xml)
+        let explicitDoc = try AIMarkdownHTML.parse(issue309Xml, "", Parser.xmlParser())
 
         XCTAssertEqual(try explicitDoc.outerHtml(), try convenienceDoc.outerHtml())
     }
@@ -86,7 +86,7 @@ class XmlTreeBuilderTest: XCTestCase {
     // MARK: - Auto-detection tests
 
     func testParseAutoDetectsXmlDeclaration() throws {
-        let doc = try SwiftSoup.parse(issue309Xml)
+        let doc = try AIMarkdownHTML.parse(issue309Xml)
 
         XCTAssertEqual("I'm link", try doc.select("link").first()?.text())
         XCTAssertEqual("I'm img", try doc.select("img").first()?.text())
@@ -97,7 +97,7 @@ class XmlTreeBuilderTest: XCTestCase {
 
     func testParseAutoDetectsXmlWithLeadingWhitespace() throws {
         let xml = "\n  \t <?xml version=\"1.0\"?><root><item>Hello</item></root>"
-        let doc = try SwiftSoup.parse(xml)
+        let doc = try AIMarkdownHTML.parse(xml)
 
         XCTAssertEqual("Hello", try doc.select("item").first()?.text())
         XCTAssertEqual(OutputSettings.Syntax.xml, doc.outputSettings().syntax())
@@ -105,7 +105,7 @@ class XmlTreeBuilderTest: XCTestCase {
 
     func testParseAutoDetectsHtmlWithoutXmlDeclaration() throws {
         let html = "<html><head><title>Test</title></head><body><p>Hello</p></body></html>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
 
         XCTAssertEqual("Test", try doc.title())
         XCTAssertEqual("Hello", try doc.select("p").first()?.text())
@@ -113,21 +113,21 @@ class XmlTreeBuilderTest: XCTestCase {
 
     func testParseAutoDetectsHtmlDoctype() throws {
         let html = "<!DOCTYPE html><html><body><link rel=\"stylesheet\"><p>Hello</p></body></html>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
 
         XCTAssertEqual("Hello", try doc.select("p").first()?.text())
     }
 
     func testParseAutoDetectionMatchesExplicitXmlParser() throws {
-        let autoDoc = try SwiftSoup.parse(issue309Xml)
-        let explicitDoc = try SwiftSoup.parse(issue309Xml, "", Parser.xmlParser())
+        let autoDoc = try AIMarkdownHTML.parse(issue309Xml)
+        let explicitDoc = try AIMarkdownHTML.parse(issue309Xml, "", Parser.xmlParser())
 
         XCTAssertEqual(try explicitDoc.outerHtml(), try autoDoc.outerHtml())
     }
 
     func testParseAutoDetectionDataOverload() throws {
         let data = issue309Xml.data(using: .utf8)!
-        let doc = try SwiftSoup.parse(data)
+        let doc = try AIMarkdownHTML.parse(data)
 
         XCTAssertEqual("I'm link", try doc.select("link").first()?.text())
         XCTAssertEqual(OutputSettings.Syntax.xml, doc.outputSettings().syntax())
@@ -136,7 +136,7 @@ class XmlTreeBuilderTest: XCTestCase {
     // MARK: - Explicit parseHTML tests
 
     func testParseHTMLForcesHtmlParserEvenForXmlInput() throws {
-        let doc = try SwiftSoup.parseHTML(issue309Xml)
+        let doc = try AIMarkdownHTML.parseHTML(issue309Xml)
 
         // HTML parser treats <link> as a void element, so it won't contain text
         XCTAssertNotEqual("I'm link", try doc.select("link").first()?.text())
@@ -144,7 +144,7 @@ class XmlTreeBuilderTest: XCTestCase {
 
     func testParseHTMLNormalizesDocument() throws {
         let html = "<p>Hello"
-        let doc = try SwiftSoup.parseHTML(html)
+        let doc = try AIMarkdownHTML.parseHTML(html)
 
         // HTML parser adds html/head/body structure
         XCTAssertEqual(1, try doc.select("head").count)
@@ -184,16 +184,16 @@ class XmlTreeBuilderTest: XCTestCase {
 	func testDoesNotForceSelfClosingKnownTags() throws {
 		// html will force "<br>one</br>" to logically "<br />One<br />".
         // XML should be stay "<br>one</br> -- don't recognise tag.
-		let htmlDoc = try SwiftSoup.parse("<br>one</br>")
+		let htmlDoc = try AIMarkdownHTML.parse("<br>one</br>")
 		XCTAssertEqual("<br />one\n<br />", try htmlDoc.body()?.html())
 
-		let xmlDoc = try SwiftSoup.parse("<br>one</br>", "", Parser.xmlParser())
+		let xmlDoc = try AIMarkdownHTML.parse("<br>one</br>", "", Parser.xmlParser())
 		XCTAssertEqual("<br>one</br>", try xmlDoc.html())
 	}
 
 	func testHandlesXmlDeclarationAsDeclaration() throws {
 		let html = "<?xml encoding='UTF-8' ?><body>One</body><!-- comment -->"
-		let doc = try SwiftSoup.parse(html, "", Parser.xmlParser())
+		let doc = try AIMarkdownHTML.parse(html, "", Parser.xmlParser())
 		try XCTAssertEqual("<?xml encoding=\"UTF-8\"?> <body> One </body> <!-- comment -->",
                            StringUtil.normaliseWhitespace(doc.outerHtml()))
         XCTAssertEqual("#declaration", doc.childNode(0).nodeName())
@@ -211,13 +211,13 @@ class XmlTreeBuilderTest: XCTestCase {
 	}
 
 	func testXmlParseDefaultsToHtmlOutputSyntax() throws {
-		let doc = try SwiftSoup.parse("x", "", Parser.xmlParser())
+		let doc = try AIMarkdownHTML.parse("x", "", Parser.xmlParser())
 		XCTAssertEqual(OutputSettings.Syntax.xml, doc.outputSettings().syntax())
 	}
 
 	func testDoesHandleEOFInTag() throws {
 		let html = "<img src=asdf onerror=\"alert(1)\" x="
-		let xmlDoc = try SwiftSoup.parse(html, "", Parser.xmlParser())
+		let xmlDoc = try AIMarkdownHTML.parse(html, "", Parser.xmlParser())
 		try XCTAssertEqual("<img src=\"asdf\" onerror=\"alert(1)\" x=\"\" />", xmlDoc.html())
 	}
 	//todo:
@@ -232,7 +232,7 @@ class XmlTreeBuilderTest: XCTestCase {
 
 	func testParseDeclarationAttributes() throws {
 		let xml = "<?xml version='1' encoding='UTF-8' something='else'?><val>One</val>"
-		let doc = try SwiftSoup.parse(xml, "", Parser.xmlParser())
+		let doc = try AIMarkdownHTML.parse(xml, "", Parser.xmlParser())
         guard let decl: XmlDeclaration =  doc.childNode(0) as? XmlDeclaration else {
             XCTAssertTrue(false)
             return
@@ -246,7 +246,7 @@ class XmlTreeBuilderTest: XCTestCase {
 
 	func testCaseSensitiveDeclaration() throws {
 		let xml = "<?XML version='1' encoding='UTF-8' something='else'?>"
-		let doc = try SwiftSoup.parse(xml, "", Parser.xmlParser())
+		let doc = try AIMarkdownHTML.parse(xml, "", Parser.xmlParser())
 		try XCTAssertEqual("<?XML version=\"1\" encoding=\"UTF-8\" something=\"else\"?>", doc.outerHtml())
 	}
 
@@ -263,19 +263,19 @@ class XmlTreeBuilderTest: XCTestCase {
 
 	func testPreservesCaseByDefault() throws {
 		let xml = "<TEST ID=1>Check</TEST>"
-		let doc = try SwiftSoup.parse(xml, "", Parser.xmlParser())
+		let doc = try AIMarkdownHTML.parse(xml, "", Parser.xmlParser())
 		try XCTAssertEqual("<TEST ID=\"1\">Check</TEST>", TextUtil.stripNewlines(doc.html()))
 	}
 
 	func testCanNormalizeCase() throws {
 		let xml = "<TEST ID=1>Check</TEST>"
-		let doc = try  SwiftSoup.parse(xml, "", Parser.xmlParser().settings(ParseSettings.htmlDefault))
+		let doc = try  AIMarkdownHTML.parse(xml, "", Parser.xmlParser().settings(ParseSettings.htmlDefault))
 		try XCTAssertEqual("<test id=\"1\">Check</test>", TextUtil.stripNewlines(doc.html()))
 	}
 
     func testNilReplaceInQueue() throws {
         let html: String = "<TABLE><TBODY><TR><TD></TD><TD><FONT color=#000000 size=1><I><FONT size=5><P align=center></FONT></I></FONT>&nbsp;</P></TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE></DIV></DIV></DIV><BLOCKQUOTE></BLOCKQUOTE><DIV style=\"FONT: 10pt Courier New\"><BR><BR>&nbsp;</DIV></BODY></HTML>"
-        _ = try SwiftSoup.parse(html)
+        _ = try AIMarkdownHTML.parse(html)
     }
 
 }

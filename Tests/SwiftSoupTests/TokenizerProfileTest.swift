@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class TokenizerProfileTest: XCTestCase {
     func testTokenizerProfile() throws {
@@ -21,7 +21,7 @@ final class TokenizerProfileTest: XCTestCase {
 
         var parsedCount = 0
         for _ in 0..<50 {
-            _ = try SwiftSoup.parse(html)
+            _ = try AIMarkdownHTML.parse(html)
             parsedCount += 1
         }
         XCTAssertGreaterThan(parsedCount, 0)

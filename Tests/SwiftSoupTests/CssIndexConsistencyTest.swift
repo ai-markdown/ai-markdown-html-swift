@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CssIndexConsistencyTest: XCTestCase {
     // Deliberately avoid Collector and all query indexes for the reference walk.
@@ -34,7 +34,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testRepeatedClassTokensAreUniqueInCombinedIndex() throws {
-        let doc = try SwiftSoup.parse("<p id='a' class='x x y X'></p><p id='b' class='x y'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='a' class='x x y X'></p><p id='b' class='x y'></p>")
         for query in [".x", "p.x", ".x.y", #".\78"#, #"p.\78"#, #":not(:not(.\78))"#] {
             try assertPaths(doc, query, ["a", "b"])
         }
@@ -42,7 +42,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testRepeatedClassTokensAreUniqueInClassOnlyRebuild() throws {
-        let doc = try SwiftSoup.parse("<p id='a' class='x x'></p><p id='b' class='x'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='a' class='x x'></p><p id='b' class='x'></p>")
         _ = try doc.getElementsByClass("x")
         XCTAssertFalse(doc.isIdQueryIndexDirty)
         XCTAssertFalse(doc.isAttributeQueryIndexDirty)
@@ -53,7 +53,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testRepeatedClassSeedsInDescendantsAndHas() throws {
-        let doc = try SwiftSoup.parse("<main id='main' class='x x'><section id='s'><p id='a' class='x x y'></p><p id='b' class='y'></p></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main id='main' class='x x'><section id='s'><p id='a' class='x x y'></p><p id='b' class='y'></p></section></main>")
         for query in ["main .x", "section > .x", "p.x.y", #"main .\78"#, ".x:not(#main)"] {
             try assertPaths(doc, query, ["a"])
         }
@@ -64,7 +64,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testRepeatedClassTokensAcrossOverlappingRoots() throws {
-        let doc = try SwiftSoup.parse("<main id='main' class='x x'><p id='a' class='x x'></p><p id='b' class='x'></p></main>")
+        let doc = try AIMarkdownHTML.parse("<main id='main' class='x x'><p id='a' class='x x'></p><p id='b' class='x'></p></main>")
         let main = try XCTUnwrap(doc.getElementById("main"))
         let a = try XCTUnwrap(doc.getElementById("a"))
         for query in [".x", #".\78"#, ".x:not(#absent)"] {
@@ -77,7 +77,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testClassMutationPreservesUnicodeDistinctionsAndDeduplicates() throws {
-        let doc = try SwiftSoup.parse("<p id='a'></p><p id='b'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='a'></p><p id='b'></p>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let b = try XCTUnwrap(doc.getElementById("b"))
         for value in ["x", "é", "e\u{301}", "日本", "x\u{B}y", "x\u{600}", "👩‍💻"] {
@@ -92,7 +92,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testEmptyAttributeEqualityAcrossEverySelectionPath() throws {
-        let doc = try SwiftSoup.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
         for query in ["[data-v='']", "p[data-v='']", "[data-v='']:not(#absent)", "p:not(:not([data-v='']))"] {
             try assertPaths(doc, query, ["empty"])
         }
@@ -100,21 +100,21 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testEmptyAttributeEqualityRetainsExistingTrimSemantics() throws {
-        let doc = try SwiftSoup.parse("<p id='empty' data-v=''></p><p id='space' data-v=' \t\n'></p><p id='full' data-v='abc'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='empty' data-v=''></p><p id='space' data-v=' \t\n'></p><p id='full' data-v='abc'></p>")
         // SwiftSoup equality historically trims values. This is not a browser-CSS assertion.
         try assertPaths(doc, "p[data-v='']", ["empty", "space"])
         try assertPaths(doc, "p[data-v='abc']", ["full"])
     }
 
     func testEmptyAttributeNegationDistinguishesMissingFromEmpty() throws {
-        let doc = try SwiftSoup.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
         for query in ["p[data-v!='']", "p:not([data-v=''])"] {
             try assertPaths(doc, query, ["full", "missing"])
         }
     }
 
     func testEmptySubstringOperandsNeverMatch() throws {
-        let doc = try SwiftSoup.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
         for op in ["^=", "$=", "*="] {
             for prefix in ["", "p"] {
                 try assertPaths(doc, prefix + "[data-v" + op + "'']", [])
@@ -124,7 +124,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testRegexCanMatchPresentEmptyPhysicalAttributes() throws {
-        let doc = try SwiftSoup.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='empty' data-v=''></p><p id='full' data-v='abc'></p><p id='missing'></p>")
         for query in ["[data-v~=^$]", "p[data-v~=^$]", "[data-v~=^$]:not(#absent)"] {
             try assertPaths(doc, query, ["empty"])
         }
@@ -132,7 +132,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testEmptyVirtualValuesDoNotInventResolvedAttributes() throws {
-        let doc = try SwiftSoup.parse("<a id='relative' href='/item'></a><a id='empty' href=''></a><a id='absolute' href='https://example.com/a'></a><a id='missing'></a>")
+        let doc = try AIMarkdownHTML.parse("<a id='relative' href='/item'></a><a id='empty' href=''></a><a id='absolute' href='https://example.com/a'></a><a id='missing'></a>")
         for query in ["[abs:href='']", "[abs:href~=^$]", "[abs:href^='']", "[abs:href$='']", "[abs:href*='']"] {
             try assertPaths(doc, query, [])
             try assertPaths(doc, query + ":not(#absent)", [])
@@ -144,7 +144,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testEmptyValuesTrackMutationAfterCachePromotion() throws {
-        let doc = try SwiftSoup.parse("<p id='a' data-v=''></p><p id='b' data-v='abc'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='a' data-v=''></p><p id='b' data-v='abc'></p>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let b = try XCTUnwrap(doc.getElementById("b"))
         for query in ["p[data-v='']", "p[data-v~=^$]"] { try assertPaths(doc, query, ["a"]) }
@@ -156,7 +156,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testNonAsciiEqualityFastPlansUseParserNormalization() throws {
-        let doc = try SwiftSoup.parse("<p id='a'></p><p id='b'></p><p id='other'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='a'></p><p id='b'></p><p id='other'></p>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let b = try XCTUnwrap(doc.getElementById("b"))
         // Preserve the parser's existing normalization; do not introduce Unicode case folding.
@@ -170,7 +170,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testPaddedVirtualAttributeValueGetterUsesResolvedLookup() throws {
-        let doc = try SwiftSoup.parse("<a id='hit' href='/item'></a><a id='miss' href='/other'></a>", "https://example.com")
+        let doc = try AIMarkdownHTML.parse("<a id='hit' href='/item'></a><a id='miss' href='/other'></a>", "https://example.com")
         for key in ["abs:href", " ABS:href ", "\tabs:href\n"] {
             for _ in 0..<4 {
                 XCTAssertEqual(try doc.getElementsByAttributeValue(key, "https://example.com/item").array().map { $0.id() }, ["hit"], key)
@@ -179,7 +179,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testDynamicAttributeIndexesRemainCorrectThroughEviction() throws {
-        let doc = try SwiftSoup.parse("<p id='a'></p><p id='b'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='a'></p><p id='b'></p>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let b = try XCTUnwrap(doc.getElementById("b"))
         for index in 0..<20 {
@@ -201,7 +201,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testSelectionAfterReparentingRemovalReplacementAndClone() throws {
-        let doc = try SwiftSoup.parse("<main><section id='left'><p id='a' class='x x'></p><p id='b' class='y'></p></section><section id='right'><p id='c' class='x'></p></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section id='left'><p id='a' class='x x'></p><p id='b' class='y'></p></section><section id='right'><p id='c' class='x'></p></section></main>")
         let left = try XCTUnwrap(doc.getElementById("left"))
         let right = try XCTUnwrap(doc.getElementById("right"))
         let a = try XCTUnwrap(doc.getElementById("a"))
@@ -227,7 +227,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testCasePreservingAttributeMutationMatchesCaseInsensitivePredicates() throws {
-        let doc = try SwiftSoup.parse("<p id='hit'></p><p id='missing'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='hit'></p><p id='missing'></p>")
         let hit = try XCTUnwrap(doc.getElementById("hit"))
         for key in ["DATA-V", "Data-V", "data-v"] {
             try hit.attr(key, "item42")
@@ -243,7 +243,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testDeterministicMutationMatrixMatchesIndependentScan() throws {
-        let doc = try SwiftSoup.parse("<main><section id='left'></section><section id='right'></section></main>", "https://old.example")
+        let doc = try AIMarkdownHTML.parse("<main><section id='left'></section><section id='right'></section></main>", "https://old.example")
         let left = try XCTUnwrap(doc.getElementById("left"))
         let right = try XCTUnwrap(doc.getElementById("right"))
         var leaves: [Element] = []
@@ -279,7 +279,7 @@ final class CssIndexConsistencyTest: XCTestCase {
     }
 
     func testUnicodeQueriesRemainDistinctAfterCacheEviction() throws {
-        let doc = try SwiftSoup.parse("<p id='é' class='é é'></p><p id='e&#x301;' class='e&#x301; e&#x301;'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='é' class='é é'></p><p id='e&#x301;' class='e&#x301; e&#x301;'></p>")
         let queries = ["#é", "#e\u{301}", ".é", ".e\u{301}", #"#\e9"#, #"#e\301"#]
         for query in queries { try assertPaths(doc, query) }
         // Exceeds all four default query-cache capacities, including the parser's 300.
@@ -292,7 +292,7 @@ final class CssIndexConsistencyTest: XCTestCase {
 
     func testGeneratedClassSelectorsRoundTripRepeatedTokensWithoutAnId() throws {
         for value in ["x", "123", "x y", "é", "e\u{301}", "x\u{B}", "x\u{600}"] {
-            let doc = try SwiftSoup.parse("<main><p></p><p></p></main>")
+            let doc = try AIMarkdownHTML.parse("<main><p></p><p></p></main>")
             let target = try XCTUnwrap(doc.select("p").first())
             try target.attr("class", value + " " + value)
             let generated = try target.cssSelector()

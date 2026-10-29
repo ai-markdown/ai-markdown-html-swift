@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class TreeMutationModelTest: XCTestCase {
     private func check(_ parent: Element, _ expected: [Node], file: StaticString = #filePath, line: UInt = #line) {
@@ -55,7 +55,7 @@ final class TreeMutationModelTest: XCTestCase {
     }
 
     func testMutationSequenceMatchesIndependentParentAndSelectorModels() throws {
-        let doc = try SwiftSoup.parse("<main><section id='a'></section><section id='b'></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section id='a'></section><section id='b'></section></main>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let b = try XCTUnwrap(doc.getElementById("b"))
         let parents = [a, b]
@@ -113,8 +113,8 @@ final class TreeMutationModelTest: XCTestCase {
     }
 
     func testCrossDocumentMovesInvalidateOldAndNewRoots() throws {
-        let left = try SwiftSoup.parse("<main><i id='move'>payload</i></main>")
-        let right = try SwiftSoup.parse("<main></main>")
+        let left = try AIMarkdownHTML.parse("<main><i id='move'>payload</i></main>")
+        let right = try AIMarkdownHTML.parse("<main></main>")
         let node = try XCTUnwrap(left.getElementById("move"))
         let roots = [try XCTUnwrap(left.select("main").first()), try XCTUnwrap(right.select("main").first())]
         for iteration in 0..<64 {
@@ -135,7 +135,7 @@ final class TreeMutationModelTest: XCTestCase {
         weak var observed: Document?
         let retained: Element
         do {
-            let doc = try SwiftSoup.parse("<div><i id='retained'>text</i></div>")
+            let doc = try AIMarkdownHTML.parse("<div><i id='retained'>text</i></div>")
             observed = doc
             let div = try XCTUnwrap(doc.select("div").first())
             retained = try XCTUnwrap(div.select("i").first())

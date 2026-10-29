@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CssEscapeReviewTest: XCTestCase {
     private func assertQuery(_ doc: Document, _ query: String, _ expected: [Element],
@@ -19,7 +19,7 @@ final class CssEscapeReviewTest: XCTestCase {
     func testGeneratedUnicodeWhitespaceIdentifiers() throws {
         for scalar in ["\u{85}", "\u{A0}", "\u{1680}", "\u{2000}", "\u{2003}", "\u{2028}", "\u{2029}", "\u{202F}", "\u{205F}", "\u{3000}"] {
             for id in [scalar, "x" + scalar, scalar + "x"] {
-                let doc = try SwiftSoup.parse("<main><p>target</p><p id='x'>plain</p></main>")
+                let doc = try AIMarkdownHTML.parse("<main><p>target</p><p id='x'>plain</p></main>")
                 let target = try doc.select("p").get(0)
                 try target.attr("id", id)
                 try assertQuery(doc, target.cssSelector(), [target])
@@ -28,7 +28,7 @@ final class CssEscapeReviewTest: XCTestCase {
     }
 
     func testTrailingSimpleEscapedSpace() throws {
-        let doc = try SwiftSoup.parse("<main><p id='x '>target</p><p id='x'>plain</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='x '>target</p><p id='x'>plain</p></main>")
         let target = try doc.select("p").get(0)
         for query in ["#x\\ ", "p#x\\ ", "main > #x\\ ", "p#x\\   "] {
             try assertQuery(doc, query, [target])
@@ -36,7 +36,7 @@ final class CssEscapeReviewTest: XCTestCase {
     }
 
     func testBalancedBackslashParity() throws {
-        let doc = try SwiftSoup.parse("<main><p>target</p><p>other</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p>target</p><p>other</p></main>")
         let target = try doc.select("p").get(0)
         for id in ["x\\", "x\\\\", "x\\)", "x\\(", "x)", "x("] {
             try target.attr("id", id)
@@ -48,7 +48,7 @@ final class CssEscapeReviewTest: XCTestCase {
     }
 
     func testNestedCombiningDelimiters() throws {
-        let doc = try SwiftSoup.parse("<main><p>target</p><p>other</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p>target</p><p>other</p></main>")
         let target = try doc.select("p").get(0)
         for id in [")\u{301}", "(\u{301}", "'\u{301}", "\"\u{301}", "\\\u{301}", "]\u{301}", "[\u{301}"] {
             try target.attr("id", id)
@@ -61,7 +61,7 @@ final class CssEscapeReviewTest: XCTestCase {
     func testEscapedClassWhitespaceNeverMatchesAClassList() throws {
         for whitespace in [" ", "\t", "\n", "\r", "\u{C}"] {
             for name in ["a" + whitespace + "b", whitespace + "a", "a" + whitespace] {
-                let doc = try SwiftSoup.parse("<main><p>target</p><p>other</p></main>")
+                let doc = try AIMarkdownHTML.parse("<main><p>target</p><p>other</p></main>")
                 let target = try doc.select("p").get(0)
                 try target.attr("class", name)
                 XCTAssertFalse(target.hasClass(name))
@@ -78,7 +78,7 @@ final class CssEscapeReviewTest: XCTestCase {
 
     func testPaddingDoesNotStripUnicodeIdentifierContent() throws {
         for scalar in ["\u{A0}", "\u{2003}", "\u{2028}", "\u{3000}"] {
-            let doc = try SwiftSoup.parse("<main><p>target</p><p id='x'>plain</p></main>")
+            let doc = try AIMarkdownHTML.parse("<main><p>target</p><p id='x'>plain</p></main>")
             let target = try doc.select("p").get(0)
             try target.attr("id", "x" + scalar).attr("class", "x" + scalar)
             for query in ["#x" + scalar, ".x" + scalar, "main > #x" + scalar] {
@@ -101,7 +101,7 @@ final class CssEscapeReviewTest: XCTestCase {
         for codePoint in UInt32(1)...UInt32(127) {
             let scalar = String(try XCTUnwrap(UnicodeScalar(codePoint)))
             for identifier in [scalar, "x" + scalar, scalar + "x"] {
-                let doc = try SwiftSoup.parse("<main><p>target</p><p>other</p></main>")
+                let doc = try AIMarkdownHTML.parse("<main><p>target</p><p>other</p></main>")
                 let target = try doc.select("p").get(0)
                 try target.attr("id", identifier)
                 let query = try target.cssSelector()
@@ -117,7 +117,7 @@ final class CssEscapeReviewTest: XCTestCase {
         for codePoint in UInt32(1)...UInt32(127) where !separators.contains(codePoint) {
             let scalar = String(try XCTUnwrap(UnicodeScalar(codePoint)))
             for identifier in [scalar, "x" + scalar, scalar + "x"] {
-                let doc = try SwiftSoup.parse("<main><p>target</p><p>other</p></main>")
+                let doc = try AIMarkdownHTML.parse("<main><p>target</p><p>other</p></main>")
                 let target = try doc.select("p").get(0)
                 try target.attr("class", identifier)
                 // ID serialization gives an independent spelling of the same
@@ -136,7 +136,7 @@ final class CssEscapeReviewTest: XCTestCase {
         for codePoint: UInt32 in [0x0600, 0x06DD, 0x070F, 0x08E2, 0x110BD, 0x110CD] {
             let scalar = String(try XCTUnwrap(UnicodeScalar(codePoint)))
             for identifier in [scalar, "x" + scalar] {
-                let doc = try SwiftSoup.parse("<main><p>target</p><p>other</p></main>")
+                let doc = try AIMarkdownHTML.parse("<main><p>target</p><p>other</p></main>")
                 let target = try doc.select("p").get(0)
                 try target.attr("id", identifier).attr("class", identifier)
                 for prefix in ["#", "."] {
@@ -163,7 +163,7 @@ final class CssEscapeReviewTest: XCTestCase {
     }
 
     func testQueryPaddingRespectsBackslashParityAndHexTerminators() throws {
-        let doc = try SwiftSoup.parse("<main><p></p><p></p><p></p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p></p><p></p><p></p></main>")
         let targets = try doc.select("p").array()
         try targets[0].attr("id", "x ")
         try targets[1].attr("id", "x\\")
@@ -181,7 +181,7 @@ final class CssEscapeReviewTest: XCTestCase {
     }
 
     func testVerticalTabRemainsPartOfClassTokensAfterMutation() throws {
-        let doc = try SwiftSoup.parse("<main><p class='before'></p><p class='x'></p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p class='before'></p><p class='x'></p></main>")
         let target = try doc.select("p").get(0)
         let root = try doc.select("main").get(0)
         try assertQuery(doc, ".before", [target])
@@ -209,7 +209,7 @@ final class CssEscapeReviewTest: XCTestCase {
     func testCompoundBoundariesDoNotConsumeAdjacentPrependCharacters() throws {
         for codePoint: UInt32 in [0x0600, 0x06DD, 0x070F, 0x08E2, 0x110BD, 0x110CD] {
             let identifier = String(try XCTUnwrap(UnicodeScalar(codePoint)))
-            let doc = try SwiftSoup.parse("<main><p><span></span></p><p></p></main>")
+            let doc = try AIMarkdownHTML.parse("<main><p><span></span></p><p></p></main>")
             let target = try doc.select("p").get(0)
             let sibling = try doc.select("p").get(1)
             let child = try doc.select("span").get(0)
@@ -228,7 +228,7 @@ final class CssEscapeReviewTest: XCTestCase {
     }
 
     func testLiteralIdLookupDoesNotStripWhitespace() throws {
-        let doc = try SwiftSoup.parse("<main><p id='x'></p><p></p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='x'></p><p></p></main>")
         let plain = try doc.select("p").get(0)
         let target = try doc.select("p").get(1)
         for whitespace in [" ", "\t", "\n", "\r", "\u{B}", "\u{C}", "\u{A0}"] {
@@ -244,7 +244,7 @@ final class CssEscapeReviewTest: XCTestCase {
 
     func testEveryCssWhitespaceCombinatorBypassesTheBareIdFastPath() throws {
         for whitespace in [" ", "\t", "\n", "\r", "\u{C}"] {
-            let doc = try SwiftSoup.parse("<main id='parent'><span></span></main><p></p>")
+            let doc = try AIMarkdownHTML.parse("<main id='parent'><span></span></main><p></p>")
             let child = try doc.select("span").get(0)
             let distractor = try doc.select("p").get(0)
             try distractor.attr("id", "parent" + whitespace + "span")
@@ -256,7 +256,7 @@ final class CssEscapeReviewTest: XCTestCase {
     func testParsedClassTokensUseTheSameWhitespaceRulesAsMutatedAttributes() throws {
         for whitespace in [" ", "\t", "\n", "\r", "\u{C}"] {
             let identifier = "a\u{B}x"
-            let doc = try SwiftSoup.parse("<p class='" + whitespace + identifier + whitespace + "y" + whitespace + "'></p>")
+            let doc = try AIMarkdownHTML.parse("<p class='" + whitespace + identifier + whitespace + "y" + whitespace + "'></p>")
             let target = try doc.select("p").get(0)
             XCTAssertEqual(Array(try target.classNamesUTF8()), [Array(identifier.utf8), Array("y".utf8)])
             XCTAssertTrue(try doc.getElementsByClass(identifier).first() === target)

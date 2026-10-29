@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class PendingAttributesTransferTest: XCTestCase {
     private func add(_ token: Token.StartTag, _ name: String, _ value: String? = nil) throws {
@@ -32,7 +32,7 @@ final class PendingAttributesTransferTest: XCTestCase {
     }
 
     func testExistingMaterializedAttributesKeepIdentityAndInvalidateSelectors() throws {
-        let doc = try SwiftSoup.parse("<div class='before' data-keep='value'></div>")
+        let doc = try AIMarkdownHTML.parse("<div class='before' data-keep='value'></div>")
         let element = try XCTUnwrap(doc.select(".before").first())
         let attributes = try XCTUnwrap(element.getAttributes())
         _ = attributes.size()
@@ -108,7 +108,7 @@ final class PendingAttributesTransferTest: XCTestCase {
     }
 
     func testXMLPreservesCaseAndDistinctKeysAcrossElements() throws {
-        let doc = try SwiftSoup.parse("<root><item A='one' a='two'/><item A='three'/></root>", "", Parser.xmlParser())
+        let doc = try AIMarkdownHTML.parse("<root><item A='one' a='two'/><item A='three'/></root>", "", Parser.xmlParser())
         let items = try doc.select("item")
         let first = try XCTUnwrap(items.get(0).getAttributes())
         let second = try XCTUnwrap(items.get(1).getAttributes())

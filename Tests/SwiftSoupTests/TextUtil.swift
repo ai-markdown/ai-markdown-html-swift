@@ -6,7 +6,7 @@
 //
 
 import Foundation
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 private let _crashTraceInstalled: Void = {
     CrashTrace.installIfNeeded()

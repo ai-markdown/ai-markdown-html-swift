@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class CharacterReaderUnicodeMatchTest: XCTestCase {
     func testUnicodePrefixesMatchWholeScalars() {

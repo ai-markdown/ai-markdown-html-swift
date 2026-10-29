@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class NumericReferenceNormalizationTest: XCTestCase {
     // WHATWG numeric-character-reference-end-state. Undefined Windows-1252
@@ -55,14 +55,14 @@ final class NumericReferenceNormalizationTest: XCTestCase {
         let expected = "�€‚‘Ÿ"
         let html = "<p title='\(refs)'>\(refs)</p><textarea>\(refs)</textarea>"
         let bytes = Array(html.utf8)
-        let documents = try [SwiftSoup.parse(html), SwiftSoup.parse(Data(bytes)),
-            SwiftSoup.parse(withBytes: { parse in try bytes.withUnsafeBufferPointer { try parse($0) } })]
+        let documents = try [AIMarkdownHTML.parse(html), AIMarkdownHTML.parse(Data(bytes)),
+            AIMarkdownHTML.parse(withBytes: { parse in try bytes.withUnsafeBufferPointer { try parse($0) } })]
         for doc in documents {
             let p = try XCTUnwrap(doc.select("p").first())
             XCTAssertEqual(try p.attr("title"), expected)
             XCTAssertEqual(try p.text(), expected)
             XCTAssertEqual(try doc.select("textarea").text(), expected)
-            let roundTrip = try SwiftSoup.parse(String(decoding: doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self))
+            let roundTrip = try AIMarkdownHTML.parse(String(decoding: doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self))
             XCTAssertEqual(try roundTrip.select("p").text(), expected)
             try p.html(refs)
             XCTAssertEqual(try p.text(), expected)
@@ -73,14 +73,14 @@ final class NumericReferenceNormalizationTest: XCTestCase {
         let expected: [UInt32] = [0x80, 0x82, 0x91, 0x9F]
         let xml = "<?xml version='1.0'?><root title='\(refs)'>\(refs)</root>"
         let bytes = Array(xml.utf8)
-        let documents = try [SwiftSoup.parseXML(xml), SwiftSoup.parseXML(Data(bytes)),
-                             SwiftSoup.parse(xml), SwiftSoup.parse(Data(bytes)),
+        let documents = try [AIMarkdownHTML.parseXML(xml), AIMarkdownHTML.parseXML(Data(bytes)),
+                             AIMarkdownHTML.parse(xml), AIMarkdownHTML.parse(Data(bytes)),
                              Parser.xmlParser().parseInput(bytes, "")]
         for doc in documents {
             let root = try XCTUnwrap(doc.select("root").first())
             XCTAssertEqual(scalars(try root.attr("title")), expected)
             XCTAssertEqual(scalars(try root.text()), expected)
-            let roundTrip = try SwiftSoup.parseXML(String(decoding: doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self))
+            let roundTrip = try AIMarkdownHTML.parseXML(String(decoding: doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self))
             XCTAssertEqual(scalars(try roundTrip.select("root").text()), expected)
         }
         let fragment = try Parser.parseXmlFragment("<root>\(refs)</root>", "")

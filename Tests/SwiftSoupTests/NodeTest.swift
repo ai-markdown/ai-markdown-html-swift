@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class NodeTest: XCTestCase {
 
@@ -38,7 +38,7 @@ class NodeTest: XCTestCase {
 
 	func testSetBaseUriIsRecursive() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div><p></p></div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div><p></p></div>")
 			let baseUri: String = "https://jsoup.org"
 			try doc.setBaseUri(baseUri)
 
@@ -52,7 +52,7 @@ class NodeTest: XCTestCase {
 
 	func testHandlesAbsPrefix() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<a href=/foo>Hello</a>", "https://jsoup.org/")
+			let doc: Document = try AIMarkdownHTML.parse("<a href=/foo>Hello</a>", "https://jsoup.org/")
 			let a: Element? = try doc.select("a").first()
 			XCTAssertEqual("/foo", try a?.attr("href"))
 			XCTAssertEqual("https://jsoup.org/foo", try a?.attr("abs:href"))
@@ -64,7 +64,7 @@ class NodeTest: XCTestCase {
 
 	func testHandlesAbsOnImage() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p><img src=\"/rez/osi_logo.png\" /></p>", "https://jsoup.org/")
+			let doc: Document = try AIMarkdownHTML.parse("<p><img src=\"/rez/osi_logo.png\" /></p>", "https://jsoup.org/")
 			let img: Element? = try doc.select("img").first()
 			XCTAssertEqual("https://jsoup.org/rez/osi_logo.png", try img?.attr("abs:src"))
 			XCTAssertEqual(try img?.absUrl("src"), try img?.attr("abs:src"))
@@ -77,7 +77,7 @@ class NodeTest: XCTestCase {
 	func testHandlesAbsPrefixOnHasAttr() {
 		do {
 			// 1: no abs url; 2: has abs url
-			let doc: Document = try SwiftSoup.parse("<a id=1 href='/foo'>One</a> <a id=2 href='https://jsoup.org/'>Two</a>")
+			let doc: Document = try AIMarkdownHTML.parse("<a id=1 href='/foo'>One</a> <a id=2 href='https://jsoup.org/'>Two</a>")
 			let one: Element = try doc.select("#1").first()!
 			let two: Element = try doc.select("#2").first()!
 
@@ -97,7 +97,7 @@ class NodeTest: XCTestCase {
 	func testLiteralAbsPrefix() {
 		do {
 			// if there is a literal attribute "abs:xxx", don't try and make absolute.
-			let doc: Document = try SwiftSoup.parse("<a abs:href='odd'>One</a>")
+			let doc: Document = try AIMarkdownHTML.parse("<a abs:href='odd'>One</a>")
 			let el: Element = try doc.select("a").first()!
 			XCTAssertTrue(el.hasAttr("abs:href"))
 			XCTAssertEqual("odd", try el.attr("abs:href"))
@@ -122,7 +122,7 @@ class NodeTest: XCTestCase {
 */
 	func testHandleAbsOnLocalhostFileUris() {
 		do {
-			let doc: Document  = try SwiftSoup.parse("<a href='password'>One/a><a href='/var/log/messages'>Two</a>", "file://localhost/etc/")
+			let doc: Document  = try AIMarkdownHTML.parse("<a href='password'>One/a><a href='/var/log/messages'>Two</a>", "file://localhost/etc/")
 			let one: Element? = try doc.select("a").first()
 			XCTAssertEqual("file://localhost/etc/password", try one?.absUrl("href"))
 		} catch {
@@ -132,8 +132,8 @@ class NodeTest: XCTestCase {
 
 	func testHandlesAbsOnProtocolessAbsoluteUris() {
 		do {
-			let doc1: Document = try SwiftSoup.parse("<a href='//example.net/foo'>One</a>", "http://example.com/")
-			let doc2: Document = try SwiftSoup.parse("<a href='//example.net/foo'>One</a>", "https://example.com/")
+			let doc1: Document = try AIMarkdownHTML.parse("<a href='//example.net/foo'>One</a>", "http://example.com/")
+			let doc2: Document = try AIMarkdownHTML.parse("<a href='//example.net/foo'>One</a>", "https://example.com/")
 
 			let one: Element? = try doc1.select("a").first()
 			let two: Element? = try doc2.select("a").first()
@@ -141,7 +141,7 @@ class NodeTest: XCTestCase {
 			XCTAssertEqual("http://example.net/foo", try one?.absUrl("href"))
 			XCTAssertEqual("https://example.net/foo", try two?.absUrl("href"))
 
-			let doc3: Document = try SwiftSoup.parse("<img src=//www.google.com/images/errors/logo_sm.gif alt=Google>", "https://google.com")
+			let doc3: Document = try AIMarkdownHTML.parse("<img src=//www.google.com/images/errors/logo_sm.gif alt=Google>", "https://google.com")
 			XCTAssertEqual("https://www.google.com/images/errors/logo_sm.gif", try doc3.select("img").attr("abs:src"))
 		} catch {
 			XCTAssertEqual(1, 2)
@@ -150,7 +150,7 @@ class NodeTest: XCTestCase {
 
 	func testAbsHandlesRelativeQuery() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<a href='?foo'>One</a> <a href='bar.html?foo'>Two</a>", "https://jsoup.org/path/file?bar")
+			let doc: Document = try AIMarkdownHTML.parse("<a href='?foo'>One</a> <a href='bar.html?foo'>Two</a>", "https://jsoup.org/path/file?bar")
 
 			let a1: Element? = try doc.select("a").first()
 			XCTAssertEqual("https://jsoup.org/path/file?foo", try a1?.absUrl("href"))
@@ -164,7 +164,7 @@ class NodeTest: XCTestCase {
 
 	func testAbsHandlesDotFromIndex() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<a href='./one/two.html'>One</a>", "http://example.com")
+			let doc: Document = try AIMarkdownHTML.parse("<a href='./one/two.html'>One</a>", "http://example.com")
 			let a1: Element? = try doc.select("a").first()
 			XCTAssertEqual("http://example.com/one/two.html", try a1?.absUrl("href"))
 		} catch {
@@ -174,7 +174,7 @@ class NodeTest: XCTestCase {
 
 	func testRemove() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p>One <span>two</span> three</p>")
+			let doc: Document = try AIMarkdownHTML.parse("<p>One <span>two</span> three</p>")
 			let p: Element? = try doc.select("p").first()
 			try p?.childNode(0).remove()
 
@@ -187,7 +187,7 @@ class NodeTest: XCTestCase {
 
 	func testReplace() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p>One <span>two</span> three</p>")
+			let doc: Document = try AIMarkdownHTML.parse("<p>One <span>two</span> three</p>")
 			let p: Element? = try doc.select("p").first()
 			let insert: Element = try doc.createElement("em").text("foo")
 			try p?.childNode(1).replaceWith(insert)
@@ -200,7 +200,7 @@ class NodeTest: XCTestCase {
 
 	func testOwnerDocument() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p>Hello")
+			let doc: Document = try AIMarkdownHTML.parse("<p>Hello")
 			let p: Element? = try doc.select("p").first()
 			XCTAssertTrue(p?.ownerDocument() == doc)
 			XCTAssertTrue(doc.ownerDocument() == doc)
@@ -212,7 +212,7 @@ class NodeTest: XCTestCase {
 
 	func testBefore() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p>One <b>two</b> three</p>")
+			let doc: Document = try AIMarkdownHTML.parse("<p>One <b>two</b> three</p>")
 			let newNode: Element =  Element(try Tag.valueOf("em"), "")
 			try newNode.appendText("four")
 
@@ -228,7 +228,7 @@ class NodeTest: XCTestCase {
 
 	func testAfter() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<p>One <b>two</b> three</p>")
+			let doc: Document = try AIMarkdownHTML.parse("<p>One <b>two</b> three</p>")
 			let newNode: Element = Element(try Tag.valueOf("em"), "")
 			try newNode.appendText("four")
 
@@ -245,7 +245,7 @@ class NodeTest: XCTestCase {
 
 	func testUnwrap() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div>One <span>Two <b>Three</b></span> Four</div>")
 			let span: Element? = try doc.select("span").first()
 			let twoText: Node? = span?.childNode(0)
 			let node: Node? = try span?.unwrap()
@@ -262,7 +262,7 @@ class NodeTest: XCTestCase {
 
 	func testUnwrapNoChildren() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div>One <span></span> Two</div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div>One <span></span> Two</div>")
 			let span: Element? = try doc.select("span").first()
 			let node: Node? = try span?.unwrap()
 			XCTAssertEqual("<div>One  Two</div>", TextUtil.stripNewlines(try doc.body()!.html()))
@@ -274,7 +274,7 @@ class NodeTest: XCTestCase {
 
 	func testTraverse() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div><p>Hello</p></div><div>There</div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div><p>Hello</p></div><div>There</div>")
 			let accum: StringBuilder = StringBuilder()
 			class nv: NodeVisitor {
 				let accum: StringBuilder
@@ -317,7 +317,7 @@ class NodeTest: XCTestCase {
 
 	func testNodeIsNotASiblingOfItself() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div><p>One<p>Two<p>Three</div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div><p>One<p>Two<p>Three</div>")
 			let p2: Element = try doc.select("p").get(1)
 
 			XCTAssertEqual("Two", try p2.text())
@@ -332,7 +332,7 @@ class NodeTest: XCTestCase {
 
 	func testChildNodesCopy() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div id=1>Text 1 <p>One</p> Text 2 <p>Two<p>Three</div><div id=2>")
+			let doc: Document = try AIMarkdownHTML.parse("<div id=1>Text 1 <p>One</p> Text 2 <p>Two<p>Three</div><div id=2>")
 			let div1: Element? = try doc.select("#1").first()
 			let div2: Element? = try doc.select("#2").first()
 			let divChildren = div1?.childNodesCopy()
@@ -350,7 +350,7 @@ class NodeTest: XCTestCase {
 
 	func testSupportsClone() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div class=foo>Text</div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div class=foo>Text</div>")
 			let el: Element = try doc.select("div").first()!
 			XCTAssertTrue(el.hasClass("foo"))
 
@@ -371,7 +371,7 @@ class NodeTest: XCTestCase {
 
 	func testDeepCloneIndependence() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div id=wrap><p class=one data-x=1>Text <span>Child</span></p></div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div id=wrap><p class=one data-x=1>Text <span>Child</span></p></div>")
 			let original: Element = try doc.select("#wrap").first()!
 			let clone: Element = original.copy() as! Element
 
@@ -400,7 +400,7 @@ class NodeTest: XCTestCase {
 
 	func testDeepCloneDoesNotShareChildren() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div id=wrap><p>One</p><p>Two</p></div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div id=wrap><p>One</p><p>Two</p></div>")
 			let original: Element = try doc.select("#wrap").first()!
 			let clone: Element = original.copy() as! Element
 
@@ -417,7 +417,7 @@ class NodeTest: XCTestCase {
 
 	func testCloneWithEmptyAttributes() {
 		do {
-			let doc: Document = try SwiftSoup.parse("<div><span>Hi</span></div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div><span>Hi</span></div>")
 			let span: Element = try doc.select("span").first()!
 			XCTAssertFalse(span.hasAttr("data-x"))
 			let clone: Element = span.copy() as! Element

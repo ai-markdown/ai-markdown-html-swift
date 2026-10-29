@@ -1,9 +1,9 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class TreeMutationBoundaryTest: XCTestCase {
     private func fixture() throws -> (Document, Element, Element, Element, Element) {
-        let doc = try SwiftSoup.parse("<main><div id='left'><i id='a'>a</i><i id='b'>b</i><i id='c'>c</i></div><div id='right'></div></main>")
+        let doc = try AIMarkdownHTML.parse("<main><div id='left'><i id='a'>a</i><i id='b'>b</i><i id='c'>c</i></div><div id='right'></div></main>")
         let left = try XCTUnwrap(doc.getElementById("left"))
         return (doc, left, try XCTUnwrap(doc.getElementById("a")), try XCTUnwrap(doc.getElementById("b")), try XCTUnwrap(doc.getElementById("c")))
     }
@@ -17,7 +17,7 @@ final class TreeMutationBoundaryTest: XCTestCase {
         }
     }
     func testAppendTextInvalidatesWarmedSelectorsAndExternalVersion() throws {
-        let doc = try SwiftSoup.parse("<main><p>old</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p>old</p></main>")
         let p = try XCTUnwrap(doc.select("p").first())
         for root in [doc as Element, p] {
             for _ in 0..<3 {
@@ -36,7 +36,7 @@ final class TreeMutationBoundaryTest: XCTestCase {
     }
     func testAppendDataAndCommentInvalidatesWarmedDataSelectors() throws {
         for comment in [false, true] {
-            let doc = try SwiftSoup.parse("<main></main>")
+            let doc = try AIMarkdownHTML.parse("<main></main>")
             let root = try XCTUnwrap(doc.select("main").first())
             for _ in 0..<4 { XCTAssertEqual(try root.select(":containsData(added)").size(), 0) }
             if comment { try root.appendChild(Comment(Array("added".utf8), [])) }
@@ -46,7 +46,7 @@ final class TreeMutationBoundaryTest: XCTestCase {
         }
     }
     func testAppendToEmptyInvalidatesEmptySelector() throws {
-        let doc = try SwiftSoup.parse("<p></p>")
+        let doc = try AIMarkdownHTML.parse("<p></p>")
         let p = try XCTUnwrap(doc.select("p:empty").first())
         for _ in 0..<4 { XCTAssertEqual(try p.select(":empty").size(), 1) }
         try p.appendChild(TextNode("text", ""))

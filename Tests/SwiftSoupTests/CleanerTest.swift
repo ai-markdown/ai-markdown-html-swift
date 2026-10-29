@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 class CleanerTest: XCTestCase {
 
@@ -15,26 +15,26 @@ class CleanerTest: XCTestCase {
         //        let dropped = try SwiftSoup.clean(html, Whitelist.basicWithImages())
         //        XCTAssertEqual("<img> \n<img>", dropped)
 
-        let preserved = try SwiftSoup.clean(html, Whitelist.basicWithImages().addProtocols("img", "src", "cid", "data"))
+        let preserved = try AIMarkdownHTML.clean(html, Whitelist.basicWithImages().addProtocols("img", "src", "cid", "data"))
         XCTAssertEqual("<img src=\"cid:12345\" /> \n<img src=\"data:gzzt\" />", preserved)
     }
 
     func testSimpleBehaviourTest() throws {
         let h = "<div><p class=foo><a href='http://evil.com'>Hello <b id=bar>there</b>!</a></div>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.simpleText())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.simpleText())
         XCTAssertEqual("Hello <b>there</b>!", TextUtil.stripNewlines(cleanHtml!))
     }
 
     func testSimpleBehaviourTest2() throws {
         let h = "Hello <b>there</b>!"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.simpleText())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.simpleText())
 
         XCTAssertEqual("Hello <b>there</b>!", TextUtil.stripNewlines(cleanHtml!))
     }
 
     func testBasicBehaviourTest() throws {
         let h = "<div><p><a href='javascript:sendAllMoney()'>Dodgy</a> <A HREF='HTTP://nice.com'>Nice</a></p><blockquote>Hello</blockquote>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.basic())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.basic())
 
         XCTAssertEqual("<p><a rel=\"nofollow\">Dodgy</a> <a href=\"HTTP://nice.com\" rel=\"nofollow\">Nice</a></p><blockquote>Hello</blockquote>",
                        TextUtil.stripNewlines(cleanHtml!))
@@ -42,33 +42,33 @@ class CleanerTest: XCTestCase {
 
     func testBasicWithImagesTest() throws {
         let h = "<div><p><img src='http://example.com/' alt=Image></p><p><img src='ftp://ftp.example.com'></p></div>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.basicWithImages())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.basicWithImages())
         XCTAssertEqual("<p><img src=\"http://example.com/\" alt=\"Image\" /></p><p><img /></p>", TextUtil.stripNewlines(cleanHtml!))
     }
 
     func testRelaxed() throws {
         let h = "<h1>Head</h1><table><tr><td>One<td>Two</td></tr></table>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.relaxed())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.relaxed())
         XCTAssertEqual("<h1>Head</h1><table><tbody><tr><td>One</td><td>Two</td></tr></tbody></table>", TextUtil.stripNewlines(cleanHtml!))
     }
 
     func testRemoveTags() throws {
         let h = "<div><p><A HREF='HTTP://nice.com'>Nice</a></p><blockquote>Hello</blockquote>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.basic().removeTags("a"))
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.basic().removeTags("a"))
 
         XCTAssertEqual("<p>Nice</p><blockquote>Hello</blockquote>", TextUtil.stripNewlines(cleanHtml!))
     }
 
     func testRemoveAttributes() throws {
         let h = "<div><p>Nice</p><blockquote cite='http://example.com/quotations'>Hello</blockquote>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.basic().removeAttributes("blockquote", "cite"))
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.basic().removeAttributes("blockquote", "cite"))
 
         XCTAssertEqual("<p>Nice</p><blockquote>Hello</blockquote>", TextUtil.stripNewlines(cleanHtml!))
     }
 
     func testRemoveEnforcedAttributes() throws {
         let h = "<div><p><A HREF='HTTP://nice.com'>Nice</a></p><blockquote>Hello</blockquote>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.basic().removeEnforcedAttribute("a", "rel"))
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.basic().removeEnforcedAttribute("a", "rel"))
 
         XCTAssertEqual("<p><a href=\"HTTP://nice.com\">Nice</a></p><blockquote>Hello</blockquote>",
                        TextUtil.stripNewlines(cleanHtml!))
@@ -76,7 +76,7 @@ class CleanerTest: XCTestCase {
 
     func testRemoveProtocols() throws {
         let h = "<p>Contact me <a href='mailto:info@example.com'>here</a></p>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.basic().removeProtocols("a", "href", "ftp", "mailto"))
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.basic().removeProtocols("a", "href", "ftp", "mailto"))
 
         XCTAssertEqual("<p>Contact me <a rel=\"nofollow\">here</a></p>",
                        TextUtil.stripNewlines(cleanHtml!))
@@ -84,31 +84,31 @@ class CleanerTest: XCTestCase {
 
     func testDropComments() throws {
         let h = "<p>Hello<!-- no --></p>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.relaxed())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.relaxed())
         XCTAssertEqual("<p>Hello</p>", cleanHtml)
     }
 
     func testDropXmlProc() throws {
         let h = "<?import namespace=\"xss\"><p>Hello</p>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.relaxed())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.relaxed())
         XCTAssertEqual("<p>Hello</p>", cleanHtml)
     }
 
     func testDropScript() throws {
         let h = "<SCRIPT SRC=//ha.ckers.org/.j><SCRIPT>alert(/XSS/.source)</SCRIPT>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.relaxed())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.relaxed())
         XCTAssertEqual("", cleanHtml)
     }
 
     func testDropImageScript() throws {
         let h = "<IMG SRC=\"javascript:alert('XSS')\">"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.relaxed())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.relaxed())
         XCTAssertEqual("<img />", cleanHtml)
     }
 
     func testCleanJavascriptHref() throws {
         let h = "<A HREF=\"javascript:document.location='http://www.google.com/'\">XSS</A>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.relaxed())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.relaxed())
         XCTAssertEqual("<a>XSS</a>", cleanHtml)
     }
 
@@ -117,32 +117,32 @@ class CleanerTest: XCTestCase {
         let invalidAnchor = "<a href=\"#anchor with spaces\">Invalid anchor</a>"
 
         // A Whitelist that does not allow anchors will strip them out.
-        var cleanHtml = try SwiftSoup.clean(validAnchor, Whitelist.relaxed())
+        var cleanHtml = try AIMarkdownHTML.clean(validAnchor, Whitelist.relaxed())
         XCTAssertEqual("<a>Valid anchor</a>", cleanHtml)
 
-        cleanHtml = try SwiftSoup.clean(invalidAnchor, Whitelist.relaxed())
+        cleanHtml = try AIMarkdownHTML.clean(invalidAnchor, Whitelist.relaxed())
         XCTAssertEqual("<a>Invalid anchor</a>", cleanHtml)
 
         // A Whitelist that allows them will keep them.
         let relaxedWithAnchor: Whitelist = try Whitelist.relaxed().addProtocols("a", "href", "#")
 
-        cleanHtml = try SwiftSoup.clean(validAnchor, relaxedWithAnchor)
+        cleanHtml = try AIMarkdownHTML.clean(validAnchor, relaxedWithAnchor)
         XCTAssertEqual(validAnchor, cleanHtml)
 
         // An invalid anchor is never valid.
-        cleanHtml = try SwiftSoup.clean(invalidAnchor, relaxedWithAnchor)
+        cleanHtml = try AIMarkdownHTML.clean(invalidAnchor, relaxedWithAnchor)
         XCTAssertEqual("<a>Invalid anchor</a>", cleanHtml)
     }
 
     func testDropsUnknownTags() throws {
         let h = "<p><custom foo=true>Test</custom></p>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.relaxed())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.relaxed())
         XCTAssertEqual("<p>Test</p>", cleanHtml)
     }
 
     func testtestHandlesEmptyAttributes() throws {
         let h = "<img alt=\"\" src= unknown=''>"
-        let cleanHtml = try SwiftSoup.clean(h, Whitelist.basicWithImages())
+        let cleanHtml = try AIMarkdownHTML.clean(h, Whitelist.basicWithImages())
         XCTAssertEqual("<img alt=\"\" />", cleanHtml)
     }
 
@@ -151,21 +151,21 @@ class CleanerTest: XCTestCase {
         let nok1 = "<p><script></script>Not <b>OK</b></p>"
         let nok2 = "<p align=right>Test Not <b>OK</b></p>"
         let nok3 = "<!-- comment --><p>Not OK</p>" // comments and the like will be cleaned
-        XCTAssertTrue(try SwiftSoup.isValid(ok, Whitelist.basic()))
-        XCTAssertFalse(try SwiftSoup.isValid(nok1, Whitelist.basic()))
-        XCTAssertFalse(try SwiftSoup.isValid(nok2, Whitelist.basic()))
-        XCTAssertFalse(try SwiftSoup.isValid(nok3, Whitelist.basic()))
+        XCTAssertTrue(try AIMarkdownHTML.isValid(ok, Whitelist.basic()))
+        XCTAssertFalse(try AIMarkdownHTML.isValid(nok1, Whitelist.basic()))
+        XCTAssertFalse(try AIMarkdownHTML.isValid(nok2, Whitelist.basic()))
+        XCTAssertFalse(try AIMarkdownHTML.isValid(nok3, Whitelist.basic()))
     }
 
     func testResolvesRelativeLinks() throws {
         let html = "<a href='/foo'>Link</a><img src='/bar'>"
-        let clean = try SwiftSoup.clean(html, "http://example.com/", Whitelist.basicWithImages())
+        let clean = try AIMarkdownHTML.clean(html, "http://example.com/", Whitelist.basicWithImages())
         XCTAssertEqual("<a href=\"http://example.com/foo\" rel=\"nofollow\">Link</a>\n<img src=\"http://example.com/bar\" />", clean)
     }
 
     func testOnlyResolvesSlashPrefixedURLAttributes() throws {
         let html = "<a href='article.html'>Link</a><img src='image.png'>"
-        let clean = try SwiftSoup.clean(html, "http://example.com/base/", Whitelist.basicWithImages())
+        let clean = try AIMarkdownHTML.clean(html, "http://example.com/base/", Whitelist.basicWithImages())
         XCTAssertEqual("<a href=\"article.html\" rel=\"nofollow\">Link</a>\n<img src=\"image.png\" />", clean)
     }
 
@@ -175,7 +175,7 @@ class CleanerTest: XCTestCase {
             .addTags("img")
             .addAttributes("img", "width", "src")
             .addProtocols("img", "src", "http", "https")
-        let clean = try SwiftSoup.clean(html, "http://example.com/", whitelist)
+        let clean = try AIMarkdownHTML.clean(html, "http://example.com/", whitelist)
         XCTAssertEqual("<img width=\"/16\" src=\"http://example.com/bar\" />", clean)
     }
 
@@ -185,19 +185,19 @@ class CleanerTest: XCTestCase {
             .addTags("img")
             .addAttributes("img", "width", "height", "src")
             .addProtocols("img", "src", "http", "https")
-        let clean = try SwiftSoup.clean(html, "http://example.com/", whitelist)
+        let clean = try AIMarkdownHTML.clean(html, "http://example.com/", whitelist)
         XCTAssertEqual("<img width=\"16\" height=\"16\" src=\"http://example.com/bar\" />", clean)
     }
 
     func testPreservesRelativeLinksIfConfigured() throws {
         let html = "<a href='/foo'>Link</a><img src='/bar'> <img src='javascript:alert()'>"
-        let clean = try SwiftSoup.clean(html, "http://example.com/", Whitelist.basicWithImages().preserveRelativeLinks(true))
+        let clean = try AIMarkdownHTML.clean(html, "http://example.com/", Whitelist.basicWithImages().preserveRelativeLinks(true))
         XCTAssertEqual("<a href=\"/foo\" rel=\"nofollow\">Link</a>\n<img src=\"/bar\" /> \n<img />", clean)
     }
 
     func testDropsUnresolvableRelativeLinks() throws {
         let html = "<a href='/foo'>Link</a>"
-        let clean = try SwiftSoup.clean(html, Whitelist.basic())
+        let clean = try AIMarkdownHTML.clean(html, Whitelist.basic())
         XCTAssertEqual("<a rel=\"nofollow\">Link</a>", clean)
     }
 
@@ -208,7 +208,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addTags("p", "a")
 
-        let clean = try SwiftSoup.clean(html, whitelist)
+        let clean = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual("<p class=\"foo\"><a class=\"qux\">link</a></p>", clean)
     }
 
@@ -217,7 +217,7 @@ class CleanerTest: XCTestCase {
         let whitelist = try Whitelist()
             .addAttributes("p", "class")
         // ^^ whitelist does not have explicit tag add for p, inferred from add attributes.
-        let clean = try SwiftSoup.clean(html, whitelist)
+        let clean = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual("<p class=\"foo\">One</p>", clean)
     }
 
@@ -246,10 +246,10 @@ class CleanerTest: XCTestCase {
 
     func testHandlesFramesets() throws {
         let dirty = "<html><head><script></script><noscript></noscript></head><frameset><frame src=\"foo\" /><frame src=\"foo\" /></frameset></html>"
-        let clean = try SwiftSoup.clean(dirty, Whitelist.basic())
+        let clean = try AIMarkdownHTML.clean(dirty, Whitelist.basic())
         XCTAssertEqual("", clean) // nothing good can come out of that
 
-        let dirtyDoc: Document = try SwiftSoup.parse(dirty)
+        let dirtyDoc: Document = try AIMarkdownHTML.parse(dirty)
         let cleanDoc: Document? = try Cleaner(Whitelist.basic()).clean(dirtyDoc)
         XCTAssertFalse(cleanDoc == nil)
         XCTAssertEqual(0, cleanDoc?.body()?.childNodeSize())
@@ -262,7 +262,7 @@ class CleanerTest: XCTestCase {
         let headWhitelist = try Whitelist.none()
             .addTags("title")
 
-        let dirtyDoc = try SwiftSoup.parse(dirty)
+        let dirtyDoc = try AIMarkdownHTML.parse(dirty)
         let cleanDoc = try Cleaner(headWhitelist: headWhitelist, bodyWhitelist: .relaxed()).clean(dirtyDoc)
 
         let cleanHead = cleanDoc.head()
@@ -274,39 +274,39 @@ class CleanerTest: XCTestCase {
     }
 
     func testCleansInternationalText() throws {
-        XCTAssertEqual("привет", try SwiftSoup.clean("привет", Whitelist.none()))
+        XCTAssertEqual("привет", try AIMarkdownHTML.clean("привет", Whitelist.none()))
     }
 
     func testWhitelistNoneNormalizesNbspEntityToSpace() throws {
-        XCTAssertEqual(" ", try SwiftSoup.clean("&nbsp;", Whitelist.none()))
+        XCTAssertEqual(" ", try AIMarkdownHTML.clean("&nbsp;", Whitelist.none()))
     }
 
     func testWhitelistNoneNormalizesNumericNbspEntitiesToSpaces() throws {
         let html = "Hello&nbsp;there&#160;friend"
-        XCTAssertEqual("Hello there friend", try SwiftSoup.clean(html, Whitelist.none()))
+        XCTAssertEqual("Hello there friend", try AIMarkdownHTML.clean(html, Whitelist.none()))
     }
 
     func testWhitelistNoneStillEscapesOtherEntities() throws {
         let html = "&amp;&lt;&gt;"
-        XCTAssertEqual("&amp;&lt;&gt;", try SwiftSoup.clean(html, Whitelist.none()))
+        XCTAssertEqual("&amp;&lt;&gt;", try AIMarkdownHTML.clean(html, Whitelist.none()))
     }
 
     func testNonEmptyWhitelistStillPreservesNbspEntity() throws {
         let html = "&nbsp;<b>Bold</b>"
-        XCTAssertEqual("&nbsp;<b>Bold</b>", TextUtil.stripNewlines(try SwiftSoup.clean(html, Whitelist.simpleText())!))
+        XCTAssertEqual("&nbsp;<b>Bold</b>", TextUtil.stripNewlines(try AIMarkdownHTML.clean(html, Whitelist.simpleText())!))
     }
 
     func testScriptTagInWhiteList() throws {
         let whitelist: Whitelist = try Whitelist.relaxed()
         try whitelist.addTags( "script" )
-        XCTAssertTrue( try SwiftSoup.isValid("Hello<script>alert('Doh')</script>World !", whitelist ) )
+        XCTAssertTrue( try AIMarkdownHTML.isValid("Hello<script>alert('Doh')</script>World !", whitelist ) )
     }
     
     func testEscapingInAttributeURLs() throws {
         // See https://github.com/scinfu/SwiftSoup/issues/268 for discussions about the issues tested here.
         
         let html = #"<a href="mailto:mail@example.com?subject=Job%20Requisition[NID]">Send</a></body></html>"#
-        let document = try SwiftSoup.parse(html)
+        let document = try AIMarkdownHTML.parse(html)
         
         let customWhitelist = Whitelist.none()
         try customWhitelist
@@ -355,7 +355,7 @@ class CleanerTest: XCTestCase {
             .addProtocols("a", "href", "http", "https", "mailto")
             .addProtocols("img", "src", "http", "https")
             .urlWhitespace(mode)
-        let result = try SwiftSoup.clean(original, baseURI, whitelist)
+        let result = try AIMarkdownHTML.clean(original, baseURI, whitelist)
         XCTAssertEqual(expected, result, file: file, line: line)
     }
 
@@ -545,7 +545,7 @@ class CleanerTest: XCTestCase {
         let whitelist = try Whitelist()
             .addTags("div")
             .addAttributes("div", "style")
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertTrue(cleaned?.contains("background-color:#E9EAEB") == true,
                       "Expected # to be preserved in style attribute, got: \(cleaned ?? "nil")")
     }
@@ -555,7 +555,7 @@ class CleanerTest: XCTestCase {
         let whitelist = try Whitelist()
             .addTags("div")
             .addAttributes("div", "class")
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertTrue(cleaned?.contains(#"class="foo#bar""#) == true,
                       "Expected # to be preserved in class attribute, got: \(cleaned ?? "nil")")
     }
@@ -568,7 +568,7 @@ class CleanerTest: XCTestCase {
             .addTags("a")
             .addAttributes("a", "href", "style")
             .addProtocols("a", "href", "http", "https")
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertTrue(cleaned?.contains("http://example.com") == true,
                       "Expected href to be preserved, got: \(cleaned ?? "nil")")
         XCTAssertTrue(cleaned?.contains("color:#333") == true,
@@ -582,7 +582,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "color", "font-weight")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<p style="color:red; font-weight:bold">Hello</p>"#, cleaned)
     }
 
@@ -593,7 +593,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "color")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual("<p>Hello</p>", cleaned)
     }
 
@@ -604,7 +604,7 @@ class CleanerTest: XCTestCase {
             .addAttributes(":all", "style")
             .addCSSProperties(":all", "color")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<div style="color:red">One</div><span style="color:blue">Two</span>"#, TextUtil.stripNewlines(cleaned!))
     }
 
@@ -615,7 +615,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "color", "font-weight")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<p style="color:red; font-weight:bold">Hello</p>"#, cleaned)
     }
 
@@ -626,7 +626,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "transform", "content")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<p style="transform:translate(10px, calc(100% - 1em)); content:'a;b:c'">Hello</p>"#, cleaned)
     }
 
@@ -637,7 +637,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "color", "background-image", "width")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<p style="color:red">Hello</p>"#, cleaned)
     }
 
@@ -648,7 +648,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "behavior", "color", "-moz-binding")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<p style="color:red">Hello</p>"#, cleaned)
     }
 
@@ -659,7 +659,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "color", "font-weight", "content")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<p style="color:red; font-weight:bold; content:'a/*not-comment*/b'">Hello</p>"#, cleaned)
     }
 
@@ -670,7 +670,7 @@ class CleanerTest: XCTestCase {
             .addAttributes("p", "style")
             .addCSSProperties("p", "color", "width", "background-image")
 
-        let cleaned = try SwiftSoup.clean(html, whitelist)
+        let cleaned = try AIMarkdownHTML.clean(html, whitelist)
         XCTAssertEqual(#"<p style="color:red">Hello</p>"#, cleaned)
     }
 

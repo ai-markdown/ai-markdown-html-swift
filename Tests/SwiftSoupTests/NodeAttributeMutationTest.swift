@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class NodeAttributeMutationTest: XCTestCase {
     private func assertSelection(_ root: Element, _ query: String, _ expected: [Element],
@@ -19,7 +19,7 @@ final class NodeAttributeMutationTest: XCTestCase {
     }
 
     private func script() throws -> (Document, Element, DataNode) {
-        let doc = try SwiftSoup.parse("<html><head><script>before</script></head><body></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head><script>before</script></head><body></body></html>")
         doc.outputSettings().prettyPrint(pretty: false)
         let script = try XCTUnwrap(doc.select("script").first())
         let data = try XCTUnwrap(script.getChildNodes().first as? DataNode)
@@ -114,7 +114,7 @@ final class NodeAttributeMutationTest: XCTestCase {
     }
 
     func testTextMaterializationDoesNotDirtySourceOrTextVersion() throws {
-        let doc = try SwiftSoup.parse("<p>one&amp;two</p>")
+        let doc = try AIMarkdownHTML.parse("<p>one&amp;two</p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let text = try XCTUnwrap(p.getChildNodes().first as? TextNode)
         let version = doc.textMutationVersionToken()
@@ -137,7 +137,7 @@ final class NodeAttributeMutationTest: XCTestCase {
     }
 
     func testTextAttributeMutationInvalidatesWarmedSelectors() throws {
-        let doc = try SwiftSoup.parse("<p>before</p>")
+        let doc = try AIMarkdownHTML.parse("<p>before</p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let text = try XCTUnwrap(p.getChildNodes().first as? TextNode)
         let attr = try XCTUnwrap(text.getAttributes().first { $0.getKey() == "text" })
@@ -181,7 +181,7 @@ final class NodeAttributeMutationTest: XCTestCase {
     }
 
     func testNoOpAttributeMutationDoesNotInvalidateCaches() throws {
-        let doc = try SwiftSoup.parse("<p class='old'></p>")
+        let doc = try AIMarkdownHTML.parse("<p class='old'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let a = try XCTUnwrap(p.getAttributes()?.first(where: { _ in true }))
         try assertSelection(doc, ".old", [p])
@@ -192,14 +192,14 @@ final class NodeAttributeMutationTest: XCTestCase {
     }
 
     func testAttributeMutationChangesAllSerializerModes() throws {
-        let doc = try SwiftSoup.parse("<html><head></head><body><p title='before'>text</p></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head></head><body><p title='before'>text</p></body></html>")
         doc.outputSettings().prettyPrint(pretty: false)
         let p = try XCTUnwrap(doc.select("p").first())
         let a = try XCTUnwrap(p.getAttributes()?.first(where: { _ in true }))
         _ = try doc.outerHtmlUTF8()
         a.setValue(value: Array("after".utf8))
         for bytes in [try doc.outerHtmlUTF8(), try doc.outerHtmlUTF8WithoutSourceReuse(), try doc.outerHtmlUTF8ReusingSourceOutsideBody()] {
-            let parsed = try SwiftSoup.parse(String(decoding: bytes, as: UTF8.self))
+            let parsed = try AIMarkdownHTML.parse(String(decoding: bytes, as: UTF8.self))
             XCTAssertEqual(try parsed.select("p").attr("title"), "after")
         }
     }

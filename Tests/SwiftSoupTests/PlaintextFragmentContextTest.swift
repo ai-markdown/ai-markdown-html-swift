@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class PlaintextFragmentContextTest: XCTestCase {
     private let payload = "A&amp;<b>literal</b></plaintext><p>still text</p>日本😀"

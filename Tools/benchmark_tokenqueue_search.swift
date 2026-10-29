@@ -1,7 +1,7 @@
 // Public-API benchmark. Build with -O against the matching SwiftSoup module.
 // Run <workload> <iterations>, --verify, or --list. Cache disabled explicitly.
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 struct SearchCase {
     let name: String
@@ -43,7 +43,7 @@ func makeOperation(_ name: String) throws -> () throws -> Int {
     if name == "normal-parse-control" {
         let html = "<article>" + String(repeating: "<p>日本語の文章 <em>example</em></p>", count: 64) + "</article>"
         return {
-            let doc = try SwiftSoup.parse(html)
+            let doc = try AIMarkdownHTML.parse(html)
             return try doc.select("p").size() + doc.text().utf8.count
         }
     }
@@ -66,7 +66,7 @@ if CommandLine.arguments.count == 2, CommandLine.arguments[1] == "--list" {
     }
     for count in [0, 1, 8, 32, 128] {
         let html = "<article>" + String(repeating: "<p>日e\u{301}<ruby>語<rt>ご</rt></ruby></p>", count: count) + "</article>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         records.append(["html": Array(try doc.outerHtml().utf8), "text": Array(try doc.text().utf8), "count": try doc.select("p").size()])
     }
     try output(records)

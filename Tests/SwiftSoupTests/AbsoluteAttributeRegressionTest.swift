@@ -1,11 +1,11 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AbsoluteAttributeRegressionTest: XCTestCase {
     func testVirtualAttributePrefixIsCaseInsensitiveAcrossOverloads() throws {
         for prefix in ["abs:", "ABS:", "Abs:", "aBs:"] {
             for key in ["href", "HREF", "HrEf"] {
-                let doc = try SwiftSoup.parse("<a href='page'>link</a>", "https://example.test/dir/")
+                let doc = try AIMarkdownHTML.parse("<a href='page'>link</a>", "https://example.test/dir/")
                 let link = try XCTUnwrap(doc.select("a").first())
                 let query = prefix + key
                 XCTAssertEqual(try link.attr(query), "https://example.test/dir/page")
@@ -18,7 +18,7 @@ final class AbsoluteAttributeRegressionTest: XCTestCase {
     }
 
     func testCaseInsensitiveVirtualPresenceTracksBaseURIChanges() throws {
-        let doc = try SwiftSoup.parse("<a href='relative'>link</a>", "")
+        let doc = try AIMarkdownHTML.parse("<a href='relative'>link</a>", "")
         let link = try XCTUnwrap(doc.select("a").first())
         for base in ["", "https://example.test/a/", "", "https://example.test/b/"] {
             try link.setBaseUri(base)
@@ -30,7 +30,7 @@ final class AbsoluteAttributeRegressionTest: XCTestCase {
     }
 
     func testVirtualPresenceTracksDirectAttributeMutation() throws {
-        let doc = try SwiftSoup.parse("<a href='https://one.test/a'>link</a>")
+        let doc = try AIMarkdownHTML.parse("<a href='https://one.test/a'>link</a>")
         let link = try XCTUnwrap(doc.select("a").first())
         let attr = try XCTUnwrap(link.getAttributes()?.asList().first)
         for value in ["https://one.test/a", "relative", "https://two.test/b", ""] {
@@ -42,7 +42,7 @@ final class AbsoluteAttributeRegressionTest: XCTestCase {
     }
 
     func testPhysicalVirtualNamedAttributesRetainFallback() throws {
-        let link = try SwiftSoup.parse("<a abs:href='literal'>link</a>").select("a").first()!
+        let link = try AIMarkdownHTML.parse("<a abs:href='literal'>link</a>").select("a").first()!
         for key in ["abs:href", "ABS:HREF", "Abs:href"] {
             XCTAssertTrue(link.hasAttr(key))
             XCTAssertEqual(try link.attr(key), "literal")
@@ -107,7 +107,7 @@ final class AbsoluteAttributeRegressionTest: XCTestCase {
     }
 
     func testAbsoluteURLLookupDoesNotDirtySourceOrTextCaches() throws {
-        let doc = try SwiftSoup.parse("<p>text</p>", "https://example.test/")
+        let doc = try AIMarkdownHTML.parse("<p>text</p>", "https://example.test/")
         let text = try XCTUnwrap(doc.select("p").first()?.textNodes().first)
         try text.attr("href", "relative")
         let version = doc.textMutationVersionToken()

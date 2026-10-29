@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class TextSplitRefinementCompatibilityTest: XCTestCase {
     func testGraphemeOffsetsPreserveUnicodeBytes() throws {
@@ -58,7 +58,7 @@ final class TextSplitRefinementCompatibilityTest: XCTestCase {
     func testUtf8ContinuationOffsetsThrowWithoutChangingTree() throws {
         for text in ["日本", "éx", "👩🏽‍💻Z"] {
             for offset in 0..<text.utf8.count where Array(text.utf8)[offset] & 0xC0 == 0x80 {
-                let doc = try SwiftSoup.parse("<p>\(text)</p>")
+                let doc = try AIMarkdownHTML.parse("<p>\(text)</p>")
                 let p = try XCTUnwrap(doc.select("p").first())
                 let node = try XCTUnwrap(p.childNode(0) as? TextNode)
                 let source = try p.outerHtml()
@@ -85,7 +85,7 @@ final class TextSplitRefinementCompatibilityTest: XCTestCase {
     }
 
     func testSplitUpdatesSiblingOrderAndWarmedText() throws {
-        let doc = try SwiftSoup.parse("<p>A<span>日本語</span>Z</p>")
+        let doc = try AIMarkdownHTML.parse("<p>A<span>日本語</span>Z</p>")
         let span = try XCTUnwrap(doc.select("span").first())
         let node = try XCTUnwrap(span.childNode(0) as? TextNode)
         _ = try doc.text()
@@ -164,7 +164,7 @@ final class TextSplitRefinementCompatibilityTest: XCTestCase {
 
     func testRepeatedSplitsReconstructAttachedTextAndSource() throws {
         let text = "日本e\u{301}👩🏽‍💻\r\nZ"
-        let doc = try SwiftSoup.parse("<p></p>")
+        let doc = try AIMarkdownHTML.parse("<p></p>")
         doc.outputSettings().prettyPrint(pretty: false)
         let parent = try XCTUnwrap(doc.select("p").first())
         var cursor = TextNode(text, nil)
@@ -184,7 +184,7 @@ final class TextSplitRefinementCompatibilityTest: XCTestCase {
         let copy = try XCTUnwrap(parent.copy() as? Element)
         // An element clone is detached; supply the same output settings through
         // its new document instead of comparing against default pretty printing.
-        let copiedDoc = try SwiftSoup.parse("")
+        let copiedDoc = try AIMarkdownHTML.parse("")
         copiedDoc.outputSettings().prettyPrint(pretty: false)
         try copiedDoc.body()!.appendChild(copy)
         XCTAssertEqual(Array(try copy.html().utf8), Array(text.utf8))
@@ -208,7 +208,7 @@ final class TextSplitRefinementCompatibilityTest: XCTestCase {
     }
 
     func testInvalidSplitKeepsMaterializedAttributeReferenceAndWarmCaches() throws {
-        let doc = try SwiftSoup.parse("<p>日本</p>")
+        let doc = try AIMarkdownHTML.parse("<p>日本</p>")
         let parent = try XCTUnwrap(doc.select("p").first())
         let node = try XCTUnwrap(parent.childNode(0) as? TextNode)
         let attr = try XCTUnwrap(node.getAttributes().asList().first)

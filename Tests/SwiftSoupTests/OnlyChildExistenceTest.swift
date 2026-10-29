@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 private final class OnlyChildTrace {
     var events: [String] = []
@@ -138,7 +138,7 @@ final class OnlyChildExistenceTest: XCTestCase {
     }
 
     func testSeededMutationAndWarmedPublicQueries() throws {
-        let document = try SwiftSoup.parse("<main><section><p>日</p></section><aside></aside></main>")
+        let document = try AIMarkdownHTML.parse("<main><section><p>日</p></section><aside></aside></main>")
         let root = try XCTUnwrap(document.select("main").first())
         let left = try XCTUnwrap(document.select("section").first())
         let right = try XCTUnwrap(document.select("aside").first())
@@ -170,7 +170,7 @@ final class OnlyChildExistenceTest: XCTestCase {
     }
 
     func testDeepCopiesAndReadsDoNotMutateSource() throws {
-        let document = try SwiftSoup.parse("<main><section>t<p>日</p><!--c--></section><aside><i>a</i><b>b</b></aside></main>")
+        let document = try AIMarkdownHTML.parse("<main><section>t<p>日</p><!--c--></section><aside><i>a</i><b>b</b></aside></main>")
         let copy = document.copy() as! Document
         for doc in [document, copy] {
             let before = try doc.outerHtml().utf8.map { $0 }

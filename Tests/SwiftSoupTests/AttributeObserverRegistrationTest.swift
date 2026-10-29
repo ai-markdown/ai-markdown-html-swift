@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeObserverRegistrationTest: XCTestCase {
     func testRepeatedSnapshotsAndIteratorsKeepExactlyOneRegistrationPerOwner() throws {
@@ -34,8 +34,8 @@ final class AttributeObserverRegistrationTest: XCTestCase {
     }
 
     func testSharedMutationsAfterReregistrationReachBothDocuments() throws {
-        let first = try SwiftSoup.parse("<p class='before'></p>")
-        let second = try SwiftSoup.parse("<p></p>")
+        let first = try AIMarkdownHTML.parse("<p class='before'></p>")
+        let second = try AIMarkdownHTML.parse("<p></p>")
         let a = try XCTUnwrap(first.body()?.child(0).getAttributes())
         let b = try XCTUnwrap(second.body()?.child(0).getAttributes())
         let shared = try XCTUnwrap(a.asList().first)

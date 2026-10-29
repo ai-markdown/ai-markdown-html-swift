@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SiblingReindexTest: XCTestCase {
     func testEveryValidSuffixWithRetainedArraySnapshot() throws {
@@ -24,7 +24,7 @@ final class SiblingReindexTest: XCTestCase {
     }
 
     func testReindexDoesNotInvalidateWarmedReadState() throws {
-        let doc = try SwiftSoup.parse("<main>text<p id='a'>one</p><!--gap--><p id='b'>two</p>tail</main>")
+        let doc = try AIMarkdownHTML.parse("<main>text<p id='a'>one</p><!--gap--><p id='b'>two</p>tail</main>")
         doc.outputSettings().prettyPrint(pretty: false)
         let root = try XCTUnwrap(doc.getElementsByTag("main").first())
         for _ in 0..<4 { _ = try doc.select("p"); _ = try doc.text() }
@@ -96,7 +96,7 @@ final class SiblingReindexTest: XCTestCase {
     }
 
     func testDeepCopyReindexesWithoutChangingSource() throws {
-        let original = try SwiftSoup.parse("<main><p><b>one</b></p><p>two</p></main>")
+        let original = try AIMarkdownHTML.parse("<main><p><b>one</b></p><p>two</p></main>")
         let copy = original.copy() as! Document
         let source = try XCTUnwrap(original.getElementsByTag("main").first())
         let destination = try XCTUnwrap(copy.getElementsByTag("main").first())

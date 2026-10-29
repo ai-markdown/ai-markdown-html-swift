@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CleanerConfiguredScopeValidationTest: XCTestCase {
     private func cleaner() throws -> Cleaner {
@@ -10,7 +10,7 @@ final class CleanerConfiguredScopeValidationTest: XCTestCase {
     func testConfiguredHeadTagsAndAttributesParticipateInValidation() throws {
         let validator = try cleaner()
         for head in ["<script>example</script>", "<style>body{}</style>", "<meta name=ok content=removed>", "<!--removed-->"] {
-            let doc = try SwiftSoup.parse("<html><head>\(head)</head><body><p>safe</p></body></html>")
+            let doc = try AIMarkdownHTML.parse("<html><head>\(head)</head><body><p>safe</p></body></html>")
             let original = try doc.outerHtmlUTF8WithoutSourceReuse()
             XCTAssertFalse(try validator.isValid(doc), head)
             XCTAssertEqual(try doc.outerHtmlUTF8WithoutSourceReuse(), original)
@@ -20,14 +20,14 @@ final class CleanerConfiguredScopeValidationTest: XCTestCase {
 
     func testAllowedHeadAndBodyAndRejectedBody() throws {
         let validator = try cleaner()
-        let doc = try SwiftSoup.parse("<html><head><title>safe</title><meta name=ok></head><body><p>safe</p></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head><title>safe</title><meta name=ok></head><body><p>safe</p></body></html>")
         XCTAssertTrue(try validator.isValid(doc))
         try XCTUnwrap(doc.body()).appendElement("div")
         XCTAssertFalse(try validator.isValid(doc))
     }
 
     func testLegacyBodyOnlyValidationDoesNotAcquireAHeadPolicy() throws {
-        let doc = try SwiftSoup.parse("<html><head><script>example</script></head><body><p>safe</p></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head><script>example</script></head><body><p>safe</p></body></html>")
         let bodyOnly = Cleaner(headWhitelist: nil, bodyWhitelist: try Whitelist().addTags("p"))
         XCTAssertTrue(try bodyOnly.isValid(doc))
         XCTAssertTrue(try bodyOnly.clean(doc).select("script").isEmpty())

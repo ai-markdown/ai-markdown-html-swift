@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class WhitespaceRunTest: XCTestCase {
     private struct Observation: Equatable {
@@ -157,7 +157,7 @@ final class WhitespaceRunTest: XCTestCase {
     }
 
     func testPublicTextAPIsMutationAndPreservedWhitespace() throws {
-        let doc = try SwiftSoup.parse("<main><p>\t日本語日本語\n次の文</p><p>😀\u{a0}終わり</p><pre>甲\t乙\n丙</pre></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p>\t日本語日本語\n次の文</p><p>😀\u{a0}終わり</p><pre>甲\t乙\n丙</pre></main>")
         let p = try XCTUnwrap(doc.select("p").first())
         for _ in 0..<3 {
             XCTAssertEqual(try p.text(), "日本語日本語 次の文")

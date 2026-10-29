@@ -1,7 +1,7 @@
 // Standalone public-API client. Build against each matching shipping module/library.
 // Do not time compilation, fixture construction (except parse-*), or verification.
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 private final class ProjectedParent: Element {
     override func children() -> Elements { super.children() }
@@ -68,7 +68,7 @@ private func operation(_ name: String) throws -> () throws -> Int {
         let html = (0..<128).map { "<section><p id='n\($0)'>日本語\($0)</p><em>text</em></section>" }.joined()
         let evaluator = Evaluator.IsOnlyChild()
         return {
-            let document = try SwiftSoup.parse(html)
+            let document = try AIMarkdownHTML.parse(html)
             if name == "parse-control" {
                 return try document.text().utf8.count + document.select("p").size()
             }

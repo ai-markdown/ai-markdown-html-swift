@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeValueIndexUpdateTest: XCTestCase {
     private func assertMatchesScan(_ root: Element, _ key: String, _ value: String,
@@ -22,7 +22,7 @@ final class AttributeValueIndexUpdateTest: XCTestCase {
         let html = "<main>" + (0..<100).map {
             "<a id='n\($0)' class='link' href=' /ITEM/\($0) ' rel=' TAG ' data-kind='k\($0 % 7)'>text</a>"
         }.joined() + "<a href='/日本語' rel='tag'></a></main>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         XCTAssertNil(doc.normalizedAttributeValueIndex)
         try assertMatchesScan(doc, "href", "/item/50")
         try assertMatchesScan(doc, "rel", "tag")
@@ -34,7 +34,7 @@ final class AttributeValueIndexUpdateTest: XCTestCase {
     }
 
     func testSoloIndexRebuildAfterMutationPreservesOtherIndexes() throws {
-        let doc = try SwiftSoup.parse("<main><a href='/one' rel='tag'>one</a><a href='/two' rel='tag'>two</a></main>")
+        let doc = try AIMarkdownHTML.parse("<main><a href='/one' rel='tag'>one</a><a href='/two' rel='tag'>two</a></main>")
         doc.materializeAttributesRecursively()
         doc.rebuildQueryIndexesForAllTags()
         XCTAssertNotNil(doc.normalizedClassNameIndex)
@@ -60,14 +60,14 @@ final class AttributeValueIndexUpdateTest: XCTestCase {
 
     func testDynamicKeysRebuildAndEvictWithoutChangingResults() throws {
         let attrs = (0..<12).map { "data-k\($0)='v\($0)'" }.joined(separator: " ")
-        let doc = try SwiftSoup.parse("<div \(attrs)></div><span \(attrs)></span>")
+        let doc = try AIMarkdownHTML.parse("<div \(attrs)></div><span \(attrs)></span>")
         for key in 0..<12 { try assertMatchesScan(doc, "data-k\(key)", "v\(key)") }
         for key in (0..<12).reversed() { try assertMatchesScan(doc, "data-k\(key)", "v\(key)") }
         XCTAssertLessThanOrEqual(doc.dynamicAttributeValueIndexKeySet?.count ?? 0, Element.dynamicAttributeValueIndexMaxKeys)
     }
 
     func testValueIndexTracksRepeatedMutationsRemovalAndMoves() throws {
-        let doc = try SwiftSoup.parse("<main><a id='a' href='/old' rel='tag'></a><section><a id='b' href='/old' rel='tag'></a></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><a id='a' href='/old' rel='tag'></a><section><a id='b' href='/old' rel='tag'></a></section></main>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let section = try XCTUnwrap(doc.getElementsByTag("section").first())
         for _ in 0..<4 { try assertMatchesScan(doc, "href", "/old") }

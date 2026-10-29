@@ -65,7 +65,7 @@ def main():
                                        'faster_pairs': sum(r < 0 for r in ratios), 'paired_changes': ratios}
     identities = {'platform': platform.platform(), 'client_sha256': {role: hashlib.sha256(client.read_bytes()).hexdigest() for role, client in clients.items()}}
     for role, directory in libraries.items():
-        identities[role] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in directory.glob('libSwiftSoup.*')}
+        identities[role] = {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in directory.glob('libAIMarkdownHTML.*')}
     (a.output / 'summary.json').write_text(json.dumps({'identities': identities, 'results': summary}, indent=2) + '\n')
     print(json.dumps(summary, indent=2))
 if __name__ == '__main__':

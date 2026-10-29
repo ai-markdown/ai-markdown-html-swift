@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CSSCommentFastPathTest: XCTestCase {
     private func whitelist() throws -> Whitelist {
@@ -63,7 +63,7 @@ final class CSSCommentFastPathTest: XCTestCase {
 
     func testCleaningAndRepeatedRuleChangesDoNotMutateInput() throws {
         let rules = try whitelist()
-        let document = try SwiftSoup.parse("<p style=\"color:red; position:absolute\">日本語</p><span style=\"content:'a/b'\">x</span>")
+        let document = try AIMarkdownHTML.parse("<p style=\"color:red; position:absolute\">日本語</p><span style=\"content:'a/b'\">x</span>")
         let original = try document.outerHtml()
         let cleaner = Cleaner(headWhitelist: nil, bodyWhitelist: rules)
         let first = try cleaner.clean(document)

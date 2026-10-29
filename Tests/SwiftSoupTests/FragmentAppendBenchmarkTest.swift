@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 /// Opt in with SWIFTSOUP_FRAGMENT_BENCHMARK=1 in a release test build.
 /// Use identical test sources/counts/iterations on both revisions and alternate
@@ -44,13 +44,13 @@ final class FragmentAppendBenchmarkTest: XCTestCase {
                 let parser = Parser.htmlParser().settings(ParseSettings(false, false, kind != "parse-coalesced"))
                 return try parser.parseInput(interrupted, "").textUTF8()
             case "parse-text":
-                return try SwiftSoup.parse(markup).textUTF8()
+                return try AIMarkdownHTML.parse(markup).textUTF8()
             case "parse-attribute":
-                let doc = try SwiftSoup.parse(markup)
+                let doc = try AIMarkdownHTML.parse(markup)
                 doc.materializeAttributesRecursively()
                 return try doc.getElementsByTag("p").first()!.attr(Array("title".utf8))
             default:
-                return Array(try SwiftSoup.parse(script).getElementsByTag("script").first()!.data().utf8)
+                return Array(try AIMarkdownHTML.parse(script).getElementsByTag("script").first()!.data().utf8)
             }
         }
         let expected = ["parse-coalesced", "parse-discarded"].contains(kind)

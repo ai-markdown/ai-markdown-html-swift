@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class TextAttributePresenceTest: XCTestCase {
     func testFreshByteQueriesAgreeWithStringQueries() throws {
@@ -13,7 +13,7 @@ final class TextAttributePresenceTest: XCTestCase {
     }
 
     func testByteQueriesThroughNodeReferenceDoNotDirtyParsedSource() throws {
-        let doc = try SwiftSoup.parse("<p>日本 &amp; text</p>")
+        let doc = try AIMarkdownHTML.parse("<p>日本 &amp; text</p>")
         let text = try XCTUnwrap(doc.select("p").first()?.textNodes().first)
         let node: Node = text
         let version = doc.textMutationVersionToken()

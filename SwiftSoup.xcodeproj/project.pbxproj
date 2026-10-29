@@ -236,7 +236,7 @@
 				71F49559DB1712088FD9F82A /* XmlDeclaration.swift */,
 				7B81A9EDDA0E2137D2668987 /* XmlTreeBuilder.swift */,
 			);
-			path = Sources;
+			path = Sources/AIMarkdownHTML;
 			sourceTree = "<group>";
 		};
 		37A47F3BE4AF63B5AE99391B /* Derived */ = {

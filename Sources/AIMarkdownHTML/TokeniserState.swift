@@ -2915,6 +2915,9 @@ enum TokeniserState: TokeniserStateProtocol {
 
     @inline(__always)
     static func readCharRef(_ t: Tokeniser, _ advance: TokeniserState)throws {
+        let sourceStart = t.readerRef.pos - 1
+        let sourcePieceStart = t.sourceEventPieces.count
+        defer { t.sourceReference(start: sourceStart, pieceStart: sourcePieceStart) }
         if let byte = t.currentByte(), Tokeniser.isNotCharRefAscii(byte) {
             t.emit(UnicodeScalar.Ampersand)
             t.transition(advance)

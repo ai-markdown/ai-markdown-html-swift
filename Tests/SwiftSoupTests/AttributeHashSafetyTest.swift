@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeHashSafetyTest: XCTestCase {
     func testHashMixingWrapsRatherThanTrappingOnOverflow() throws {
@@ -27,7 +27,7 @@ final class AttributeHashSafetyTest: XCTestCase {
     }
 
     func testFragmentedValueHashingDoesNotNotifyOwners() throws {
-        let doc = try SwiftSoup.parse("<p data-v='a'></p>")
+        let doc = try AIMarkdownHTML.parse("<p data-v='a'></p>")
         let p = try XCTUnwrap(doc.body()?.child(0))
         let attribute = try XCTUnwrap(p.getAttributes()?.asList().first)
         attribute.appendValueSlice(ByteSlice.fromArray(Array("日本語".utf8)))

@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class XmlCharsetDeclarationTest: XCTestCase {
     private func declaration(_ document: Document) throws -> XmlDeclaration {

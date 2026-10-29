@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class QueryParserCacheTest: XCTestCase {
     

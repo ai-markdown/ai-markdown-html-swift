@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SingleTextBufferTest: XCTestCase {
     private func assertReads(_ bytes: [UInt8], slice: ByteSlice,
@@ -55,7 +55,7 @@ final class SingleTextBufferTest: XCTestCase {
     }
 
     func testAttributeBackedTextMutationAndSelectorCaches() throws {
-        let doc = try SwiftSoup.parse("<p>日本語</p>")
+        let doc = try AIMarkdownHTML.parse("<p>日本語</p>")
         let p = try XCTUnwrap(doc.getElementsByTag("p").first())
         let text = p.childNode(0) as! TextNode
         _ = text.getAttributes()

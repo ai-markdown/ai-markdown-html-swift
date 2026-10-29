@@ -6,49 +6,49 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class SelectorTest: XCTestCase {
 
 	func testByTag() throws {
 		// should be case insensitive
-		let els: Elements = try SwiftSoup.parse("<div id=1><div id=2><p>Hello</p></div></div><DIV id=3>").select("DIV")
+		let els: Elements = try AIMarkdownHTML.parse("<div id=1><div id=2><p>Hello</p></div></div><DIV id=3>").select("DIV")
 		XCTAssertEqual(3, els.size())
 		XCTAssertEqual("1", els.get(0).id())
 		XCTAssertEqual("2", els.get(1).id())
 		XCTAssertEqual("3", els.get(2).id())
 
-		let none: Elements = try SwiftSoup.parse("<div id=1><div id=2><p>Hello</p></div></div><div id=3>").select("span")
+		let none: Elements = try AIMarkdownHTML.parse("<div id=1><div id=2><p>Hello</p></div></div><div id=3>").select("span")
 		XCTAssertEqual(0, none.size())
 	}
 
 	func testById() throws {
-		let els: Elements = try SwiftSoup.parse("<div><p id=foo>Hello</p><p id=foo>Foo two!</p></div>").select("#foo")
+		let els: Elements = try AIMarkdownHTML.parse("<div><p id=foo>Hello</p><p id=foo>Foo two!</p></div>").select("#foo")
 		XCTAssertEqual(2, els.size())
 		XCTAssertEqual("Hello", try els.get(0).text())
 		XCTAssertEqual("Foo two!", try els.get(1).text())
 
-		let none: Elements = try SwiftSoup.parse("<div id=1></div>").select("#foo")
+		let none: Elements = try AIMarkdownHTML.parse("<div id=1></div>").select("#foo")
 		XCTAssertEqual(0, none.size())
 	}
 
 	func testByClass() throws {
-		let els: Elements = try SwiftSoup.parse("<p id=0 class='ONE two'><p id=1 class='one'><p id=2 class='two'>").select("P.One")
+		let els: Elements = try AIMarkdownHTML.parse("<p id=0 class='ONE two'><p id=1 class='one'><p id=2 class='two'>").select("P.One")
 		XCTAssertEqual(2, els.size())
 		XCTAssertEqual("0", els.get(0).id())
 		XCTAssertEqual("1", els.get(1).id())
 
-		let none: Elements = try SwiftSoup.parse("<div class='one'></div>").select(".foo")
+		let none: Elements = try AIMarkdownHTML.parse("<div class='one'></div>").select(".foo")
 		XCTAssertEqual(0, none.size())
 
-		let els2: Elements = try SwiftSoup.parse("<div class='One-Two'></div>").select(".one-two")
+		let els2: Elements = try AIMarkdownHTML.parse("<div class='One-Two'></div>").select(".one-two")
 		XCTAssertEqual(1, els2.size())
 	}
 
 	func testByAttribute() throws {
 		let h: String = "<div Title=Foo /><div Title=Bar /><div Style=Qux /><div title=Bam /><div title=SLAM />" +
 		"<div data-name='with spaces'/>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 
 		let withTitle: Elements = try doc.select("[title]")
 		XCTAssertEqual(4, withTitle.size())
@@ -89,7 +89,7 @@ class SelectorTest: XCTestCase {
     func testDescendantSelectorMatches() throws {
         let html = "<div id=one><p class=alpha><span class=item>One</span></p></div>" +
             "<p class=alpha><span class=item>Two</span></p>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
 
         let divSpan = try doc.select("div span")
         XCTAssertEqual(1, divSpan.size())
@@ -105,7 +105,7 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectTagAndClass() throws {
-        let doc = try SwiftSoup.parse("<div><p class=lead id=1></p><p class=lead id=2></p><span class=lead id=3></span></div>")
+        let doc = try AIMarkdownHTML.parse("<div><p class=lead id=1></p><p class=lead id=2></p><span class=lead id=3></span></div>")
         let els = try doc.select("p.lead")
         XCTAssertEqual(2, els.size())
         XCTAssertEqual("1", els.get(0).id())
@@ -113,14 +113,14 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectTagAndAttributeValueHot() throws {
-        let doc = try SwiftSoup.parse("<a href=one id=1></a><a href=two id=2></a><a href=one id=3></a>")
+        let doc = try AIMarkdownHTML.parse("<a href=one id=1></a><a href=two id=2></a><a href=one id=3></a>")
         let els = try doc.select("a[href=two]")
         XCTAssertEqual(1, els.size())
         XCTAssertEqual("2", els.get(0).id())
     }
 
     func testSelectTagAndAttributeName() throws {
-        let doc = try SwiftSoup.parse("<a href=one id=1></a><div href=two id=2></div><a id=3></a>")
+        let doc = try AIMarkdownHTML.parse("<a href=one id=1></a><div href=two id=2></div><a id=3></a>")
         let els = try doc.select("a[href]")
         XCTAssertEqual(1, els.size())
         XCTAssertEqual("1", els.get(0).id())
@@ -138,7 +138,7 @@ class SelectorTest: XCTestCase {
             "<div id=d2 class=card></div>" +
             "</div>"
 
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
 
         func ids(_ elements: Elements) -> [String] {
             return elements.array().map { $0.id() }
@@ -159,7 +159,7 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectAbsAttributeMatchesCollector() throws {
-        let doc = try SwiftSoup.parse("<a href=/one id=1></a><a href=/two id=2></a>")
+        let doc = try AIMarkdownHTML.parse("<a href=/one id=1></a><a href=/two id=2></a>")
         let selector = "[abs:href]"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -174,7 +174,7 @@ class SelectorTest: XCTestCase {
             "<article id=a2><p class=body>Two</p></article>" +
             "<section id=s1><p class=lead>Three</p></section>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let selector = "article:has(p.lead):not(.missing)"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -184,7 +184,7 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectAbsAttributeValueMatchesCollector() throws {
-        let doc = try SwiftSoup.parse("<a href=/one id=1></a><a href=/two id=2></a>")
+        let doc = try AIMarkdownHTML.parse("<a href=/one id=1></a><a href=/two id=2></a>")
         let selector = "[abs:href=/one]"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -193,7 +193,7 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectAttributeStartingMatchesCollector() throws {
-        let doc = try SwiftSoup.parse("<div data-x=1 id=1></div><div data-y=2 id=2></div><div id=3></div>")
+        let doc = try AIMarkdownHTML.parse("<div data-x=1 id=1></div><div data-y=2 id=2></div><div id=3></div>")
         let selector = "[^data-]"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -209,7 +209,7 @@ class SelectorTest: XCTestCase {
             "<article id=a3 class=skip><p class=lead>Three</p></article>" +
             "<section id=s1><p class=lead>Four</p></section>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let selector = "article:has(header h1):has(p.lead):not(.skip)"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -226,7 +226,7 @@ class SelectorTest: XCTestCase {
             "<a id=a1 class=lead href=one>Link</a>" +
             "<span id=s1 class=lead>Span</span>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let selector = "p.lead, a[href], span.lead"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -241,7 +241,7 @@ class SelectorTest: XCTestCase {
             "<article id=a2><h2>Two</h2><p class=body>Body</p></article>" +
             "<article id=a3><h2>Three</h2><p class=lead>Lead</p><p class=body>Body</p></article>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let selector = "article:has(h2 + p.lead):not(:has(p.body))"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -257,7 +257,7 @@ class SelectorTest: XCTestCase {
             "<section id=s2><div><p class=body>Body</p></div></section>" +
             "<section id=s3><div><p class=lead>Lead</p><p class=body>Body</p></div></section>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let selector = "section:has(div > p.lead):not(:has(p.body))"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -274,7 +274,7 @@ class SelectorTest: XCTestCase {
             "<article id=a3><h2>Three</h2><p class=lead>Lead</p><p class=note>Note</p><p class=body>Body</p><p class=tail>Tail</p></article>" +
             "<section id=s1><h2>Side</h2><p class=lead>Lead</p><p class=note>Note</p></section>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let selector = "article:has(h2 + p.lead ~ p.note):not(:has(p.body + p.note))"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -292,7 +292,7 @@ class SelectorTest: XCTestCase {
             "<section id=s3><header></header><p class=lead>Lead</p><p class=note>Note</p><p class=body>Body</p></section>" +
             "<section id=s4><header></header><div><p class=lead>Lead</p><p class=note>Note</p></div></section>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let selector = "section:has(header + p.lead + p.note):not(:has(header + p.body + p.note))"
         let eval = try QueryParser.parse(selector)
         let slow = try Collector.collect(eval, doc)
@@ -311,7 +311,7 @@ class SelectorTest: XCTestCase {
             "<nav id=n1><a id=l1 href=/one>One</a><a id=l2>Two</a></nav>" +
             "<ul id=u1><li id=li1>Alpha</li><li id=li2>Beta</li><li id=li3>Gamma</li></ul>" +
             "</div>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
 
         let a1 = try doc.getElementById("a1")!
         try a1.removeAttr("data-x")
@@ -327,7 +327,7 @@ class SelectorTest: XCTestCase {
         try p3.after("<p id=p3b class=note>Note2</p>")
 
         let p5 = try doc.getElementById("p5")!
-        let replacement = try SwiftSoup.parse("<span id=p5r class=note>Note</span>").select("span").first()!
+        let replacement = try AIMarkdownHTML.parse("<span id=p5r class=note>Note</span>").select("span").first()!
         try p5.replaceWith(replacement)
 
         let l2 = try doc.getElementById("l2")!
@@ -367,14 +367,14 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectTagClassAndId() throws {
-        let doc = try SwiftSoup.parse("<div class=card id=hit></div><div class=card id=miss></div><span class=card id=hit2></span>")
+        let doc = try AIMarkdownHTML.parse("<div class=card id=hit></div><div class=card id=miss></div><span class=card id=hit2></span>")
         let els = try doc.select("div.card#hit")
         XCTAssertEqual(1, els.size())
         XCTAssertEqual("hit", els.get(0).id())
     }
     
     func testSelectAttributeValueHotKeyOrder() throws {
-        let doc = try SwiftSoup.parse("<a href=one id=1></a><a href=two id=2></a><a href=one id=3></a>")
+        let doc = try AIMarkdownHTML.parse("<a href=one id=1></a><a href=two id=2></a><a href=one id=3></a>")
         let els: Elements = try doc.select("[href=one]")
         XCTAssertEqual(2, els.size())
         XCTAssertEqual("1", els.get(0).id())
@@ -382,7 +382,7 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectorCacheInvalidatesOnMutation() throws {
-        let doc = try SwiftSoup.parse("<div id=one class=hit></div><div id=two></div>")
+        let doc = try AIMarkdownHTML.parse("<div id=one class=hit></div><div id=two></div>")
         let root = doc.body()!
         XCTAssertEqual(1, try root.select(".hit").size())
         // Second call should hit selector cache.
@@ -393,7 +393,7 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectorCacheInvalidatesOnTextMutation() throws {
-        let doc = try SwiftSoup.parse("<div id=one>foo</div><div id=two>bar</div>")
+        let doc = try AIMarkdownHTML.parse("<div id=one>foo</div><div id=two>bar</div>")
         let root = doc.body()!
         XCTAssertEqual(1, try root.select("div:contains(foo)").size())
         // Second call should hit selector cache.
@@ -404,7 +404,7 @@ class SelectorTest: XCTestCase {
     }
 
     func testSelectorCacheSingleRootForSelectRoots() throws {
-        let doc = try SwiftSoup.parse("<div id=one class=hit></div><div id=two></div>")
+        let doc = try AIMarkdownHTML.parse("<div id=one class=hit></div><div id=two></div>")
         let root = doc.body()!
         XCTAssertEqual(1, try CssSelector.select(".hit", [root]).size())
         XCTAssertEqual(1, try CssSelector.select(".hit", [root]).size())
@@ -413,13 +413,13 @@ class SelectorTest: XCTestCase {
     }
     
     func testSelectAttributeAbsFallback() throws {
-        let doc = try SwiftSoup.parse("<a href=/one id=1></a><a href=/two id=2></a>")
+        let doc = try AIMarkdownHTML.parse("<a href=/one id=1></a><a href=/two id=2></a>")
         let els: Elements = try doc.select("[abs:href]")
         XCTAssertEqual(0, els.size())
     }
 
 	func testNamespacedTag() throws {
-		let doc: Document = try SwiftSoup.parse("<div><abc:def id=1>Hello</abc:def></div> <abc:def class=bold id=2>There</abc:def>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><abc:def id=1>Hello</abc:def></div> <abc:def class=bold id=2>There</abc:def>")
 		let byTag: Elements = try doc.select("abc|def")
 		XCTAssertEqual(2, byTag.size())
 		XCTAssertEqual("1", byTag.first()?.id())
@@ -440,7 +440,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testWildcardNamespacedTag() throws {
-		let doc: Document = try SwiftSoup.parse("<div><abc:def id=1>Hello</abc:def></div> <abc:def class=bold id=2>There</abc:def>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><abc:def id=1>Hello</abc:def></div> <abc:def class=bold id=2>There</abc:def>")
 		let byTag: Elements = try doc.select("*|def")
 		XCTAssertEqual(2, byTag.size())
 		XCTAssertEqual("1", byTag.first()?.id())
@@ -461,7 +461,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testByAttributeStarting() throws {
-		let doc: Document = try SwiftSoup.parse("<div id=1 data-name=SwiftSoup>Hello</div><p data-val=5 id=2>There</p><p id=3>No</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<div id=1 data-name=SwiftSoup>Hello</div><p data-val=5 id=2>There</p><p id=3>No</p>")
 		var withData: Elements = try doc.select("[^data-]")
 		XCTAssertEqual(2, withData.size())
 		XCTAssertEqual("1", withData.first()?.id())
@@ -473,7 +473,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testByAttributeRegex() throws {
-		let doc: Document = try SwiftSoup.parse("<p><img src=foo.png id=1><img src=bar.jpg id=2><img src=qux.JPEG id=3><img src=old.gif><img></p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p><img src=foo.png id=1><img src=bar.jpg id=2><img src=qux.JPEG id=3><img src=old.gif><img></p>")
 		let imgs: Elements = try doc.select("img[src~=(?i)\\.(png|jpe?g)]")
 		XCTAssertEqual(3, imgs.size())
 		XCTAssertEqual("1", imgs.get(0).id())
@@ -482,7 +482,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testByAttributeRegexCharacterClass() throws {
-		let doc: Document = try SwiftSoup.parse("<p><img src=foo.png id=1><img src=bar.jpg id=2><img src=qux.JPEG id=3><img src=old.gif id=4></p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p><img src=foo.png id=1><img src=bar.jpg id=2><img src=qux.JPEG id=3><img src=old.gif id=4></p>")
 		let imgs: Elements = try doc.select("img[src~=[o]]")
 		XCTAssertEqual(2, imgs.size())
 		XCTAssertEqual("1", imgs.get(0).id())
@@ -490,14 +490,14 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testByAttributeRegexCombined() throws {
-		let doc: Document = try SwiftSoup.parse("<div><table class=x><td>Hello</td></table></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><table class=x><td>Hello</td></table></div>")
 		let els: Elements = try doc.select("div table[class~=x|y]")
 		XCTAssertEqual(1, els.size())
 		try XCTAssertEqual("Hello", els.text())
 	}
 
 	func testCombinedWithContains() throws {
-		let doc: Document = try SwiftSoup.parse("<p id=1>One</p><p>Two +</p><p>Three +</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p id=1>One</p><p>Two +</p><p>Three +</p>")
 		let els: Elements = try doc.select("p#1 + :contains(+)")
 		XCTAssertEqual(1, els.size())
 		try XCTAssertEqual("Two +", els.text())
@@ -506,7 +506,7 @@ class SelectorTest: XCTestCase {
 
 	func testAllElements() throws {
 		let h: String = "<div><p>Hello</p><p><b>there</b></p></div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let allDoc: Elements = try doc.select("*")
 		let allUnderDiv: Elements = try doc.select("div *")
 		XCTAssertEqual(8, allDoc.size())
@@ -516,14 +516,14 @@ class SelectorTest: XCTestCase {
 
 	func testAllWithClass() throws {
 		let h: String = "<p class=first>One<p class=first>Two<p>Three"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let ps: Elements = try doc.select("*.first")
 		XCTAssertEqual(2, ps.size())
 	}
 
 	func testGroupOr() throws {
 		let h: String = "<div title=foo /><div title=bar /><div /><p></p><img /><span title=qux>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let els: Elements = try doc.select("p,div,[title]")
 
 		XCTAssertEqual(5, els.size())
@@ -540,7 +540,7 @@ class SelectorTest: XCTestCase {
 
 	func testGroupOrAttribute() throws {
 		let h: String = "<div id=1 /><div id=2 /><div title=foo /><div title=bar />"
-		let els: Elements = try SwiftSoup.parse(h).select("[id],[title=foo]")
+		let els: Elements = try AIMarkdownHTML.parse(h).select("[id],[title=foo]")
 
 		XCTAssertEqual(3, els.size())
 		XCTAssertEqual("1", els.get(0).id())
@@ -550,7 +550,7 @@ class SelectorTest: XCTestCase {
 
 	func testDescendant() throws {
 		let h: String = "<div class=head><p class=first>Hello</p><p>There</p></div><p>None</p>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let root: Element = try doc.getElementsByClass("HEAD").first()!
 
 		let els: Elements = try root.select(".head p")
@@ -571,7 +571,7 @@ class SelectorTest: XCTestCase {
 
 	func testAnd() throws {
 		let h: String = "<div id=1 class='foo bar' title=bar name=qux><p class=foo title=bar>Hello</p></div"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 
 		let div: Elements = try doc.select("div.foo")
 		XCTAssertEqual(1, div.size())
@@ -592,7 +592,7 @@ class SelectorTest: XCTestCase {
 
 	func testDeeperDescendant() throws {
 		let h: String = "<div class=head><p><span class=first>Hello</div><div class=head><p class=first><span>Another</span><p>Again</div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let root: Element = try doc.getElementsByClass("head").first()!
 
 		let els: Elements = try root.select("div p .first")
@@ -606,7 +606,7 @@ class SelectorTest: XCTestCase {
 
 	func testParentChildElement() throws {
 		let h: String = "<div id=1><div id=2><div id = 3></div></div></div><div id=4></div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 
 		let divs: Elements = try doc.select("div > div")
 		XCTAssertEqual(2, divs.size())
@@ -620,7 +620,7 @@ class SelectorTest: XCTestCase {
 
 	func testParentWithClassChild() throws {
 		let h: String = "<h1 class=foo><a href=1 /></h1><h1 class=foo><a href=2 class=bar /></h1><h1><a href=3 /></h1>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 
 		let allAs: Elements = try doc.select("h1 > a")
 		XCTAssertEqual(3, allAs.size())
@@ -636,7 +636,7 @@ class SelectorTest: XCTestCase {
 
 	func testParentChildStar() throws {
 		let h: String = "<div id=1><p>Hello<p><b>there</b></p></div><div id=2><span>Hi</span></div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let divChilds: Elements = try doc.select("div > *")
 		XCTAssertEqual(3, divChilds.size())
 		XCTAssertEqual("p", divChilds.get(0).tagName())
@@ -646,7 +646,7 @@ class SelectorTest: XCTestCase {
 
 	func testMultiChildDescent() throws {
 		let h: String = "<div id=foo><h1 class=bar><a href=http://example.com/>One</a></h1></div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let els: Elements = try doc.select("div#foo > h1.bar > a[href*=example]")
 		XCTAssertEqual(1, els.size())
 		XCTAssertEqual("a", els.first()?.tagName())
@@ -654,7 +654,7 @@ class SelectorTest: XCTestCase {
 
 	func testCaseInsensitive() throws {
 		let h: String = "<dIv tItle=bAr><div>" // mixed case so a simple toLowerCase() on value doesn't catch
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 
 		XCTAssertEqual(2, try doc.select("DIV").size())
 		XCTAssertEqual(1, try doc.select("DIV[TITLE]").size())
@@ -664,7 +664,7 @@ class SelectorTest: XCTestCase {
 
 	func testAdjacentSiblings() throws {
 		let h: String = "<ol><li>One<li>Two<li>Three</ol>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let sibs: Elements = try doc.select("li + li")
 		XCTAssertEqual(2, sibs.size())
 		try XCTAssertEqual("Two", sibs.get(0).text())
@@ -673,7 +673,7 @@ class SelectorTest: XCTestCase {
 
 	func testAdjacentSiblingsWithId() throws {
 		let h: String = "<ol><li id=1>One<li id=2>Two<li id=3>Three</ol>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let sibs: Elements = try doc.select("li#1 + li#2")
 		XCTAssertEqual(1, sibs.size())
 		try XCTAssertEqual("Two", sibs.get(0).text())
@@ -681,14 +681,14 @@ class SelectorTest: XCTestCase {
 
 	func testNotAdjacent() throws {
 		let h: String = "<ol><li id=1>One<li id=2>Two<li id=3>Three</ol>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let sibs: Elements = try doc.select("li#1 + li#3")
 		XCTAssertEqual(0, sibs.size())
 	}
 
 	func testMixCombinator() throws {
 		let h: String = "<div class=foo><ol><li>One<li>Two<li>Three</ol></div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let sibs: Elements = try doc.select("body > div.foo li + li")
 
 		XCTAssertEqual(2, sibs.size())
@@ -698,7 +698,7 @@ class SelectorTest: XCTestCase {
 
 	func testMixCombinatorGroup() throws {
 		let h: String = "<div class=foo><ol><li>One<li>Two<li>Three</ol></div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let els: Elements = try doc.select(".foo > ol, ol > li + li")
 
 		XCTAssertEqual(3, els.size())
@@ -709,7 +709,7 @@ class SelectorTest: XCTestCase {
 
 	func testGeneralSiblings() throws {
 		let h: String = "<ol><li id=1>One<li id=2>Two<li id=3>Three</ol>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 		let els: Elements = try doc.select("#1 ~ #3")
 		XCTAssertEqual(1, els.size())
 		try XCTAssertEqual("Three", els.first()?.text())
@@ -719,7 +719,7 @@ class SelectorTest: XCTestCase {
 	func testCharactersInIdAndClass() throws {
 		// using CSS spec for identifiers (id and class): a-z0-9, -, _. NOT . (which is OK in html spec, but not css)
 		let h: String = "<div><p id='a1-foo_bar'>One</p><p class='b2-qux_bif'>Two</p></div>"
-		let doc: Document = try SwiftSoup.parse(h)
+		let doc: Document = try AIMarkdownHTML.parse(h)
 
 		let el1: Element = try doc.getElementById("a1-foo_bar")!
 		try XCTAssertEqual("One", el1.text())
@@ -735,7 +735,7 @@ class SelectorTest: XCTestCase {
 	// for http://github.com/jhy/jsoup/issues#issue/13
 	func testSupportsLeadingCombinator() throws {
 		var h: String = "<div><p><span>One</span><span>Two</span></p></div>"
-		var doc: Document = try SwiftSoup.parse(h)
+		var doc: Document = try AIMarkdownHTML.parse(h)
 
 		let p: Element = try doc.select("div > p").first()!
 		let spans: Elements = try p.select("> span")
@@ -744,13 +744,13 @@ class SelectorTest: XCTestCase {
 
 		// make sure doesn't get nested
 		h = "<div id=1><div id=2><div id=3></div></div></div>"
-		doc = try SwiftSoup.parse(h)
+		doc = try AIMarkdownHTML.parse(h)
 		let div: Element = try doc.select("div").select(" > div").first()!
 		XCTAssertEqual("2", div.id())
 	}
 
 	func testPseudoLessThan() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p>One</p><p>Two</p><p>Three</>p></div><div><p>Four</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p>One</p><p>Two</p><p>Three</>p></div><div><p>Four</p>")
 		let ps: Elements = try doc.select("div p:lt(2)")
 		XCTAssertEqual(3, ps.size())
 		try XCTAssertEqual("One", ps.get(0).text())
@@ -759,7 +759,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testPseudoGreaterThan() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p>One</p><p>Two</p><p>Three</p></div><div><p>Four</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p>One</p><p>Two</p><p>Three</p></div><div><p>Four</p>")
 		let ps: Elements = try doc.select("div p:gt(0)")
 		XCTAssertEqual(2, ps.size())
 		try XCTAssertEqual("Two", ps.get(0).text())
@@ -767,7 +767,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testPseudoEquals() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p>One</p><p>Two</p><p>Three</>p></div><div><p>Four</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p>One</p><p>Two</p><p>Three</>p></div><div><p>Four</p>")
 		let ps: Elements = try doc.select("div p:eq(0)")
 		XCTAssertEqual(2, ps.size())
 		try XCTAssertEqual("One", ps.get(0).text())
@@ -780,21 +780,21 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testPseudoBetween() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p>One</p><p>Two</p><p>Three</>p></div><div><p>Four</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p>One</p><p>Two</p><p>Three</>p></div><div><p>Four</p>")
 		let ps: Elements = try doc.select("div p:gt(0):lt(2)")
 		XCTAssertEqual(1, ps.size())
 		try XCTAssertEqual("Two", ps.get(0).text())
 	}
 
 	func testPseudoCombined() throws {
-		let doc: Document = try SwiftSoup.parse("<div class='foo'><p>One</p><p>Two</p></div><div><p>Three</p><p>Four</p></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div class='foo'><p>One</p><p>Two</p></div><div><p>Three</p><p>Four</p></div>")
 		let ps: Elements = try doc.select("div.foo p:gt(0)")
 		XCTAssertEqual(1, ps.size())
 		try XCTAssertEqual("Two", ps.get(0).text())
 	}
 
 	func testPseudoHas() throws {
-		let doc: Document = try SwiftSoup.parse("<div id=0><p><span>Hello</span></p></div> <div id=1><span class=foo>There</span></div> <div id=2><p>Not</p></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div id=0><p><span>Hello</span></p></div> <div id=1><span class=foo>There</span></div> <div id=2><p>Not</p></div>")
 
 		let divs1: Elements = try doc.select("div:has(span)")
 		XCTAssertEqual(2, divs1.size())
@@ -819,7 +819,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testNestedHas() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p><span>One</span></p></div> <div><p>Two</p></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p><span>One</span></p></div> <div><p>Two</p></div>")
 		var divs: Elements = try doc.select("div:has(p:has(span))")
 		XCTAssertEqual(1, divs.size())
 		try XCTAssertEqual("One", divs.first()?.text())
@@ -838,7 +838,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testPseudoContains() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p>The Rain.</p> <p class=light>The <i>rain</i>.</p> <p>Rain, the.</p></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p>The Rain.</p> <p class=light>The <i>rain</i>.</p> <p>Rain, the.</p></div>")
 
 		let ps1: Elements = try doc.select("p:contains(Rain)")
 		XCTAssertEqual(3, ps1.size())
@@ -861,7 +861,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testPsuedoContainsWithParentheses() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p id=1>This (is good)</p><p id=2>This is bad)</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p id=1>This (is good)</p><p id=2>This is bad)</p>")
 
 		let ps1: Elements = try doc.select("p:contains(this (is good))")
 		XCTAssertEqual(1, ps1.size())
@@ -873,7 +873,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testContainsOwn() throws {
-		let doc: Document = try SwiftSoup.parse("<p id=1>Hello <b>there</b> now</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p id=1>Hello <b>there</b> now</p>")
 		let ps: Elements = try doc.select("p:containsOwn(Hello now)")
 		XCTAssertEqual(1, ps.size())
 		XCTAssertEqual("1", ps.first()?.id())
@@ -882,7 +882,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testContainsData() throws {
-		let doc: Document = try SwiftSoup.parse("<div><p>Some text</p><script>var foo = 'bar';</script><style>.red { color: red; }</style></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><p>Some text</p><script>var foo = 'bar';</script><style>.red { color: red; }</style></div>")
 
 		// script data
 		let scripts: Elements = try doc.select("script:containsData(foo)")
@@ -907,14 +907,14 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testContainsDataInDescendants() throws {
-		let doc: Document = try SwiftSoup.parse("<div><script>alert('hello');</script></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div><script>alert('hello');</script></div>")
 		let divs: Elements = try doc.select("div:containsData(hello)")
 		XCTAssertEqual(1, divs.size())
 		XCTAssertEqual("div", divs.first()?.tagName())
 	}
 
 	func testMatches() throws {
-		let doc: Document = try SwiftSoup.parse("<p id=1>The <i>Rain</i></p> <p id=2>There are 99 bottles.</p> <p id=3>Harder (this)</p> <p id=4>Rain</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p id=1>The <i>Rain</i></p> <p id=2>There are 99 bottles.</p> <p id=3>Harder (this)</p> <p id=4>Rain</p>")
 
 		let p1: Elements = try doc.select("p:matches(The rain)") // no match, case sensitive
 		XCTAssertEqual(0, p1.size())
@@ -941,7 +941,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testMatchesOwn() throws {
-		let doc: Document = try SwiftSoup.parse("<p id=1>Hello <b>there</b> now</p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p id=1>Hello <b>there</b> now</p>")
 
 		let p1: Elements = try doc.select("p:matchesOwn((?i)hello now)")
 		XCTAssertEqual(1, p1.size())
@@ -951,7 +951,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testRelaxedTags() throws {
-		let doc: Document = try SwiftSoup.parse("<abc_def id=1>Hello</abc_def> <abc-def id=2>There</abc-def>")
+		let doc: Document = try AIMarkdownHTML.parse("<abc_def id=1>Hello</abc_def> <abc-def id=2>There</abc-def>")
 
 		let el1: Elements = try doc.select("abc_def")
 		XCTAssertEqual(1, el1.size())
@@ -963,7 +963,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testNotParas() throws {
-		let doc: Document = try SwiftSoup.parse("<p id=1>One</p> <p>Two</p> <p><span>Three</span></p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p id=1>One</p> <p>Two</p> <p><span>Three</span></p>")
 
 		let el1: Elements = try doc.select("p:not([id=1])")
 		XCTAssertEqual(2, el1.size())
@@ -977,7 +977,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testNotAll() throws {
-		let doc: Document = try SwiftSoup.parse("<p>Two</p> <p><span>Three</span></p>")
+		let doc: Document = try AIMarkdownHTML.parse("<p>Two</p> <p><span>Three</span></p>")
 
 		let el1: Elements = try doc.body()!.select(":not(p)") // should just be the span
 		XCTAssertEqual(2, el1.size())
@@ -986,7 +986,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testNotClass() throws {
-		let doc: Document = try SwiftSoup.parse("<div class=left>One</div><div class=right id=1><p>Two</p></div>")
+		let doc: Document = try AIMarkdownHTML.parse("<div class=left>One</div><div class=right id=1><p>Two</p></div>")
 
 		let el1: Elements = try doc.select("div:not(.left)")
 		XCTAssertEqual(1, el1.size())
@@ -994,7 +994,7 @@ class SelectorTest: XCTestCase {
 	}
 
 	func testHandlesCommasInSelector() throws {
-		let doc: Document = try SwiftSoup.parse("<p name='1,2'>One</p><div>Two</div><ol><li>123</li><li>Text</li></ol>")
+		let doc: Document = try AIMarkdownHTML.parse("<p name='1,2'>One</p><div>Two</div><ol><li>123</li><li>Text</li></ol>")
 
 		let ps: Elements = try doc.select("[name=1,2]")
 		XCTAssertEqual(1, ps.size())
@@ -1009,7 +1009,7 @@ class SelectorTest: XCTestCase {
 	func testSelectSupplementaryCharacter() throws {
 		#if !os(Linux)
 			let s = String(Character(UnicodeScalar(135361)!))
-			let doc: Document = try SwiftSoup.parse("<div k" + s + "='" + s + "'>^" + s + "$/div>")
+			let doc: Document = try AIMarkdownHTML.parse("<div k" + s + "='" + s + "'>^" + s + "$/div>")
 			XCTAssertEqual("div", try doc.select("div[k" + s + "]").first()?.tagName())
 			XCTAssertEqual("div", try doc.select("div:containsOwn(" + s + ")").first()?.tagName())
 		#endif
@@ -1019,7 +1019,7 @@ class SelectorTest: XCTestCase {
 		 let html: String = "<div class=\"value\">class without space</div>\n"
 			+ "<div class=\"value \">class with space</div>"
 
-		let doc: Document = try SwiftSoup.parse(html)
+		let doc: Document = try AIMarkdownHTML.parse(html)
 
 		var found: Elements = try doc.select("div[class=value ]")
 		XCTAssertEqual(2, found.size())
@@ -1038,7 +1038,7 @@ class SelectorTest: XCTestCase {
 	func testSelectSameElements() throws {
 		let html: String = "<div>one</div><div>one</div>"
 
-		let doc: Document = try SwiftSoup.parse(html)
+		let doc: Document = try AIMarkdownHTML.parse(html)
 		let els: Elements = try doc.select("div")
 		XCTAssertEqual(2, els.size())
 
@@ -1048,7 +1048,7 @@ class SelectorTest: XCTestCase {
 
 	func testAttributeWithBrackets() throws {
 		let html: String = "<div data='End]'>One</div> <div data='[Another)]]'>Two</div>"
-		let doc: Document = try SwiftSoup.parse(html)
+		let doc: Document = try AIMarkdownHTML.parse(html)
 		try _ = doc.select("div[data='End]'")
 		XCTAssertEqual("One", try doc.select("div[data='End]'").first()?.text())
 		XCTAssertEqual("Two", try doc.select("div[data='[Another)]]'").first()?.text())
@@ -1058,7 +1058,7 @@ class SelectorTest: XCTestCase {
 
 	// A combinator is what decides between the two match paths; both must agree.
 	func testEscapedIdSelectorIsIndependentOfCombinators() throws {
-		let doc = try SwiftSoup.parse("<div><p id='x$y'>t</p></div>")
+		let doc = try AIMarkdownHTML.parse("<div><p id='x$y'>t</p></div>")
 		XCTAssertEqual(1, try doc.select(#"#x\$y"#).size())
 		XCTAssertEqual(1, try doc.select(#"body #x\$y"#).size())
 		XCTAssertEqual(1, try doc.select(#"div > #x\$y"#).size())
@@ -1068,7 +1068,7 @@ class SelectorTest: XCTestCase {
 	// Verify compound attribute selectors work on simple HTML
 	func testCompoundAttributeSelectorSimple() throws {
 		let html = "<div id='info-id' data-type='info-data'><p>Hello</p></div>"
-		let doc = try SwiftSoup.parse(html)
+		let doc = try AIMarkdownHTML.parse(html)
 		let result = try doc.select("div[id='info-id'][data-type='info-data']")
 		XCTAssertEqual(1, result.size(), "Compound selector on simple HTML should work")
 	}
@@ -1097,7 +1097,7 @@ class SelectorTest: XCTestCase {
 		</html>
 		"""
 
-		let document = try SwiftSoup.parse(html)
+		let document = try AIMarkdownHTML.parse(html)
 
 		// Single attribute selectors should work
 		let byId = try document.select("div[id='info-id']")

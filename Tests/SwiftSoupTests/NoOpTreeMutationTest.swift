@@ -1,11 +1,11 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class NoOpTreeMutationTest: XCTestCase {
     private func fixture(empty: Bool = false) throws -> (Document, Element) {
         let html = "<html><head></head><body><DIV id = 'target' data-x='keep'>" +
             (empty ? "" : "<SPAN title = 'nested'>payload</SPAN>") + "</DIV></body></html>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         return (doc, try XCTUnwrap(doc.getElementById("target")))
     }
 

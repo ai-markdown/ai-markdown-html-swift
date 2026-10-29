@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 let counts = [16, 128, 1024]
 let exposureCount = 131_072

@@ -1,9 +1,9 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class RelativeHasParserTest: XCTestCase {
     func testMixedRelativeSelectorListParsesEachBranchIndependently() throws {
-        let doc = try SwiftSoup.parse("""
+        let doc = try AIMarkdownHTML.parse("""
             <main>
               <section id='first'><b></b></section>
               <section id='second'><i class='hit'></i></section>
@@ -22,7 +22,7 @@ final class RelativeHasParserTest: XCTestCase {
     }
 
     func testHasListSplitterPreservesNestedAndEscapedCommas() throws {
-        let doc = try SwiftSoup.parse("""
+        let doc = try AIMarkdownHTML.parse("""
             <main id='nested'>
               <p class='a,b' data-note='x,y'>x,y</p>
             </main>

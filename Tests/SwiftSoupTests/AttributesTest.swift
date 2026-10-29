@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class AttributesTest: XCTestCase {
 
@@ -79,7 +79,7 @@ class AttributesTest: XCTestCase {
 
     func testParsedAttributesMaterializeAndMutate() throws {
         let html = "<a href=\"/one\" data-foo=\"bar\" disabled class=\"A B\"></a>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let el = try doc.select("a").first()!
         let attrs = el.getAttributes()!
 
@@ -111,7 +111,7 @@ class AttributesTest: XCTestCase {
 
     func testParsedAttributesHtmlCloneAndEquals() throws {
         let html = "<a href=\"/one\" disabled data-foo=\"a&b\"></a>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let el = try doc.select("a").first()!
         let attrs = el.getAttributes()!
 
@@ -125,7 +125,7 @@ class AttributesTest: XCTestCase {
 
     func testGetIgnoreCaseKeyIndexAfterParse() throws {
         let html = "<a DaTa-FoO=\"bar\" href=\"/one\"></a>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let el = try doc.select("a").first()!
         let attrs = el.getAttributes()!
 

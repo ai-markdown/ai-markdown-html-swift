@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SiblingEndpointReadTest: XCTestCase {
     private func check(_ parent: Element, receivers: [Element]? = nil, file: StaticString = #filePath, line: UInt = #line) {
@@ -100,7 +100,7 @@ final class SiblingEndpointReadTest: XCTestCase {
     }
 
     func testMutationRoundsClonesAndSourceState() throws {
-        let doc=try SwiftSoup.parse("<main><p>a</p>t<b>b</b><!--c--><p>c</p></main><aside><em>x</em></aside>")
+        let doc=try AIMarkdownHTML.parse("<main><p>a</p>t<b>b</b><!--c--><p>c</p></main><aside><em>x</em></aside>")
         let main=try XCTUnwrap(doc.select("main").first()), aside=try XCTUnwrap(doc.select("aside").first())
         let output=try doc.outerHtml(), token=doc.textMutationVersionToken()
         for _ in 0..<4 { check(main); check(aside) }

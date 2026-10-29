@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 private func emit(_ value: Any) throws {
     let data = try JSONSerialization.data(withJSONObject: value, options: [.sortedKeys])
@@ -41,7 +41,7 @@ private func main() throws {
     if name == "parse-control" {
         let html = "<main>" + (0..<128).map { "<p class='x'>日本語 \($0)</p>" }.joined() + "</main>"
         operation = {
-            let document = try SwiftSoup.parse(html)
+            let document = try AIMarkdownHTML.parse(html)
             return UInt64(try document.select("p.x").count + document.text().utf8.count)
         }
     } else {

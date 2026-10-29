@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class XmlBorrowedInitializationTest: XCTestCase {
     func testBorrowedXmlPreservesSyntaxAndSerialization() throws {

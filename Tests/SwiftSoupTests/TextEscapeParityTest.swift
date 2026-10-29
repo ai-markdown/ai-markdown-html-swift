@@ -1,6 +1,6 @@
 import XCTest
 import Foundation
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class TextEscapeParityTest: XCTestCase {
     private func bytes(_ text: String) -> [UInt8] { Array(text.utf8) }
@@ -55,7 +55,7 @@ final class TextEscapeParityTest: XCTestCase {
             let target = "prefix" + String(repeating: "\\", count: count) + "(日本)"
             let escaped = target.replacingOccurrences(of: "\\", with: "\\\\")
                 .replacingOccurrences(of: "(", with: "\\(").replacingOccurrences(of: ")", with: "\\)")
-            let doc = try SwiftSoup.parse("<main><p id='target'></p><p id='other'>unrelated</p></main>")
+            let doc = try AIMarkdownHTML.parse("<main><p id='target'></p><p id='other'>unrelated</p></main>")
             try doc.select("#target").first()!.text(target)
             for predicate in ["contains", "containsOwn"] {
                 for prefix in ["", "main > ", "#absent, "] {
@@ -69,7 +69,7 @@ final class TextEscapeParityTest: XCTestCase {
         for count in 1...12 {
             let target = "prefix" + String(repeating: "\\", count: count) + "日本"
             let escaped = target.replacingOccurrences(of: "\\", with: "\\\\")
-            let doc = try SwiftSoup.parse("<main><script id='target'></script><script id='other'></script></main>")
+            let doc = try AIMarkdownHTML.parse("<main><script id='target'></script><script id='other'></script></main>")
             let script = try XCTUnwrap(doc.select("#target").first())
             try script.appendChild(DataNode(Array(target.utf8), []))
             for prefix in ["", "main > "] {
@@ -79,7 +79,7 @@ final class TextEscapeParityTest: XCTestCase {
     }
 
     func testRegexArgumentsAreNotTextUnescaped() throws {
-        let doc = try SwiftSoup.parse("<main><p id='target'></p><p id='other'>other</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='target'></p><p id='other'>other</p></main>")
         let target = "prefix\\\\日本"
         try doc.select("#target").first()!.text(target)
         let regex = "^" + NSRegularExpression.escapedPattern(for: target) + "$"

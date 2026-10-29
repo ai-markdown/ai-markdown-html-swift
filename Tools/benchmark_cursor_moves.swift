@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 // Public-client benchmark. Compile the same file against each matching module.
 // Fixture setup is outside timing unless the workload name starts with parse-.
@@ -29,7 +29,7 @@ func verify() throws {
             }
         }
     }
-    let doc = try SwiftSoup.parse("<main><p class='日本語'>École</p><p>other</p></main>")
+    let doc = try AIMarkdownHTML.parse("<main><p class='日本語'>École</p><p>other</p></main>")
     records.append(["html": try doc.outerHtml(), "text": try doc.text(),
                     "selected": try doc.select("main > p:nth-child(2n + 1)").array().map { try $0.outerHtml() }])
     let data = try JSONSerialization.data(withJSONObject: records, options: [.sortedKeys])
@@ -94,7 +94,7 @@ if name.hasPrefix("region-") || name.hasPrefix("prefix-") {
     operation = { let parsed = try QueryParser.parse(query); return parsed.toString().utf8.count }
 } else if name == "parse-control" {
     let html = "<main>" + (0..<128).map { "<section id='n\($0)'><p>日本語の文章 \($0)</p></section>" }.joined() + "</main>"
-    operation = { let doc = try SwiftSoup.parse(html); return try doc.text().utf8.count + doc.select("p").size() }
+    operation = { let doc = try AIMarkdownHTML.parse(html); return try doc.text().utf8.count + doc.select("p").size() }
 } else { fatalError("unknown workload") }
 let expected = try operation()
 for _ in 0..<3 { let value = try operation(); precondition(value == expected) }

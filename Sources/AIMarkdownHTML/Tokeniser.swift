@@ -178,6 +178,33 @@ final class Tokeniser {
     private var pendingSlices = [ByteSlice]()
     private var pendingSlicesCount: Int = 0
     private var pendingCharRange: SourceRange? = nil
+    var sourceEvents: SourceEventRecorder?
+    var sourceEventCapturesCharacters = false
+    var sourceEventPieces: [SourceEventPiece] = []
+    func sourcePiece(_ value: [UInt8], range: [Int]? = nil, kind: String = "uncovered-tokeniser-emission") {
+        guard sourceEventCapturesCharacters, !value.isEmpty else { return }
+        sourceEventPieces.append(SourceEventPiece(bytes: value, range: range, kind: kind))
+    }
+    func sourceSlice(_ slice: ByteSlice) {
+        guard sourceEventCapturesCharacters else { return }
+        let isInput = slice.withUnsafeBufferPointer { $0.baseAddress == reader.input.baseAddress?.advanced(by: slice.start) }
+        sourcePiece(Array(slice), range: isInput ? [slice.start, slice.end] : nil, kind: isInput ? "copy" : "uncovered-tokeniser-emission")
+    }
+    func sourceDrain(_ token: Token.Char) -> Token.Char {
+        token.sourceEventID = nil
+        token.sourceEventPieces = sourceEventPieces
+        sourceEventPieces.removeAll(keepingCapacity: true)
+        return token
+    }
+    func sourceReference(start: Int, pieceStart: Int) {
+        guard sourceEventCapturesCharacters else { return }
+        let pieces = Array(sourceEventPieces.dropFirst(pieceStart))
+        sourceEventPieces.removeSubrange(pieceStart...)
+        let value = pieces.flatMap(\.bytes)
+        let range = [start, reader.pos]
+        let same = start >= 0 && start <= reader.pos && Array(reader.input[start..<reader.pos]) == value
+        sourcePiece(value, range: range, kind: same ? "copy" : "decoded-reference")
+    }
     private var pendingTagStartPos: Int? = nil
     private let charsBuilder: StringBuilder = StringBuilder(256) // buffers characters to output as one token, if more than one emit per read
     let dataBuffer: StringBuilder = StringBuilder(4 * 1024) // buffers data looking for </script>
@@ -309,13 +336,13 @@ final class Tokeniser {
             pendingSlicesCount = 0
             charPending.sourceRange = nil
             pendingCharRange = nil
-            return charPending.data(str)
+            return sourceDrain(charPending.data(str))
         } else if let slice = charsSlice {
             charsSlice = nil
             charsSliceFromInput = false
             charPending.sourceRange = pendingCharRange
             pendingCharRange = nil
-            return charPending.data(slice)
+            return sourceDrain(charPending.data(slice))
         } else if !pendingSlices.isEmpty {
             if pendingSlices.count == 1 {
                 let slice = pendingSlices[0]
@@ -323,7 +350,7 @@ final class Tokeniser {
                 pendingSlicesCount = 0
                 charPending.sourceRange = nil
                 pendingCharRange = nil
-                return charPending.data(slice)
+                return sourceDrain(charPending.data(slice))
             } else {
                 // Combine all the pending slices in one allocation.
                 let totalCount = pendingSlicesCount
@@ -346,7 +373,7 @@ final class Tokeniser {
                     pendingSlicesCount = 0
                     charPending.sourceRange = nil
                     pendingCharRange = nil
-                    return charPending.data(combined)
+                    return sourceDrain(charPending.data(combined))
                 } else {
                     var combined = [UInt8]()
                     combined.reserveCapacity(totalCount)
@@ -357,7 +384,7 @@ final class Tokeniser {
                     pendingSlicesCount = 0
                     charPending.sourceRange = nil
                     pendingCharRange = nil
-                    return charPending.data(combined)
+                    return sourceDrain(charPending.data(combined))
                 }
             }
         } else {
@@ -617,6 +644,7 @@ final class Tokeniser {
     
     @inline(__always)
     private func emitInputSlice(_ str: ByteSlice) {
+        sourceSlice(str)
         if pendingCharRange != nil, (!charsBuilder.isEmpty || charsSlice != nil || !pendingSlices.isEmpty) {
             pendingCharRange = nil
         }
@@ -647,6 +675,7 @@ final class Tokeniser {
     }
 
     func emit(_ str: ByteSlice) {
+        sourceSlice(str)
         if pendingCharRange != nil, (!charsBuilder.isEmpty || charsSlice != nil || !pendingSlices.isEmpty) {
             pendingCharRange = nil
         }
@@ -683,6 +712,7 @@ final class Tokeniser {
     func emit(_ str: String) {
         pendingCharRange = nil
         if !charsBuilder.isEmpty {
+            sourcePiece(Array(str.utf8))
             charsBuilder.append(str)
             return
         }
@@ -720,12 +750,14 @@ final class Tokeniser {
             emitByte(UInt8(val))
             return
         }
+        sourcePiece(Array(String(c).utf8))
         ensureCharsBuilderForAppend()
         charsBuilder.appendCodePoint(c)
     }
 
     @inline(__always)
     func emitByte(_ byte: UInt8) {
+        sourcePiece([byte])
         ensureCharsBuilderForAppend()
         charsBuilder.append(byte)
     }
@@ -733,6 +765,7 @@ final class Tokeniser {
     func emit(_ c: [UnicodeScalar]) {
         pendingCharRange = nil
         guard !c.isEmpty else { return }
+        sourcePiece(c.flatMap { Array(String($0).utf8) })
         ensureCharsBuilderForAppend()
         for scalar in c {
             charsBuilder.appendCodePoint(scalar)

@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class CharacterReaderUnicodeCursorTest: XCTestCase {
     private func checkScanners(_ input: String, file: StaticString = #filePath, line: UInt = #line) {

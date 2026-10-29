@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class CssTest: XCTestCase {
 	var html: Document!
@@ -41,7 +41,7 @@ class CssTest: XCTestCase {
 
 		sb.append("</body></html>")
 		htmlString = sb.toString()
-		html  = try! SwiftSoup.parse(htmlString)
+		html  = try! AIMarkdownHTML.parse(htmlString)
 	}
 
 
@@ -68,7 +68,7 @@ class CssTest: XCTestCase {
 </div>
 """
 		
-		let doc: Document = try SwiftSoup.parse(html)
+		let doc: Document = try AIMarkdownHTML.parse(html)
 		let creatives = try doc.select(".models .model")
 		var count = 0
 		for creative in creatives {
@@ -115,7 +115,7 @@ class CssTest: XCTestCase {
 		</div>
 		"""
 		
-		let doc: Document = try SwiftSoup.parse(html)
+		let doc: Document = try AIMarkdownHTML.parse(html)
 		let elementArray = try doc.select("div.info-wrap > div")
 		XCTAssertEqual(elementArray.count, 1)
 		

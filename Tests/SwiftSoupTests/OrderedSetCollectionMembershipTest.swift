@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class OrderedSetCollectionMembershipTest: XCTestCase {
     private final class OneShot<T>: Sequence {

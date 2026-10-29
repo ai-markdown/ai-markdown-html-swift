@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 #if canImport(Glibc)
 import Glibc
 #else
@@ -67,13 +67,13 @@ func runOne(_ i: Int) throws -> String {
     if workload.hasPrefix("parse-") {
         let doc: Document
         if workload.hasSuffix("-data") {
-            doc = try SwiftSoup.parse(dataInputs[index])
+            doc = try AIMarkdownHTML.parse(dataInputs[index])
         } else if workload.hasSuffix("-buffer") {
-            doc = try SwiftSoup.parse(withBytes: { parse in
+            doc = try AIMarkdownHTML.parse(withBytes: { parse in
                 try byteInputs[index].withUnsafeBufferPointer { try parse($0) }
             })
         } else {
-            doc = try SwiftSoup.parse(htmlInputs[index])
+            doc = try AIMarkdownHTML.parse(htmlInputs[index])
         }
         return try doc.text()
     }

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SelectorCacheLifetimeTest: XCTestCase {
     private func element() throws -> Element {
@@ -48,7 +48,7 @@ final class SelectorCacheLifetimeTest: XCTestCase {
         weak var paragraph: Element?
         weak var span: Element?
         do {
-            let doc = try SwiftSoup.parse("<html><head></head><body><p>one</p><span>two</span></body></html>")
+            let doc = try AIMarkdownHTML.parse("<html><head></head><body><p>one</p><span>two</span></body></html>")
             document = doc
             paragraph = doc.body()?.child(0)
             span = doc.body()?.child(1)

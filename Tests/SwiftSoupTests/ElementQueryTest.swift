@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class ElementQueryTest: XCTestCase {
 
@@ -23,13 +23,13 @@ class ElementQueryTest: XCTestCase {
     // MARK: - Conformance verification
 
     func testElementConformsToElementQuery() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
         let element: any ElementQuery = doc.body()!
         XCTAssertTrue(try element.hasText())
     }
 
     func testElementsConformsToElementQuery() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
         let elements: any ElementQuery = try doc.select("a")
         XCTAssertTrue(try elements.hasText())
     }
@@ -49,7 +49,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testGenericFunctionWithElement() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
         let div = try doc.select("div.content").first()!
 
         let text = try extractText(div)
@@ -64,7 +64,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testGenericFunctionWithElements() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
         let anchors = try doc.select("a")
 
         let text = try extractText(anchors)
@@ -81,7 +81,7 @@ class ElementQueryTest: XCTestCase {
     // MARK: - Protocol methods work consistently
 
     func testAttrThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
 
         let element: any ElementQuery = try doc.select("a").first()!
         XCTAssertEqual("/link1", try element.attr("href"))
@@ -91,7 +91,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testHasAttrThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
 
         let element: any ElementQuery = try doc.select("a").first()!
         XCTAssertTrue(element.hasAttr("href"))
@@ -103,7 +103,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testHasClassThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
 
         let element: any ElementQuery = try doc.select("p").first()!
         XCTAssertTrue(element.hasClass("intro"))
@@ -114,7 +114,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testValThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
 
         let element: any ElementQuery = try doc.select("input").first()!
         XCTAssertEqual("search term", try element.val())
@@ -124,7 +124,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testTextThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
 
         let element: any ElementQuery = try doc.select("p.intro").first()!
         XCTAssertEqual("Hello world", try element.text())
@@ -134,7 +134,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testHtmlThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
 
         let element: any ElementQuery = try doc.select("p.intro").first()!
         let elementHtml = try element.html()
@@ -148,7 +148,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testSelectThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
 
         let element: any ElementQuery = try doc.select("div").first()!
         let fromElement = try element.select("a")
@@ -160,7 +160,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testSelectWithEvaluatorThroughProtocol() throws {
-        let doc = try SwiftSoup.parse(testHtml)
+        let doc = try AIMarkdownHTML.parse(testHtml)
         let evaluator = try QueryParser.parse("a.nav")
 
         let element: any ElementQuery = try doc.select("div").first()!
@@ -173,7 +173,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testOuterHtmlThroughProtocol() throws {
-        let doc = try SwiftSoup.parse("<p id=\"t\">Hi</p>")
+        let doc = try AIMarkdownHTML.parse("<p id=\"t\">Hi</p>")
 
         let element: any ElementQuery = try doc.select("p").first()!
         XCTAssertEqual("<p id=\"t\">Hi</p>", try element.outerHtml())
@@ -183,7 +183,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testHasTextThroughProtocol() throws {
-        let doc = try SwiftSoup.parse("<p>Hello</p><div></div>")
+        let doc = try AIMarkdownHTML.parse("<p>Hello</p><div></div>")
 
         let withText: any ElementQuery = try doc.select("p").first()!
         XCTAssertTrue(withText.hasText())
@@ -199,7 +199,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testTextWithExplicitNormalizationParameter() throws {
-        let doc = try SwiftSoup.parse("<p>  Hello   world  </p>")
+        let doc = try AIMarkdownHTML.parse("<p>  Hello   world  </p>")
 
         let element: any ElementQuery = try doc.select("p").first()!
         XCTAssertEqual("Hello world", try element.text(trimAndNormaliseWhitespace: true))
@@ -213,7 +213,7 @@ class ElementQueryTest: XCTestCase {
     // MARK: - Edge cases
 
     func testAttrReturnsEmptyStringWhenMissing() throws {
-        let doc = try SwiftSoup.parse("<p>Hi</p>")
+        let doc = try AIMarkdownHTML.parse("<p>Hi</p>")
 
         let element: any ElementQuery = try doc.select("p").first()!
         XCTAssertEqual("", try element.attr("data-missing"))
@@ -223,7 +223,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testEmptyElementsReturnsDefaults() throws {
-        let doc = try SwiftSoup.parse("<p>Hi</p>")
+        let doc = try AIMarkdownHTML.parse("<p>Hi</p>")
         let empty: any ElementQuery = try doc.select("span") // no spans
 
         XCTAssertEqual("", try empty.attr("href"))
@@ -238,7 +238,7 @@ class ElementQueryTest: XCTestCase {
     }
 
     func testHasClassFalseOnElements() throws {
-        let doc = try SwiftSoup.parse("<p>No class</p>")
+        let doc = try AIMarkdownHTML.parse("<p>No class</p>")
         let elements: any ElementQuery = try doc.select("p")
         XCTAssertFalse(elements.hasClass("missing"))
     }

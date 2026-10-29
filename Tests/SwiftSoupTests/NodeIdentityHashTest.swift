@@ -1,9 +1,9 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class NodeIdentityHashTest: XCTestCase {
     func testHashAndDictionaryMembershipSurviveDOMMutation() throws {
-        let document = try SwiftSoup.parse("<p>Before</p>")
+        let document = try AIMarkdownHTML.parse("<p>Before</p>")
         let node = try XCTUnwrap(document.select("p").first())
         let originalHash = node.hashValue
         let nodes: Set<Node> = [node]
@@ -21,7 +21,7 @@ final class NodeIdentityHashTest: XCTestCase {
     }
 
     func testDistinctNodesWithIdenticalMarkupRemainDistinct() throws {
-        let document = try SwiftSoup.parse("<p>Same</p><p>Same</p>")
+        let document = try AIMarkdownHTML.parse("<p>Same</p><p>Same</p>")
         let paragraphs = try document.select("p").array()
         XCTAssertEqual(paragraphs.count, 2)
         let first: Node = paragraphs[0]
@@ -34,8 +34,8 @@ final class NodeIdentityHashTest: XCTestCase {
     }
 
     func testHashSurvivesReparentingAndOutputSettingsChanges() throws {
-        let original = try SwiftSoup.parse("<div><p>Value</p></div>")
-        let destination = try SwiftSoup.parse("<main></main>")
+        let original = try AIMarkdownHTML.parse("<div><p>Value</p></div>")
+        let destination = try AIMarkdownHTML.parse("<main></main>")
         let node = try XCTUnwrap(original.select("p").first())
         let parent = try XCTUnwrap(destination.select("main").first())
         let hash = node.hashValue

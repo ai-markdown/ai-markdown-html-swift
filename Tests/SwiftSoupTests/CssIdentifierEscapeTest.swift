@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CssIdentifierEscapeTest: XCTestCase {
     private func assertIdentifier(_ input: String, _ expected: String, remainder: String = "",
@@ -134,7 +134,7 @@ final class HexEscapedSelectorTest: XCTestCase {
             (#"\61"# + "\u{301}", "a\u{301}")
         ]
         for (escaped, value) in cases {
-            let doc = try SwiftSoup.parse("<main><p>hit</p><p>miss</p></main>")
+            let doc = try AIMarkdownHTML.parse("<main><p>hit</p><p>miss</p></main>")
             let target = try XCTUnwrap(doc.select("p").first())
             try target.attr("id", value).attr("class", value)
             for marker in ["#", "."] {
@@ -146,7 +146,7 @@ final class HexEscapedSelectorTest: XCTestCase {
     }
 
     func testOldLiteralInterpretationDoesNotSelectWrongElement() throws {
-        let doc = try SwiftSoup.parse(#"<p id="a">correct</p><p id="61">digits</p><p id="\61">literal</p>"#)
+        let doc = try AIMarkdownHTML.parse(#"<p id="a">correct</p><p id="61">digits</p><p id="\61">literal</p>"#)
         let correct = try XCTUnwrap(doc.getElementById("a"))
         for query in [#"#\61"#, #"p#\61"#, #"body #\61"#, #"body > #\61"#] {
             try assertSelects(doc, query, correct)
@@ -157,7 +157,7 @@ final class HexEscapedSelectorTest: XCTestCase {
     }
 
     func testEscapeWhitespaceIsNotADescendantCombinator() throws {
-        let doc = try SwiftSoup.parse(#"<div id="a"><b>descendant</b></div><p id="ab">identifier</p>"#)
+        let doc = try AIMarkdownHTML.parse(#"<div id="a"><b>descendant</b></div><p id="ab">identifier</p>"#)
         let identifier = try XCTUnwrap(doc.getElementById("ab"))
         let descendant = try XCTUnwrap(doc.select("b").first())
         for prefix in ["", "body ", "body > "] {
@@ -168,7 +168,7 @@ final class HexEscapedSelectorTest: XCTestCase {
     }
 
     func testWhitespaceTerminatorsInCompoundSelectors() throws {
-        let doc = try SwiftSoup.parse(#"<main><p id="123" class="123">hit</p></main>"#)
+        let doc = try AIMarkdownHTML.parse(#"<main><p id="123" class="123">hit</p></main>"#)
         let target = try XCTUnwrap(doc.select("p").first())
         for whitespace in [" ", "\t", "\n", "\r", "\u{C}", "\r\n"] {
             for prefix in ["#", "p#", "main #", "main > #", "main .", "main > p."] {
@@ -178,7 +178,7 @@ final class HexEscapedSelectorTest: XCTestCase {
     }
 
     func testSiblingCombinatorsGroupsAndNestedSelectors() throws {
-        let doc = try SwiftSoup.parse(#"<main><p>before</p><p id="ab">hit</p></main>"#)
+        let doc = try AIMarkdownHTML.parse(#"<main><p>before</p><p id="ab">hit</p></main>"#)
         let target = try XCTUnwrap(doc.getElementById("ab"))
         for query in [#"p + p#\61 b"#, #"p ~ p#\61 b"#, #"#missing, p#\61 b"#,
                       #"main:has(> p#\61 b) > p#\61 b"#, #"main > p:not(:not(#\61 b))"#] {
@@ -189,7 +189,7 @@ final class HexEscapedSelectorTest: XCTestCase {
     func testEscapedDelimitersRemainLiteralInCompoundSelectors() throws {
         for (hex, literal) in [("2e", "."), ("23", "#"), ("2c", ","), ("3e", ">"), ("2b", "+"),
                                ("7e", "~"), ("5b", "["), ("5d", "]"), ("28", "("), ("29", ")"), ("5c", "\\")] {
-            let doc = try SwiftSoup.parse("<main><p>hit</p></main>")
+            let doc = try AIMarkdownHTML.parse("<main><p>hit</p></main>")
             let target = try XCTUnwrap(doc.select("p").first())
             try target.attr("id", "x" + literal + "y").attr("class", "x" + literal + "y")
             for prefix in ["#", "main > #", "main .", "main > p."] {
@@ -199,7 +199,7 @@ final class HexEscapedSelectorTest: XCTestCase {
     }
 
     func testReplacementCharacterMatchesInvalidCodePointEscapes() throws {
-        let doc = try SwiftSoup.parse("<main><p id='\u{FFFD}' class='\u{FFFD}'>hit</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='\u{FFFD}' class='\u{FFFD}'>hit</p></main>")
         let target = try XCTUnwrap(doc.select("p").first())
         for escape in [#"\0"#, #"\d800"#, #"\DFFF"#, #"\110000"#, #"\FFFFFF"#] {
             for prefix in ["#", "main > #", "main > p."] {
@@ -210,7 +210,7 @@ final class HexEscapedSelectorTest: XCTestCase {
 
     func testGeneratedSelectorsStillRoundTrip() throws {
         for value in ["plain", "123", "a$b/c", "Fz(xs)", #"x\61"#, "日本", "e\u{301}", "a b"] {
-            let doc = try SwiftSoup.parse("<main><p>hit</p><p>miss</p></main>")
+            let doc = try AIMarkdownHTML.parse("<main><p>hit</p><p>miss</p></main>")
             let target = try XCTUnwrap(doc.select("p").first())
             try target.attr("id", value)
             try assertSelects(doc, target.cssSelector(), target)

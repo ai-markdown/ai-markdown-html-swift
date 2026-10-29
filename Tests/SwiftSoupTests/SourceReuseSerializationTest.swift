@@ -1,9 +1,9 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SourceReuseSerializationTest: XCTestCase {
     private func parseHTML(_ html: String, prettyPrint: Bool = false) throws -> Document {
-        let document = try SwiftSoup.parse(html)
+        let document = try AIMarkdownHTML.parse(html)
         document.outputSettings().prettyPrint(pretty: prettyPrint)
         return document
     }
@@ -29,7 +29,7 @@ final class SourceReuseSerializationTest: XCTestCase {
         let main = try XCTUnwrap(document.getElementById("reader"))
         try main.attr("data-state", "complete")
 
-        let reparsed = try SwiftSoup.parse(string(try document.outerHtmlUTF8WithoutSourceReuse()))
+        let reparsed = try AIMarkdownHTML.parse(string(try document.outerHtmlUTF8WithoutSourceReuse()))
         XCTAssertEqual(try reparsed.title(), "Updated")
         XCTAssertEqual(try reparsed.getElementById("reader")?.attr("data-state"), "complete")
         XCTAssertEqual(try reparsed.getElementById("reader")?.text(), "Before")
@@ -45,7 +45,7 @@ final class SourceReuseSerializationTest: XCTestCase {
         try html.attr("data-document-state", "processed")
         try body.attr("data-processing-state", "complete")
 
-        let reparsed = try SwiftSoup.parse(string(try document.outerHtmlUTF8()))
+        let reparsed = try AIMarkdownHTML.parse(string(try document.outerHtmlUTF8()))
         XCTAssertEqual(try reparsed.getElementsByTag("html").first()?.attr("data-document-state"), "processed")
         XCTAssertEqual(try reparsed.body()?.attr("data-processing-state"), "complete")
     }
@@ -67,7 +67,7 @@ final class SourceReuseSerializationTest: XCTestCase {
         XCTAssertTrue(serialized.contains("<!--before-body-->"))
         XCTAssertTrue(serialized.contains("<!--after-body-->"))
 
-        let reparsed = try SwiftSoup.parse(serialized)
+        let reparsed = try AIMarkdownHTML.parse(serialized)
         XCTAssertEqual(try reparsed.head()?.attr("data-shell"), "source")
         XCTAssertEqual(try reparsed.body()?.attr("data-processing-state"), "complete")
         XCTAssertEqual(try reparsed.getElementById("reader")?.text(), "After")
@@ -90,7 +90,7 @@ final class SourceReuseSerializationTest: XCTestCase {
         XCTAssertTrue(serialized.contains(string(replacement)))
         XCTAssertFalse(serialized.contains("Discarded"))
 
-        let reparsed = try SwiftSoup.parse(serialized)
+        let reparsed = try AIMarkdownHTML.parse(serialized)
         XCTAssertEqual(try reparsed.getElementById("replacement")?.text(), "Replacement")
     }
 

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeOwnershipRefinementTest: XCTestCase {
     private func firstParagraph(_ doc: Document) throws -> Element {
@@ -23,7 +23,7 @@ final class AttributeOwnershipRefinementTest: XCTestCase {
     }
 
     func testDeferredAttributeReadDoesNotDirtyParsedSource() throws {
-        let doc = try SwiftSoup.parse("<html><head></head><body><p title='one' CLASS='two' data-v='three'>text</p></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head></head><body><p title='one' CLASS='two' data-v='three'>text</p></body></html>")
         let p = try firstParagraph(doc)
         let attrs = try XCTUnwrap(p.attributes)
         XCTAssertFalse(p.sourceRangeDirty)
@@ -37,7 +37,7 @@ final class AttributeOwnershipRefinementTest: XCTestCase {
     }
 
     func testMaterializationPreservesAlreadyCleanIndexes() throws {
-        let doc = try SwiftSoup.parse("<html><head></head><body><p title='one'>text</p></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head></head><body><p title='one'>text</p></body></html>")
         let p = try firstParagraph(doc)
         let attrs = try XCTUnwrap(p.attributes)
         // Model indexes previously validated from the deferred representation.
@@ -53,7 +53,7 @@ final class AttributeOwnershipRefinementTest: XCTestCase {
     }
 
     func testCloneMaterializationDoesNotDirtyOriginal() throws {
-        let doc = try SwiftSoup.parse("<html><head></head><body><p title='one'>text</p></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head></head><body><p title='one'>text</p></body></html>")
         let p = try firstParagraph(doc)
         let documentWasDirty = doc.sourceRangeDirty
         let copied = try XCTUnwrap(p.attributes).clone()

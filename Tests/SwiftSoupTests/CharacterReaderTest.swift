@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 class CharacterReaderTest: XCTestCase {
     func testConsume() {
@@ -502,7 +502,7 @@ class CharacterReaderTest: XCTestCase {
                     &
                     </script>
                 """
-                _ = try SwiftSoup.parse(html)
+                _ = try AIMarkdownHTML.parse(html)
                 expectation.fulfill() // Fulfill the expectation if parse completes
             } catch {
                 XCTFail("Parsing failed with error: \(error)")
@@ -532,7 +532,7 @@ class CharacterReaderTest: XCTestCase {
                 <a href="https://secure.imagemaker360.com/Viewer/95.asp?id=181293idxIDX&Referer=&referefull="></a>
             </body>
         """
-        _ = try SwiftSoup.parse(html)
+        _ = try AIMarkdownHTML.parse(html)
     }
 
     func testMultibyteConsume() throws {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class RawTextRetagSourceReuseTest: XCTestCase {
     private func wholeText(_ element: Element) -> String {
@@ -22,7 +22,7 @@ final class RawTextRetagSourceReuseTest: XCTestCase {
                         for output in [try target.outerHtml(),
                                        String(decoding: try document.outerHtmlUTF8(), as: UTF8.self),
                                        String(decoding: try document.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self)] {
-                            let reparsed = try SwiftSoup.parse(output)
+                            let reparsed = try AIMarkdownHTML.parse(output)
                             let result = try XCTUnwrap(reparsed.getElementById("value"))
                             XCTAssertEqual(wholeText(result), value, "\(tag) -> \(replacement), source=\(trackSource)")
                             XCTAssertTrue(result.children().isEmpty)
@@ -43,7 +43,7 @@ final class RawTextRetagSourceReuseTest: XCTestCase {
             XCTAssertFalse(child.sourceRangeDirty)
             try target.tagName(replacement)
             XCTAssertFalse(child.sourceRangeDirty)
-            let result = try SwiftSoup.parse(target.outerHtml()).getElementById("value")
+            let result = try AIMarkdownHTML.parse(target.outerHtml()).getElementById("value")
             XCTAssertEqual(wholeText(try XCTUnwrap(result)), "A&amp;B")
         }
     }

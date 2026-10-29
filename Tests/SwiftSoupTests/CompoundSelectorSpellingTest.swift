@@ -1,11 +1,11 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CompoundSelectorSpellingTest: XCTestCase {
     private let numeric = ["nth-child", "nth-last-child", "nth-of-type", "nth-last-of-type", "eq", "lt", "gt"]
 
     private func fixture() throws -> Document {
-        try SwiftSoup.parse("<main><ol>" + (1...6).map {
+        try AIMarkdownHTML.parse("<main><ol>" + (1...6).map {
             "<li id='n\($0)' class='item' data-note='x) y]'>item \($0)</li>"
         }.joined() + "</ol><p id='after'>after</p></main>")
     }
@@ -154,7 +154,7 @@ final class CompoundSelectorSpellingTest: XCTestCase {
     }
 
     func testPartialLiteralContentIsNotChangedByCompoundSplitting() throws {
-        let doc = try SwiftSoup.parse("<main><p>\"item</p><p>\"item)</p><p>tail)</p><p>tail</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p>\"item</p><p>\"item)</p><p>tail)</p><p>tail</p></main>")
         for expression in [#":contains("item"#, #":contains(tail\"#, #":contains(tail\)"#] {
             let simple = try doc.select("p" + expression).array().map(ObjectIdentifier.init)
             let compound = try doc.select("main > p" + expression).array().map(ObjectIdentifier.init)

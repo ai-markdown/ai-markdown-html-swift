@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 /// Opt-in release measurements. Each invocation prints one JSON timing record.
 /// Use identical test source and environment on both revisions, alternating order.
@@ -29,11 +29,11 @@ final class FragmentConstructionBenchmarkTest: XCTestCase {
 
     private func operation(_ name: String, _ fixture: Fixture) throws -> Result {
         if name == "fragment" {
-            let document = try SwiftSoup.parseBodyFragment(fixture.injected)
+            let document = try AIMarkdownHTML.parseBodyFragment(fixture.injected)
             document.outputSettings().prettyPrint(pretty: false)
             return try Result(html: document.outerHtmlUTF8WithoutSourceReuse(), originalBodyBytes: 0)
         }
-        let document = try SwiftSoup.parse(fixture.article)
+        let document = try AIMarkdownHTML.parse(fixture.article)
         document.outputSettings().prettyPrint(pretty: false)
         if name == "injection" {
             let root = document.body()!
@@ -75,7 +75,7 @@ final class FragmentConstructionBenchmarkTest: XCTestCase {
         let actual = try operation(name, input)
         XCTAssertEqual(actual.html, expected.html)
         XCTAssertEqual(actual.originalBodyBytes, expected.originalBodyBytes)
-        let checked = try SwiftSoup.parse(expected.html, "", Parser.htmlParser())
+        let checked = try AIMarkdownHTML.parse(expected.html, "", Parser.htmlParser())
         XCTAssertEqual(try checked.getElementsByTag("p").size(), count)
         XCTAssertEqual(try checked.getElementsByTag("m-m").size(), name == "document" ? 0 : count)
         let result: [String: Any] = ["operation": name, "paragraphs": count, "iterations": iterations,

@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class WildcardNamespaceSelectorTest: XCTestCase {
     private func assertMatches(_ root: Element, _ query: String, _ ids: [String],
@@ -14,7 +14,7 @@ final class WildcardNamespaceSelectorTest: XCTestCase {
     }
 
     func testWildcardIncludesUnprefixedElementsAndRequiresWholeLocalName() throws {
-        let document = try SwiftSoup.parse("<main><item id='plain'></item><a:item id='a'></a:item><b:item id='b'></b:item><otheritem id='other'></otheritem><a:otheritem id='suffix'></a:otheritem><itemized id='long'></itemized></main>")
+        let document = try AIMarkdownHTML.parse("<main><item id='plain'></item><a:item id='a'></a:item><b:item id='b'></b:item><otheritem id='other'></otheritem><a:otheritem id='suffix'></a:otheritem><itemized id='long'></itemized></main>")
         try assertMatches(document, "*|item", ["plain", "a", "b"])
         try assertMatches(document, "*|ITEM", ["plain", "a", "b"])
         try assertMatches(document, "a|item", ["a"])
@@ -34,7 +34,7 @@ final class WildcardNamespaceSelectorTest: XCTestCase {
     }
 
     func testWildcardWorksWithCombinatorsAndFilters() throws {
-        let document = try SwiftSoup.parse("<main id='main'><item id='a' class='hit' data-v='yes'></item><x:item id='b' class='hit' data-v='yes'></x:item><item id='c'></item><other id='other'></other><section id='nested'><item id='d' class='hit'></item></section></main>")
+        let document = try AIMarkdownHTML.parse("<main id='main'><item id='a' class='hit' data-v='yes'></item><x:item id='b' class='hit' data-v='yes'></x:item><item id='c'></item><other id='other'></other><section id='nested'><item id='d' class='hit'></item></section></main>")
         try assertMatches(document, "main > *|item.hit[data-v=yes]", ["a", "b"])
         try assertMatches(document, "main > *|item:nth-child(3)", ["c"])
         try assertMatches(document, "*|item + *|item", ["b", "c"])
@@ -45,7 +45,7 @@ final class WildcardNamespaceSelectorTest: XCTestCase {
     }
 
     func testNamespaceAlternativesStayGroupedAcrossCombinators() throws {
-        let document = try SwiftSoup.parse("<main><item id='p'><span id='a'></span></item><ns:item id='q'><span id='b'></span></ns:item><section id='s'><span id='c'></span></section><item id='t'></item><ns:item id='u'></ns:item></main>")
+        let document = try AIMarkdownHTML.parse("<main><item id='p'><span id='a'></span></item><ns:item id='q'><span id='b'></span></ns:item><section id='s'><span id='c'></span></section><item id='t'></item><ns:item id='u'></ns:item></main>")
         try assertMatches(document, "*|item > span", ["a", "b"])
         try assertMatches(document, "*|item span", ["a", "b"])
         try assertMatches(document, "*|item + *|item", ["q", "u"])

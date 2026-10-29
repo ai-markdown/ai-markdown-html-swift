@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class DocumentTypeSystemIdentifierTest: XCTestCase {
     private let systemID = "https://example.com/example.dtd"

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class NthSelectorBoundaryTest: XCTestCase {
     private let variants = ["nth-child", "nth-last-child", "nth-of-type", "nth-last-of-type"]
@@ -8,7 +8,7 @@ final class NthSelectorBoundaryTest: XCTestCase {
         let tags = mixed ? ["p", "li", "li", "em", "li", "p", "li", "li", "em", "p", "li", "li"]
             : Array(repeating: "li", count: 12)
         let html = tags.enumerated().map { "text<!--gap--><\($1) id='n\($0 + 1)'>x</\($1)>" }.joined()
-        let doc = try SwiftSoup.parse("<section id='root'>" + html + "</section>")
+        let doc = try AIMarkdownHTML.parse("<section id='root'>" + html + "</section>")
         return try XCTUnwrap(doc.select("#root").first())
     }
 

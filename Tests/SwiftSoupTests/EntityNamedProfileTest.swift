@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class EntityNamedProfileTest: XCTestCase {
     func testEntityNamedProfile() throws {
@@ -26,7 +26,7 @@ final class EntityNamedProfileTest: XCTestCase {
 
         var parsedCount = 0
         for _ in 0..<max(1, iterations) {
-            _ = try SwiftSoup.parse(html)
+            _ = try AIMarkdownHTML.parse(html)
             parsedCount += 1
         }
         XCTAssertGreaterThan(parsedCount, 0)

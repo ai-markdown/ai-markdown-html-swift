@@ -1131,6 +1131,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
 
                             let replacement: Element = try Element(Tag.valueOf(node!.nodeNameUTF8(), ParseSettings.preserveCase), tb.getBaseUri())
                             replacement.treeBuilder = tb
+                            tb.sourceEvents?.cloned(node!, replacement, reason: "adoption-replacement")
                             // case will follow the original node (so honours ParseSettings)
                             try tb.replaceActiveFormattingElement(node!, replacement)
                             try tb.replaceOnStack(node!, replacement)
@@ -1162,6 +1163,7 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
 
                         let adopter: Element = Element(formatEl!.tag(), tb.getBaseUri())
                         adopter.treeBuilder = tb
+                        tb.sourceEvents?.cloned(formatEl!, adopter, reason: "adoption-adopter")
                         adopter.getAttributes()?.addAll(incoming: formatEl!.getAttributes())
                         let childNodes: [Node] = furthestBlock!.getChildNodes()
                         for childNode: Node in childNodes {
@@ -1642,9 +1644,9 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     return false
                 } else {
                     if let data = c.getDataSlice() {
-                        tb.appendPendingTableCharacter(.slice(data))
+                        tb.appendPendingTableCharacter(.slice(data, c.sourceEventID, c.sourceEventPieces, c.sourceCharacterInjection))
                     } else if let data = c.getData() {
-                        tb.appendPendingTableCharacter(.bytes(data))
+                        tb.appendPendingTableCharacter(.bytes(data, c.sourceEventID, c.sourceEventPieces, c.sourceCharacterInjection))
                     }
                 }
                 break
@@ -1654,10 +1656,18 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     let tempChar = Token.Char()
                     let pending = tb.takePendingTableCharacters()
                     let inTable = tb.currentElement() != nil && TagSets.table.contains(tb.currentElement()!.nodeNameUTF8())
+                    // parse5 classifies the entire pending buffer; any ordinary CHARACTER causes all characters to be fostered.
+                    let fosterBatch = pending.contains { item in
+                        switch item {
+                        case .slice(let value, _, _, let injected): return injected || !HtmlTreeBuilderState.isWhitespace(value)
+                        case .bytes(let value, _, _, let injected): return injected || !HtmlTreeBuilderState.isWhitespace(value)
+                        }
+                    }
                     for character in pending {
                         switch character {
-                        case .slice(let slice):
-                            if (!HtmlTreeBuilderState.isWhitespace(slice)) {
+                        case .slice(let slice, let sourceID, let pieces, let injected):
+                            tempChar.sourceEventID = sourceID; tempChar.sourceEventPieces = pieces; tempChar.sourceCharacterInjection = injected
+                            if fosterBatch {
                                 // InTable anything else section:
                                 tb.error(self)
                                 if inTable {
@@ -1670,8 +1680,9 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                             } else {
                                 try tb.insert(tempChar.data(slice))
                             }
-                        case .bytes(let bytes):
-                            if (!HtmlTreeBuilderState.isWhitespace(bytes)) {
+                        case .bytes(let bytes, let sourceID, let pieces, let injected):
+                            tempChar.sourceEventID = sourceID; tempChar.sourceEventPieces = pieces; tempChar.sourceCharacterInjection = injected
+                            if fosterBatch {
                                 // InTable anything else section:
                                 tb.error(self)
                                 if inTable {

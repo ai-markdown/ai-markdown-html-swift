@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class PreservedTextWhitespaceTest: XCTestCase {
     func testPreWhitespaceSurvivesDeepInlineMarkupAndSerialization() throws {
@@ -24,7 +24,7 @@ final class PreservedTextWhitespaceTest: XCTestCase {
     }
 
     func testWhitespaceContextTracksRetaggingAndReparenting() throws {
-        let doc = try SwiftSoup.parse("<pre><code><span>a  b\nc</span></code></pre><div id='destination'></div>")
+        let doc = try AIMarkdownHTML.parse("<pre><code><span>a  b\nc</span></code></pre><div id='destination'></div>")
         let pre = try XCTUnwrap(doc.select("pre").first())
         let code = try XCTUnwrap(doc.select("code").first())
         let destination = try XCTUnwrap(doc.getElementById("destination"))
@@ -41,7 +41,7 @@ final class PreservedTextWhitespaceTest: XCTestCase {
 
     func testNormalizedTextGettersTrimPreservedTrailingWhitespaceConsistently() throws {
         for suffix in [" ", "\t", "\n", "\r", "\u{0C}", "\u{0B}", "\t\n "] {
-            let doc = try SwiftSoup.parse("<pre id='target'></pre>")
+            let doc = try AIMarkdownHTML.parse("<pre id='target'></pre>")
             let target = try XCTUnwrap(doc.getElementById("target"))
             try target.text("value" + suffix)
             for scope in [target, doc] {

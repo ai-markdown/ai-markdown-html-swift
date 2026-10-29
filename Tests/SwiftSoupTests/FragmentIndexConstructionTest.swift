@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class FragmentIndexConstructionTest: XCTestCase {
     func testManualInsertionAfterFragmentReturnCrossesAnImpliedTbody() throws {
@@ -73,7 +73,7 @@ final class FragmentIndexConstructionTest: XCTestCase {
     }
 
     func testFragmentConstructionDoesNotModifyWarmedContextDocument() throws {
-        let document = try SwiftSoup.parse("<form id='f'><div id='context'><p class='before'>original</p></div></form>")
+        let document = try AIMarkdownHTML.parse("<form id='f'><div id='context'><p class='before'>original</p></div></form>")
         let context = try XCTUnwrap(document.getElementById("context"))
         for _ in 0..<4 { _ = try document.select(".before"); _ = try context.select("p") }
         let before = try document.outerHtmlUTF8WithoutSourceReuse()
@@ -95,7 +95,7 @@ final class FragmentIndexConstructionTest: XCTestCase {
             for _ in 0..<3 {
                 let context = try Element(Tag.valueOf("div"), "")
                 let nodes = try builder.parseFragment(Array(markup.utf8), context, [], .noTracking(), .htmlDefault)
-                let destination = try SwiftSoup.parse("<main></main>")
+                let destination = try AIMarkdownHTML.parse("<main></main>")
                 let root = try XCTUnwrap(destination.getElementsByTag("main").first())
                 try root.insertChildren(0, nodes)
                 let copy = destination.copy() as! Document
@@ -127,7 +127,7 @@ final class FragmentIndexConstructionTest: XCTestCase {
         let context = try Element(Tag.valueOf("div"), "")
         _ = try builder.parseFragment(Array("<p>initial</p>".utf8), context, [], .noTracking(), .htmlDefault)
         let privateDocument = builder.doc
-        let foreign = try SwiftSoup.parse("<main></main>")
+        let foreign = try AIMarkdownHTML.parse("<main></main>")
         let node = try RedirectedElement(Tag.valueOf("p"), "")
         node.redirectedOwner = foreign
         let parent = try XCTUnwrap(foreign.body())
@@ -160,7 +160,7 @@ final class FragmentIndexConstructionTest: XCTestCase {
         let context = try Element(Tag.valueOf("div"), "")
         _ = try builder.parseFragment(Array("<p>initial</p>".utf8), context, [], .noTracking(), .htmlDefault)
         let privateDocument = builder.doc
-        let foreign = try SwiftSoup.parse("<main></main>")
+        let foreign = try AIMarkdownHTML.parse("<main></main>")
         let parent = try RedirectedElement(Tag.valueOf("div"), "")
         parent.redirectedOwner = foreign
         try foreign.body()!.appendChild(parent)

@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class TokenQueueChompContractTest: XCTestCase {
     func testMissingDelimiterConsumesAllRemainingInput() throws {

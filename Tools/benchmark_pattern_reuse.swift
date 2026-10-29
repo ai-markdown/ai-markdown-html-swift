@@ -1,6 +1,6 @@
 import Foundation
 import Dispatch
-import SwiftSoup
+import AIMarkdownHTML
 
 func option(_ key: String, _ fallback: String) -> String {
     guard let i = CommandLine.arguments.firstIndex(of: key), i + 1 < CommandLine.arguments.count else { return fallback }
@@ -24,7 +24,7 @@ let markup = "<main>" + texts.prefix(64).map { "<p>\($0)</p>" }.joined() + "</ma
     case "unused":
         for text in texts { result += Pattern.compile(expression + text).toString().utf8.count }
     case "parse":
-        result = try SwiftSoup.parse(markup).text().utf8.count
+        result = try AIMarkdownHTML.parse(markup).text().utf8.count
     default: fatalError("Unknown workload")
     }
     return result

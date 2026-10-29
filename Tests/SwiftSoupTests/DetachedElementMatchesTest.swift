@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class DetachedElementMatchesTest: XCTestCase {
     func testStandaloneElementMatchesStringAndParsedSelectors() throws {
@@ -15,7 +15,7 @@ final class DetachedElementMatchesTest: XCTestCase {
     }
 
     func testRemovedSubtreeRetainsAncestorAndSiblingMatching() throws {
-        let document = try SwiftSoup.parse("<section><div><p id=a>one</p><p id=b>two</p></div></section>")
+        let document = try AIMarkdownHTML.parse("<section><div><p id=a>one</p><p id=b>two</p></div></section>")
         let root = try XCTUnwrap(document.select("div").first())
         let a = try XCTUnwrap(root.getElementById("a"))
         let b = try XCTUnwrap(root.getElementById("b"))
@@ -30,7 +30,7 @@ final class DetachedElementMatchesTest: XCTestCase {
     }
 
     func testDeepCopiedElementMatchesWithoutAParentDocument() throws {
-        let document = try SwiftSoup.parse("<div><b class=hit>value</b></div>")
+        let document = try AIMarkdownHTML.parse("<div><b class=hit>value</b></div>")
         let clone = try XCTUnwrap(document.select("div").first()?.copy() as? Element)
         XCTAssertTrue(try clone.iS("div:has(.hit)"))
         XCTAssertTrue(try XCTUnwrap(clone.select("b").first()).iS("div > b.hit"))

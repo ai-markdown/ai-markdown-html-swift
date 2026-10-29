@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class FormattingStackLookupTest: XCTestCase {
     func testMembershipMatchesIdentityForEmptyAndDeepStacks() throws {
@@ -41,7 +41,7 @@ final class FormattingStackLookupTest: XCTestCase {
 
     func testRenamedOrReparentedMembersRemainMembers() throws {
         let builder = HtmlTreeBuilder()
-        let document = try SwiftSoup.parse("<main><b>one</b></main><aside></aside>")
+        let document = try AIMarkdownHTML.parse("<main><b>one</b></main><aside></aside>")
         let member = try XCTUnwrap(document.getElementsByTag("b").first())
         let absent = member.copy() as! Element
         builder.stack = [member]

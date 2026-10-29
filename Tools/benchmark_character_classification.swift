@@ -1,6 +1,6 @@
 // Build against the complete shipping SwiftSoup library, not an extracted helper.
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 func originalWord(_ ch: Character) -> Bool {
     let scalars = String(ch).precomposedStringWithCanonicalMapping.unicodeScalars
@@ -25,7 +25,7 @@ func verify() throws {
         precondition(Array(q.toString().utf8) == Array(remainder.utf8))
         records.append(["input": Data(text.utf8).base64EncodedString(), "word": Data(word.utf8).base64EncodedString(), "remainder": Data(q.toString().utf8).base64EncodedString()])
     }
-    let doc = try SwiftSoup.parse("<main><section class='article'><p id='a'>日本語</p><p id='b'>two</p></section><section><p id='c'>three</p></section></main>")
+    let doc = try AIMarkdownHTML.parse("<main><section class='article'><p id='a'>日本語</p><p id='b'>two</p></section><section><p id='c'>three</p></section></main>")
     for query in ["main > section.article:nth-child(2n + 1) p:contains(日本語)", "main section p", "p", "main > section > p:nth-child(2)", "section:has(p)"] {
         records.append(["query": query, "evaluator": try QueryParser.parse(query).toString(), "ids": try doc.select(query).array().map { $0.id() }.joined(separator: ","), "html": try doc.outerHtml()])
     }
@@ -49,12 +49,12 @@ func workload(_ name: String) throws -> () throws -> Int {
         return { let q = TokenQueue("日本語éclair２:tail"); return q.consumeWord().utf8.count + q.toString().utf8.count }
     case "selector-parse", "selector-tags", "selector-unicode":
         let query = name == "selector-parse" ? "main > section.article:nth-child(2n + 1) p:contains(日本語)" : (name == "selector-tags" ? "main section article header span" : "本 > 節 文章")
-        let doc = try SwiftSoup.parse("<main><section class='article'><p>日本語</p></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section class='article'><p>日本語</p></section></main>")
         let leaf = try doc.select("p").first()!
         return { let evaluator = try QueryParser.parse(query); return try evaluator.matches(doc, leaf) ? 1 : 0 }
     case "parse-control":
         let html = "<main>" + (0..<128).map { "<section class='article'><p id='p\($0)'>日本語 and English</p></section>" }.joined() + "</main>"
-        return { let doc = try SwiftSoup.parse(html); return try doc.select("p").size() + doc.text().utf8.count }
+        return { let doc = try AIMarkdownHTML.parse(html); return try doc.select("p").size() + doc.text().utf8.count }
     default: fatalError("Unknown workload: \(name)")
     }
 }

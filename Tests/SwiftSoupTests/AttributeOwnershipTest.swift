@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeOwnershipTest: XCTestCase {
     private func attribute(_ attrs: Attributes, _ key: String) throws -> Attribute {
@@ -26,8 +26,8 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testSharedAttributeValueNotifiesEveryCollection() throws {
-        let a = try SwiftSoup.parse("<p></p>")
-        let b = try SwiftSoup.parse("<p></p>")
+        let a = try AIMarkdownHTML.parse("<p></p>")
+        let b = try AIMarkdownHTML.parse("<p></p>")
         let pa = try XCTUnwrap(a.select("p").first())
         let pb = try XCTUnwrap(b.select("p").first())
         let shared = try Attribute(key: "class", value: "old")
@@ -42,8 +42,8 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testAddAllRegistersPreviouslyUnexposedSourceAttributes() throws {
-        let a = try SwiftSoup.parse("<p id='old' data-v='first'></p>")
-        let b = try SwiftSoup.parse("<p></p>")
+        let a = try AIMarkdownHTML.parse("<p id='old' data-v='first'></p>")
+        let b = try AIMarkdownHTML.parse("<p></p>")
         let pa = try XCTUnwrap(a.select("p").first())
         let pb = try XCTUnwrap(b.select("p").first())
         pb.getAttributes()!.addAll(incoming: pa.getAttributes())
@@ -73,7 +73,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testDirectValueMutationInvalidatesDynamicAttributeIndex() throws {
-        let doc = try SwiftSoup.parse("<p data-custom='before'></p>")
+        let doc = try AIMarkdownHTML.parse("<p data-custom='before'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         try assertMatches(doc, "[data-custom=before]", [p])
         let a = try attribute(p.getAttributes()!, "data-custom")
@@ -98,7 +98,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testRenameIntoAndOutOfIdAndClass() throws {
-        let doc = try SwiftSoup.parse("<p title='x'></p>")
+        let doc = try AIMarkdownHTML.parse("<p title='x'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let a = try attribute(p.getAttributes()!, "title")
         try assertMatches(doc, "#x", [])
@@ -113,7 +113,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testAsListMutationRemainsLive() throws {
-        let doc = try SwiftSoup.parse("<p class='before'></p>")
+        let doc = try AIMarkdownHTML.parse("<p class='before'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let saved = p.getAttributes()!.asList()
         try assertMatches(doc, ".before", [p])
@@ -123,7 +123,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testSavedIteratorDoesNotMutateReplacementAttribute() throws {
-        let doc = try SwiftSoup.parse("<p class='before'></p>")
+        let doc = try AIMarkdownHTML.parse("<p class='before'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let iterator = p.getAttributes()!.makeIterator()
         try p.attr("class", "replacement")
@@ -137,7 +137,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testRemoveAllDetachesOnlyRemovedOwners() throws {
-        let doc = try SwiftSoup.parse("<p class='x' id='a'></p>")
+        let doc = try AIMarkdownHTML.parse("<p class='x' id='a'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let attrs = p.getAttributes()!
         let a = try attribute(attrs, "class")
@@ -152,7 +152,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testCompactCallbackMutationIsObservedWithoutReturnedNewValue() throws {
-        let doc = try SwiftSoup.parse("<p class='old'></p>")
+        let doc = try AIMarkdownHTML.parse("<p class='old'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         try assertMatches(doc, ".old", [p])
         p.getAttributes()!.compactAndMutate { a in
@@ -164,7 +164,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testCompactCallbackCanRetainLiveAttribute() throws {
-        let doc = try SwiftSoup.parse("<p class='old'></p>")
+        let doc = try AIMarkdownHTML.parse("<p class='old'></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         var saved: Attribute?
         p.getAttributes()!.compactAndMutate { a in
@@ -178,7 +178,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testCompactValueMutationNotifiesSharedOwners() throws {
-        let doc = try SwiftSoup.parse("<p class='old'></p><b></b>")
+        let doc = try AIMarkdownHTML.parse("<p class='old'></p><b></b>")
         let p = try XCTUnwrap(doc.select("p").first())
         let b = try XCTUnwrap(doc.select("b").first())
         b.getAttributes()!.addAll(incoming: p.getAttributes())
@@ -215,7 +215,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testElementCloneMutationDoesNotLeakToOriginal() throws {
-        let doc = try SwiftSoup.parse("<p class='old' data-v='before'></p>")
+        let doc = try AIMarkdownHTML.parse("<p class='old' data-v='before'></p>")
         let copy = doc.copy() as! Document
         let original = try XCTUnwrap(doc.select("p").first())
         let cloned = try XCTUnwrap(copy.select("p").first())
@@ -254,7 +254,7 @@ final class AttributeOwnershipTest: XCTestCase {
         weak var weakDoc: Document?
         weak var weakAttrs: Attributes?
         do {
-            let doc = try SwiftSoup.parse("<p class='old'></p>")
+            let doc = try AIMarkdownHTML.parse("<p class='old'></p>")
             let p = try XCTUnwrap(doc.select("p").first())
             let attrs = p.getAttributes()!
             weakDoc = doc
@@ -299,7 +299,7 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testCaseVariantAttributeIndexesUseFirstMatchingValue() throws {
-        let doc = try SwiftSoup.parse("<p></p>")
+        let doc = try AIMarkdownHTML.parse("<p></p>")
         let p = try XCTUnwrap(doc.select("p").first())
         let attrs = p.getAttributes()!
         try attrs.put("HREF", "first")
@@ -315,7 +315,7 @@ final class AttributeOwnershipTest: XCTestCase {
 
     func testRenameCollisionPreservesFirstMatchAtEveryIndexSize() throws {
         for padding in [0, 5, 20] {
-            let doc = try SwiftSoup.parse("<p data-a='first' data-b='second'></p>")
+            let doc = try AIMarkdownHTML.parse("<p data-a='first' data-b='second'></p>")
             let p = try XCTUnwrap(doc.select("p").first())
             let attrs = p.getAttributes()!
             for i in 0..<padding { try attrs.put("padding-\(i)", "v") }
@@ -330,8 +330,8 @@ final class AttributeOwnershipTest: XCTestCase {
     }
 
     func testReparentedOwnerInvalidatesDestinationNotOldTree() throws {
-        let a = try SwiftSoup.parse("<p class='old'></p>")
-        let b = try SwiftSoup.parse("<main></main>")
+        let a = try AIMarkdownHTML.parse("<p class='old'></p>")
+        let b = try AIMarkdownHTML.parse("<main></main>")
         let p = try XCTUnwrap(a.select("p").first())
         let saved = try attribute(p.getAttributes()!, "class")
         try b.body()!.appendChild(p)

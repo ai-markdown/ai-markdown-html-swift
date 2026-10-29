@@ -12,8 +12,8 @@ import Foundation
  */
 class HtmlTreeBuilder: TreeBuilder {
     enum PendingTableCharacter {
-        case slice(ByteSlice)
-        case bytes([UInt8])
+        case slice(ByteSlice, Int?, [SourceEventPiece], Bool)
+        case bytes([UInt8], Int?, [SourceEventPiece], Bool)
     }
 
     
@@ -138,6 +138,7 @@ class HtmlTreeBuilder: TreeBuilder {
             }
             
             root = try Element(Tag.valueOf(UTF8Arrays.html, settings), baseUri)
+            if let root { sourceEvents?.created(root, token: nil, generated: "fragment-root") }
             root?.treeBuilder = self
             try Validate.notNull(obj: root)
             try doc.appendChild(root!)
@@ -331,6 +332,7 @@ class HtmlTreeBuilder: TreeBuilder {
         if hasAttributes {
             registerPendingAttributes(el)
         }
+        sourceEvents?.created(el, token: startTag, generated: startTag.sourceEventID == nil ? "parser-generated-start-tag" : nil)
         if let range = startTag.sourceRange {
             el.setSourceRange(range, complete: false)
         }
@@ -350,6 +352,7 @@ class HtmlTreeBuilder: TreeBuilder {
             tag = try Tag.valueOfNormalized(startTagName)
         }
         let el: Element = Element(tag, baseUri, skipChildReserve: isBulkBuilding)
+        sourceEvents?.created(el, token: nil, generated: "parser-generated-start-tag")
         el.treeBuilder = self
         markStructuralChange(el)
         try insert(el)
@@ -392,6 +395,7 @@ class HtmlTreeBuilder: TreeBuilder {
         if hasAttributes {
             registerPendingAttributes(el)
         }
+        sourceEvents?.created(el, token: startTag, generated: startTag.sourceEventID == nil ? "parser-generated-start-tag" : nil)
         if let range = startTag.sourceRange {
             el.setSourceRange(range, complete: true)
         }
@@ -425,6 +429,7 @@ class HtmlTreeBuilder: TreeBuilder {
             el = FormElement(tag, baseUri, skipChildReserve: isBulkBuilding)
         }
         setFormElement(el)
+        sourceEvents?.created(el, token: startTag, generated: startTag.sourceEventID == nil ? "parser-generated-start-tag" : nil)
         if let range = startTag.sourceRange {
             el.setSourceRange(range, complete: false)
         }
@@ -439,6 +444,7 @@ class HtmlTreeBuilder: TreeBuilder {
     
     func insert(_ commentToken: Token.Comment) throws {
         let comment: Comment = Comment(slice: commentToken.takeDataSlice(), baseUri)
+        sourceEvents?.created(comment, token: commentToken)
         if let range = commentToken.sourceRange {
             comment.setSourceRange(range, complete: true)
         }
@@ -452,6 +458,23 @@ class HtmlTreeBuilder: TreeBuilder {
         let currentTagId = currentTag?.tagId ?? .none
         let isScriptOrStyle = currentTagId == .script || currentTagId == .style
         let fosterInserts = isFosterInserts()
+        let fosterCharacters = fosterInserts && [.table, .tbody, .tfoot, .thead, .tr].contains(currentTagId)
+        if fosterCharacters, try insertFosteredCharacters(characterToken) { return }
+        // Coalesce at the actual receiver of explicit character injections; comments and elements still interrupt adjacency.
+        // Preserve raw-only paths and existing foster-position recovery; raw-range continuity does not establish semantic adjacency.
+        if coalescesSourceCharacters, !fosterCharacters,
+           let last = current?.childNodes.last,
+           (isScriptOrStyle && last is DataNode || !isScriptOrStyle && last is TextNode),
+           let slice = characterToken.getDataSlice() ?? characterToken.getData().map({ ByteSlice.fromArray($0) }) {
+            sourceEvents?.character(last, token: characterToken, merge: true)
+            if let text = last as? TextNode { text.appendSlice(slice) }
+            else if let data = last as? DataNode { data.appendSlice(slice) }
+            last.markSourceDirty()
+            last.sourceRange = nil
+            last.sourceRangeIsComplete = false
+            sourceEvents?.mergedLegacyRangeCleared(last, token: characterToken)
+            return
+        }
         if isBulkBuilding,
            !tracksSourceRanges,
            !fosterInserts,
@@ -459,10 +482,12 @@ class HtmlTreeBuilder: TreeBuilder {
            let current,
            let slice = characterToken.getDataSlice() {
             if let lastText = current.childNodes.last as? TextNode {
+                sourceEvents?.character(lastText, token: characterToken, merge: true)
                 lastText.appendSlice(slice)
                 return
             }
             let node = TextNode(slice: slice, baseUri: baseUri)
+            sourceEvents?.character(node, token: characterToken, merge: false)
             node.treeBuilder = self
             node.parentNode = current
             current.childNodes.append(node)
@@ -503,9 +528,11 @@ class HtmlTreeBuilder: TreeBuilder {
                        let range = characterToken.sourceRange,
                        let source = doc.sourceBuffer,
                        lastData.extendSliceFromSourceRange(source, newRange: range) {
+                        sourceEvents?.character(lastData, token: characterToken, merge: true)
                         lastData.setSourceRangeEnd(range.end)
                         return
                     } else {
+                        sourceEvents?.character(lastData, token: characterToken, merge: true)
                         lastData.appendSlice(slice)
                         if tracksSourceRanges, let range = characterToken.sourceRange {
                             lastData.setSourceRangeEnd(range.end)
@@ -519,9 +546,11 @@ class HtmlTreeBuilder: TreeBuilder {
                        let range = characterToken.sourceRange,
                        let source = doc.sourceBuffer,
                        lastText.extendSliceFromSourceRange(source, newRange: range) {
+                        sourceEvents?.character(lastText, token: characterToken, merge: true)
                         lastText.setSourceRangeEnd(range.end)
                         return
                     } else {
+                        sourceEvents?.character(lastText, token: characterToken, merge: true)
                         lastText.appendSlice(slice)
                         if tracksSourceRanges, let range = characterToken.sourceRange {
                             lastText.setSourceRangeEnd(range.end)
@@ -533,11 +562,13 @@ class HtmlTreeBuilder: TreeBuilder {
                 if isScriptOrStyle,
                    let lastData = lastChild as? DataNode,
                    let bytes = characterToken.getData() {
+                    sourceEvents?.character(lastData, token: characterToken, merge: true)
                     lastData.appendBytes(bytes)
                     return
                 }
                 if let lastText = lastChild as? TextNode,
                    let bytes = characterToken.getData() {
+                    sourceEvents?.character(lastText, token: characterToken, merge: true)
                     lastText.appendBytes(bytes)
                     return
                 }
@@ -573,17 +604,22 @@ class HtmlTreeBuilder: TreeBuilder {
                let textNode = node as? TextNode,
                let lastText = current.childNodes.last as? TextNode {
                 // Coalesce adjacent text nodes during bulk parsing.
+                sourceEvents?.character(lastText, token: characterToken, merge: true)
                 lastText.appendSlice(textNode.wholeTextSlice())
                 return
             }
+            sourceEvents?.character(node, token: characterToken, merge: false)
             current.childNodes.append(node)
             node.parentNode = current
             node.setSiblingIndex(current.childNodes.count - 1)
         } else if fragmentParsing, !fosterInserts, let current, node.parentNode == nil {
+            sourceEvents?.character(node, token: characterToken, merge: false)
             appendFragmentNode(node, to: current)
         } else {
-            try current?.appendChild(node) // doesn't use insertNode, because we don't foster these; and will always have a stack.
+            sourceEvents?.character(node, token: characterToken, merge: false)
+            try current?.appendChild(node) // Non-foster insertion, or the explicitly unsupported template branch.
         }
+        if fosterCharacters { sourceEvents?.fosterTextBypass(node) }
     }
 
     
@@ -610,6 +646,7 @@ class HtmlTreeBuilder: TreeBuilder {
             node.sourceBuffer = doc.sourceBuffer
         }
         
+        sourceEvents?.placed(node, foster: isFosterInserts())
         // connect form controls to their form element
         if let n = (node as? Element), n.tag().isFormListed() {
             formElement?.addElement(n)
@@ -656,6 +693,7 @@ class HtmlTreeBuilder: TreeBuilder {
     @discardableResult
     func pop() -> Element {
         let element = stack.removeLast()
+        sourceEvents?.closed(element, token: currentToken)
         updateStackTrackingOnPop(element)
         if tracksSourceRanges,
            let endTag = currentToken as? Token.EndTag,
@@ -842,6 +880,7 @@ class HtmlTreeBuilder: TreeBuilder {
               let element = getFromStack(elementName) else {
             return
         }
+        sourceEvents?.closed(element, token: endTag)
         element.setSourceRangeEnd(endRange.end)
     }
 
@@ -868,6 +907,7 @@ class HtmlTreeBuilder: TreeBuilder {
                let endRange = endTag.sourceRange,
                let endName = endTag.normalName(),
                endName == elName {
+                sourceEvents?.closed(stack[index], token: currentToken)
                 stack[index].setSourceRangeEnd(endRange.end)
             }
             stack.removeSubrange(index..<stack.count)
@@ -1449,6 +1489,7 @@ class HtmlTreeBuilder: TreeBuilder {
             newEl.getAttributes()?.addAll(incoming: entry!.getAttributes())
             
             // 10. replace entry with new entry
+            sourceEvents?.cloned(entry!, newEl, reason: "formatting-reconstruct")
             formattingElements[pos] = newEl
             
             // 11
@@ -1498,6 +1539,51 @@ class HtmlTreeBuilder: TreeBuilder {
         formattingElements.append(nil)
     }
     
+    @usableFromInline
+    func insertFosteredCharacters(_ token: Token.Char) throws -> Bool {
+        // SwiftSoup has no template-content/namespace model; do not fabricate the corresponding parse5 branch.
+        if stack.contains(where: { $0.nodeNameUTF8() == Array("template".utf8) }) {
+            sourceEvents?.gaps.append("template-foster-location-not-supported")
+            return false
+        }
+        let parent: Element
+        let before: Element?
+        if let table = getFromStack(UTF8Arrays.table) {
+            if let actual = table.parent() { parent = actual; before = table }
+            else { parent = aboveOnStack(table) ?? stack.first ?? doc; before = nil }
+        } else { parent = stack.first ?? doc; before = nil }
+        // Moved bytes no longer belong to these containers' actual subtrees; do not replay HTML using their stale source envelopes.
+        let lastTableIndex = stack.lastIndex(where: { $0.nodeNameUTF8() == UTF8Arrays.table }) ?? stack.startIndex
+        for container in stack.dropFirst(lastTableIndex) where ["table", "tbody", "thead", "tfoot", "tr"].contains(container.nodeName()) {
+            container.markSourceDirty(force: true)
+            container.sourceRange = nil
+            container.sourceRangeIsComplete = false
+            sourceEvents?.invalidatedFosterContainerRange(container)
+        }
+        let index = before?.siblingIndex ?? parent.childNodes.count
+        let previous = index > 0 ? parent.childNodes[index - 1] : nil
+        guard let slice = token.getDataSlice() ?? token.getData().map({ ByteSlice.fromArray($0) }) else { return false }
+        if let text = previous as? TextNode {
+            sourceEvents?.character(text, token: token, merge: true)
+            text.appendSlice(slice)
+            text.markSourceDirty()
+            text.sourceRange = nil
+            text.sourceRangeIsComplete = false
+            sourceEvents?.mergedLegacyRangeCleared(text, token: token)
+            sourceEvents?.fosteredCharacter(text, token: token, before: before, merged: true)
+        } else {
+            let text = TextNode(slice: slice, baseUri: baseUri)
+            if tracksSourceRanges, let range = token.sourceRange { text.setSourceRange(range, complete: true) }
+            if tracksSourceRanges { text.sourceBuffer = doc.sourceBuffer }
+            text.treeBuilder = self
+            sourceEvents?.character(text, token: token, merge: false)
+            if let before { try before.before(text) }
+            else { try parent.appendChild(text) }
+            sourceEvents?.fosteredCharacter(text, token: token, before: before, merged: false)
+        }
+        return true
+    }
+
     func insertInFosterParent(_ input: Node) throws {
         let fosterParent: Element?
         let lastTable: Element? = getFromStack(UTF8Arrays.table)

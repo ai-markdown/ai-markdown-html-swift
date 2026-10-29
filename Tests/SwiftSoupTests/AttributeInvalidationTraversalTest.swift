@@ -1,9 +1,9 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeInvalidationTraversalTest: XCTestCase {
     func testAllAncestorAttributeIndexesAreInvalidatedWithoutDirtyingTags() throws {
-        let doc = try SwiftSoup.parse("<html><head></head><body><main><section><a id='old' class='before' href='/old'>text</a></section></main></body></html>")
+        let doc = try AIMarkdownHTML.parse("<html><head></head><body><main><section><a id='old' class='before' href='/old'>text</a></section></main></body></html>")
         doc.outputSettings().prettyPrint(pretty: false)
         doc.materializeAttributesRecursively()
         let target = try XCTUnwrap(doc.getElementsByTag("a").first())
@@ -31,12 +31,12 @@ final class AttributeInvalidationTraversalTest: XCTestCase {
             XCTAssertTrue(try root.select(".after#new[href='/new'][data-extra]").first() === target)
         }
         let serialized = String(decoding: try doc.outerHtmlUTF8(), as: UTF8.self)
-        let reparsed = try SwiftSoup.parse(serialized)
+        let reparsed = try AIMarkdownHTML.parse(serialized)
         XCTAssertEqual(try reparsed.select(".after#new[href='/new'][data-extra]").size(), 1)
     }
 
     func testAlreadyDirtyDescendantStillInvalidatesRebuiltAncestor() throws {
-        let doc = try SwiftSoup.parse("<main><section><a id='target' class='before' href='/one'></a></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section><a id='target' class='before' href='/one'></a></section></main>")
         doc.materializeAttributesRecursively()
         let target = try XCTUnwrap(doc.getElementById("target"))
         let section = try XCTUnwrap(target.parent())

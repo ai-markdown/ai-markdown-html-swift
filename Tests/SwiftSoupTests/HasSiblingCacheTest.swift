@@ -1,9 +1,9 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class HasSiblingCacheTest: XCTestCase {
     func testSubtreeResultsTrackAttributesOutsideTheSelectionRoot() throws {
-        let doc = try SwiftSoup.parse("<main><section id='a'></section><section id='b'><i></i></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section id='a'></section><section id='b'><i></i></section></main>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let b = try XCTUnwrap(doc.getElementById("b"))
         let i = try XCTUnwrap(b.select("i").first())
@@ -21,7 +21,7 @@ final class HasSiblingCacheTest: XCTestCase {
     }
 
     func testSiblingMutationInvalidatesNestedHasAndNot() throws {
-        let doc = try SwiftSoup.parse("<main><section id='a'><b></b></section><section id='b'></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section id='a'><b></b></section><section id='b'></section></main>")
         let a = try XCTUnwrap(doc.getElementById("a"))
         let b = try XCTUnwrap(doc.getElementById("b"))
         let query = "section:not(:has(~ .hit))"

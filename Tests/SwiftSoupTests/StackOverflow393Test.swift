@@ -1,6 +1,6 @@
 import XCTest
 import Foundation
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class StackOverflow393Test: XCTestCase {
 
@@ -31,7 +31,7 @@ final class StackOverflow393Test: XCTestCase {
     func testShallowOnSmallStackSurvives() {
         let html = makeDeepHTML(depth: 50)
         let ok = runOnSmallStack(stackSize: 512 * 1024) {
-            var doc: Document? = try? SwiftSoup.parse(html)
+            var doc: Document? = try? AIMarkdownHTML.parse(html)
             doc = nil
             _ = doc
         }
@@ -41,7 +41,7 @@ final class StackOverflow393Test: XCTestCase {
     // CONTROL B: deep tree on the main thread's big stack — must survive.
     func testDeepOnMainThreadSurvives() throws {
         let html = makeDeepHTML(depth: 12_000)
-        var doc: Document? = try SwiftSoup.parse(html)
+        var doc: Document? = try AIMarkdownHTML.parse(html)
         doc = nil
         _ = doc
     }
@@ -51,7 +51,7 @@ final class StackOverflow393Test: XCTestCase {
     func testDeepTeardownOnSmallStackSurvives() {
         let html = makeDeepHTML(depth: 12_000)
         let ok = runOnSmallStack(stackSize: 512 * 1024) {
-            var doc: Document? = try? SwiftSoup.parse(html)
+            var doc: Document? = try? AIMarkdownHTML.parse(html)
             doc = nil // subtree torn down here
             _ = doc
         }
@@ -62,7 +62,7 @@ final class StackOverflow393Test: XCTestCase {
     func testDeepEmptyOnSmallStackSurvives() {
         let html = makeDeepHTML(depth: 12_000)
         let ok = runOnSmallStack(stackSize: 512 * 1024) {
-            guard let doc = try? SwiftSoup.parse(html), let body = doc.body() else { return }
+            guard let doc = try? AIMarkdownHTML.parse(html), let body = doc.body() else { return }
             _ = body.empty()
         }
         XCTAssertTrue(ok, "deep Element.empty() overflowed the small-stack thread")

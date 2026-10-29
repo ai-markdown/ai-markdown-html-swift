@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class ByteSliceContiguousStorageTest: XCTestCase {
     private func read<C: Collection, R>(_ value: C,

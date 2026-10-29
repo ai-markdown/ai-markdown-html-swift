@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class TextNodeNBSPPrefilterTest: XCTestCase {
     func testEarlierNonNBSPTwoByteScalarsCannotHideLaterNBSP() throws {
@@ -34,7 +34,7 @@ final class TextNodeNBSPPrefilterTest: XCTestCase {
     }
 
     func testSourceBackedAndMutatedDocumentOutputRemainConsistent() throws {
-        let doc = try SwiftSoup.parse("<p>©\u{a0}x</p>")
+        let doc = try AIMarkdownHTML.parse("<p>©\u{a0}x</p>")
         doc.outputSettings().prettyPrint(pretty: false)
         let normalized = String(decoding: try doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self)
         XCTAssertTrue(normalized.contains("©&nbsp;x"))
@@ -42,7 +42,7 @@ final class TextNodeNBSPPrefilterTest: XCTestCase {
         try p.text("©\u{a0}updated")
         let output = String(decoding: try doc.outerHtmlUTF8(), as: UTF8.self)
         XCTAssertTrue(output.contains("©&nbsp;updated"))
-        XCTAssertEqual(try SwiftSoup.parse(output).select("p").text(trimAndNormaliseWhitespace: false), "©\u{a0}updated")
+        XCTAssertEqual(try AIMarkdownHTML.parse(output).select("p").text(trimAndNormaliseWhitespace: false), "©\u{a0}updated")
     }
     func testEveryEntityEscapeStorageOverloadChecksAllNBSPPrefixes() {
         for mode in [Entities.EscapeMode.base, .extended, .xhtml] {

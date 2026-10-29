@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 /// HTML parsing must retain the attributes selectors see in browser DOMs.
 final class BrowserParityTest: XCTestCase {
@@ -39,12 +39,12 @@ final class BrowserParityTest: XCTestCase {
     func testMalformedNamesAfterWhitespaceStartANewAttribute() throws {
         for name in ["x\u{0}", "x\"", "x'", "x<"] {
             let html = "<p \(name)='first' \(name)='last'></p>"
-            let p = try XCTUnwrap(SwiftSoup.parse(html).select("p").first())
+            let p = try XCTUnwrap(AIMarkdownHTML.parse(html).select("p").first())
             let key = name.replacingOccurrences(of: "\u{0}", with: "\u{fffd}")
             XCTAssertEqual(try p.attr(key), "first")
             XCTAssertEqual(p.getAttributes()?.size(), 1)
         }
-        let p = try XCTUnwrap(SwiftSoup.parse("<p a \u{0}='second'></p>").select("p").first())
+        let p = try XCTUnwrap(AIMarkdownHTML.parse("<p a \u{0}='second'></p>").select("p").first())
         XCTAssertTrue(p.hasAttr("a"))
         XCTAssertEqual(try p.attr("\u{fffd}"), "second")
         XCTAssertEqual(p.getAttributes()?.size(), 2)
@@ -62,7 +62,7 @@ final class BrowserParityTest: XCTestCase {
             let out = doc.outputSettings().prettyPrint(pretty: false)
             for reuseSource in [true, false] {
                 let serialized = try p.outerHtmlUTF8Internal(out, allowRawSource: reuseSource)
-                let reparsed = try SwiftSoup.parse(Data(serialized))
+                let reparsed = try AIMarkdownHTML.parse(Data(serialized))
                 let updated = try XCTUnwrap(reparsed.select("p").first())
                 XCTAssertFalse(updated.hasAttr("id"))
                 XCTAssertEqual(try updated.className(), "edited")
@@ -72,14 +72,14 @@ final class BrowserParityTest: XCTestCase {
         }
     }
     func testRepeatedAttributeNameKeepsTheFirstOccurrence() throws {
-        let doc = try SwiftSoup.parse(#"<a class="movie-list-subject cr2" href="/s" class="hot-item">t</a><input class="first" class="second">"#)
+        let doc = try AIMarkdownHTML.parse(#"<a class="movie-list-subject cr2" href="/s" class="hot-item">t</a><input class="first" class="second">"#)
         XCTAssertEqual(try doc.select("a").first()?.className(), "movie-list-subject cr2")
         XCTAssertEqual(try doc.select("input").first()?.className(), "first")
         XCTAssertEqual(try doc.select(".hot-item, .second").size(), 0)
     }
 
     func testBlockStartTagClosesAnOpenParagraph() throws {
-        let doc = try SwiftSoup.parse(#"<li><p class="vodlist_title"><center><a href="/voddetail/1/">t</a></center></p></li>"#)
+        let doc = try AIMarkdownHTML.parse(#"<li><p class="vodlist_title"><center><a href="/voddetail/1/">t</a></center></p></li>"#)
         XCTAssertEqual(try doc.select("[class*='title'] a").size(), 0)
         XCTAssertEqual(try doc.select("p.vodlist_title").first()?.children().size(), 0)
         XCTAssertEqual(try doc.select("li > center > a").size(), 1)
@@ -87,7 +87,7 @@ final class BrowserParityTest: XCTestCase {
 
     func testMixedCaseBooleanAndEmptyDuplicatesAcrossInputTypes() throws {
         let html = "<input CLASS='first' class='second' disabled disabled='later' value='' value='later'>"
-        for doc in [try SwiftSoup.parse(html), try SwiftSoup.parse(Data(html.utf8))] {
+        for doc in [try AIMarkdownHTML.parse(html), try AIMarkdownHTML.parse(Data(html.utf8))] {
             let input = try XCTUnwrap(doc.select("input").first())
             let attrs = try XCTUnwrap(input.getAttributes())
             XCTAssertEqual(try input.className(), "first")
@@ -105,7 +105,7 @@ final class BrowserParityTest: XCTestCase {
             let first = (0..<count).map { "data-k\($0)='first-\($0)'" }.joined(separator: " ")
             let later = (0..<count).reversed().map { "DATA-K\($0)='later'" }.joined(separator: " ")
             let html = "<p \(first) \(later)></p><p data-k0='next'></p>"
-            let doc = try SwiftSoup.parse(html)
+            let doc = try AIMarkdownHTML.parse(html)
             let ps = try doc.select("p")
             let p = try XCTUnwrap(ps.first())
             XCTAssertEqual(p.getAttributes()?.size(), count)
@@ -135,7 +135,7 @@ final class BrowserParityTest: XCTestCase {
         let collisionMask = try XCTUnwrap(groups.keys.sorted().first { groups[$0]!.count >= 9 })
         let names = groups[collisionMask]!.prefix(9)
         let html = "<p " + names.map { "\($0)='first'" }.joined(separator: " ") + " " + names.map { "\($0)='last'" }.joined(separator: " ") + "></p>"
-        let p = try XCTUnwrap(SwiftSoup.parse(html).select("p").first())
+        let p = try XCTUnwrap(AIMarkdownHTML.parse(html).select("p").first())
         XCTAssertEqual(p.getAttributes()?.size(), names.count)
         for name in names { XCTAssertEqual(try p.attr(name), "first") }
     }

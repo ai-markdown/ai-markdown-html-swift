@@ -39,7 +39,7 @@ def main() -> None:
     libraries = {'A': args.baseline_library.resolve(strict=True),
                  'B': args.candidate_library.resolve(strict=True)}
     extension = '.dylib' if platform.system() == 'Darwin' else '.so'
-    files = {k: v / ('libSwiftSoup' + extension) for k, v in libraries.items()}
+    files = {k: v / ('libAIMarkdownHTML' + extension) for k, v in libraries.items()}
     raw_path = Path(str(args.output) + '.jsonl')
     meta_path = Path(str(args.output) + '-metadata.json')
     if raw_path.exists() or meta_path.exists():

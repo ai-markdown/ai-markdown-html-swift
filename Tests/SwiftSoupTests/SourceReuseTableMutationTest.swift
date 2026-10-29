@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SourceReuseTableMutationTest: XCTestCase {
     private func assertSerializedParagraphs(_ doc: Document, _ expected: [String],
@@ -15,7 +15,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
         XCTAssertEqual(try doc.getElementsByTag("p").array().map { try $0.text() }, expected,
                        file: file, line: line)
         for output in outputs {
-            let reparsed = try SwiftSoup.parse(output)
+            let reparsed = try AIMarkdownHTML.parse(output)
             XCTAssertEqual(try reparsed.getElementsByTag("p").array().map { try $0.text() }, expected,
                            output, file: file, line: line)
             if !doc.outputSettings().prettyPrint() {
@@ -27,7 +27,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
     }
 
     func testRemovalInsideImpliedTbodyIsVisibleInCompactHTML() throws {
-        let doc = try SwiftSoup.parse("<table><tr><td><p>KEEP</p><p>STRIP</p></td></tr></table>")
+        let doc = try AIMarkdownHTML.parse("<table><tr><td><p>KEEP</p><p>STRIP</p></td></tr></table>")
         doc.outputSettings().prettyPrint(pretty: false)
         try doc.getElementsByTag("p").get(1).remove()
         XCTAssertEqual(try doc.body()?.html(), "<table><tbody><tr><td><p>KEEP</p></td></tr></tbody></table>")
@@ -41,7 +41,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
                     for query in ["tag", "p", "p.strip", "#strip"] {
                         let row = "<tr><td><p>KEEP</p><p class='strip' id='strip'>STRIP</p></td></tr>"
                         let contents = explicitTbody ? "<tbody>\(row)</tbody>" : row
-                        let doc = try SwiftSoup.parse("<table\(tableAttributes)>\(contents)</table>")
+                        let doc = try AIMarkdownHTML.parse("<table\(tableAttributes)>\(contents)</table>")
                         doc.outputSettings().prettyPrint(pretty: pretty)
                         let target = query == "tag" ? try doc.getElementsByTag("p").get(1)
                             : try doc.select(query).get(query == "p" ? 1 : 0)
@@ -54,7 +54,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
     }
 
     func testNestedImpliedTbodiesDoNotHideRemoval() throws {
-        let doc = try SwiftSoup.parse(
+        let doc = try AIMarkdownHTML.parse(
             "<table><tr><td><p>OUTER</p><table><tr><td><p>KEEP</p><p>STRIP</p>" +
             "</td></tr></table></td></tr></table>"
         )
@@ -64,7 +64,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
     }
 
     func testRepeatedMutationsOfAlreadyDirtySyntheticTbodyAreVisible() throws {
-        let doc = try SwiftSoup.parse("<table><tr><td><p>KEEP</p><p>STRIP</p></td></tr></table>")
+        let doc = try AIMarkdownHTML.parse("<table><tr><td><p>KEEP</p><p>STRIP</p></td></tr></table>")
         doc.outputSettings().prettyPrint(pretty: false)
         let tbody = try XCTUnwrap(doc.getElementsByTag("tbody").first())
         try tbody.attr("data-state", "first")
@@ -79,7 +79,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
 
     func testUnmutatedTableKeepsOriginalSourceAfterAttributeQueries() throws {
         let source = "<table class='data'><tr><td><p class='keep'>&copy;</p></td></tr></table>"
-        let doc = try SwiftSoup.parse(source)
+        let doc = try AIMarkdownHTML.parse(source)
         doc.outputSettings().prettyPrint(pretty: false)
         let originalBytes = try doc.outerHtmlUTF8()
         XCTAssertEqual(try doc.body()?.html(), source)
@@ -115,7 +115,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
             })
         ]
         for (_, expected, edit) in edits {
-            let doc = try SwiftSoup.parse("<table><tr><td data-state='original'><p>KEEP</p><p>STRIP</p></td></tr></table>")
+            let doc = try AIMarkdownHTML.parse("<table><tr><td data-state='original'><p>KEEP</p><p>STRIP</p></td></tr></table>")
             doc.outputSettings().prettyPrint(pretty: false)
             let cell = try doc.getElementsByTag("td").get(0)
             try edit(doc, cell)
@@ -124,7 +124,7 @@ final class SourceReuseTableMutationTest: XCTestCase {
     }
 
     func testMovingParagraphBetweenCellsDoesNotReplayTheOldTree() throws {
-        let doc = try SwiftSoup.parse(
+        let doc = try AIMarkdownHTML.parse(
             "<table><tr><td><p>ONE</p><p>TWO</p></td><td><p>THREE</p></td></tr></table>"
         )
         doc.outputSettings().prettyPrint(pretty: false)

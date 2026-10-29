@@ -1,5 +1,5 @@
 import Foundation
-import SwiftSoup
+import AIMarkdownHTML
 
 private final class ReversedBenchmarkParent: Element {
     override func children() -> Elements {
@@ -32,7 +32,7 @@ private func verification() throws {
     let selectors = [":first-child", ":nth-child(2n)", ":nth-child(3n+1)", ":nth-last-child(2)", ":nth-last-of-type(2)"]
     for width in [1, 2, 8, 32, 128] {
         for mixed in [false, true] {
-            let document = try SwiftSoup.parse(markup(width, mixed: mixed))
+            let document = try AIMarkdownHTML.parse(markup(width, mixed: mixed))
             let root = try document.select("main").first()!
             for round in 0..<4 {
                 let children = root.children().array()
@@ -66,7 +66,7 @@ private func verification() throws {
     }
     let cleaner = Cleaner(headWhitelist: nil, bodyWhitelist: rules)
     for style in values {
-        let document = try SwiftSoup.parse(markup(8))
+        let document = try AIMarkdownHTML.parse(markup(8))
         for p in try document.select("p") { try p.attr("style", "content:" + style + "; color:red") }
         let before = try document.outerHtml()
         let clean = try cleaner.clean(document)
@@ -87,12 +87,12 @@ private func run() throws {
     let operation: () throws -> UInt64
     switch name {
     case "index-wide", "index-mixed":
-        let document = try SwiftSoup.parse(markup(256, mixed: name == "index-mixed"))
+        let document = try AIMarkdownHTML.parse(markup(256, mixed: name == "index-mixed"))
         let root = try document.select("main").first()!
         let children = root.children().array()
         operation = { var sum: UInt64 = 0; for e in children { sum &+= UInt64(try e.elementSiblingIndex()) }; return withExtendedLifetime(document) { sum } }
     case "nth-select":
-        let document = try SwiftSoup.parse(markup(256, mixed: true))
+        let document = try AIMarkdownHTML.parse(markup(256, mixed: true))
         let root = try document.select("main").first()!
         let evaluator = Evaluator.IsNthChild(2, 0)
         operation = { withExtendedLifetime(document) {}; return UInt64(try Collector.collect(evaluator, root).size()) }
@@ -100,9 +100,9 @@ private func run() throws {
         let html = markup(128, mixed: true)
         let evaluator = Evaluator.IsNthChild(2, 0)
         if name == "parse-nth" {
-            operation = { let d = try SwiftSoup.parse(html); return UInt64(try Collector.collect(evaluator, d).size()) }
+            operation = { let d = try AIMarkdownHTML.parse(html); return UInt64(try Collector.collect(evaluator, d).size()) }
         } else {
-            operation = { let d = try SwiftSoup.parse(html); return UInt64(try d.text().utf8.count) }
+            operation = { let d = try AIMarkdownHTML.parse(html); return UInt64(try d.text().utf8.count) }
         }
     case "custom-parent":
         let parent = try ReversedBenchmarkParent(Tag.valueOf("main"), "")
@@ -124,9 +124,9 @@ private func run() throws {
         let cleaner = Cleaner(headWhitelist: nil, bodyWhitelist: rules)
         let style = name == "clean-plain" ? nil : "color:navy; font-weight:bold; margin:0 1em; font-family:'日本語'"
         let html = markup(64, style: style)
-        let document = try SwiftSoup.parse(html)
+        let document = try AIMarkdownHTML.parse(html)
         if name == "parse-clean" {
-            operation = { let d = try SwiftSoup.parse(html); return UInt64(try cleaner.clean(d).outerHtml().utf8.count) }
+            operation = { let d = try AIMarkdownHTML.parse(html); return UInt64(try cleaner.clean(d).outerHtml().utf8.count) }
         } else {
             operation = { UInt64(try cleaner.clean(document).outerHtml().utf8.count) }
         }

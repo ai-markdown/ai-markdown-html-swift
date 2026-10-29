@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class XmlNameStartTest: XCTestCase {
     private let names = ["_Item", ":Item", "日本", "Él", "π", "𐐀name", "\u{200C}name"]
@@ -31,7 +31,7 @@ final class XmlNameStartTest: XCTestCase {
                         }
                         doc.outputSettings().prettyPrint(pretty: false)
                         let serialized = String(decoding: try doc.outerHtmlUTF8WithoutSourceReuse(), as: UTF8.self)
-                        let roundTrip = try SwiftSoup.parseXML(serialized)
+                        let roundTrip = try AIMarkdownHTML.parseXML(serialized)
                         XCTAssertEqual(roundTrip.children().first()?.children().map { $0.tagName() }, [name, name, "tail"])
                     }
                 }
@@ -46,7 +46,7 @@ final class XmlNameStartTest: XCTestCase {
             0x2C00, 0x2FEF, 0x3001, 0xD7FF, 0xF900, 0xFDCF, 0xFDF0, 0xFFFD, 0x10000, 0xEFFFF]
         for value in valid {
             let name = String(UnicodeScalar(value)!) + "name"
-            let doc = try SwiftSoup.parseXML("<\(name)>text</\(name)><tail />")
+            let doc = try AIMarkdownHTML.parseXML("<\(name)>text</\(name)><tail />")
             XCTAssertEqual(doc.children().map { $0.tagName() }, [name, "tail"], "U+\(String(value, radix: 16))")
             XCTAssertEqual(try doc.children().first()?.text(), "text")
         }
@@ -90,7 +90,7 @@ final class XmlNameStartTest: XCTestCase {
         let xml = "<日本>one</日本><_item />"
         let fragment = try Parser.parseXmlFragment(xml, "")
         XCTAssertEqual(fragment.compactMap { ($0 as? Element)?.tagName() }, ["日本", "_item"])
-        XCTAssertEqual(try SwiftSoup.parseXML(Data(xml.utf8)).children().map { $0.tagName() }, ["日本", "_item"])
+        XCTAssertEqual(try AIMarkdownHTML.parseXML(Data(xml.utf8)).children().map { $0.tagName() }, ["日本", "_item"])
     }
 
     func testXmlNameStartsInExplicitTokenizerStates() throws {

@@ -1,10 +1,10 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class OwnerDocumentLookupTest: XCTestCase {
     func testLookupFollowsReparentingAndDetachment() throws {
-        let first = try SwiftSoup.parse("<main><p>one</p></main>")
-        let second = try SwiftSoup.parse("<section></section>")
+        let first = try AIMarkdownHTML.parse("<main><p>one</p></main>")
+        let second = try AIMarkdownHTML.parse("<section></section>")
         let paragraph = try XCTUnwrap(first.getElementsByTag("p").first())
         let text = paragraph.childNode(0)
         XCTAssertTrue(first.ownerDocument() === first)
@@ -43,7 +43,7 @@ final class OwnerDocumentLookupTest: XCTestCase {
     }
 
     func testOutputSettingsRemainLiveAndClonesUseTheirOwnDocument() throws {
-        let doc = try SwiftSoup.parse("<div><p>text</p></div>")
+        let doc = try AIMarkdownHTML.parse("<div><p>text</p></div>")
         let paragraph = try XCTUnwrap(doc.getElementsByTag("p").first())
         XCTAssertTrue(paragraph.getOutputSettings() === doc.outputSettings())
         let replacement = OutputSettings().prettyPrint(pretty: false).syntax(syntax: .xml)

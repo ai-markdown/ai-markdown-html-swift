@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeObservationReadTest: XCTestCase {
     func testRepeatedSnapshotsAndIteratorsKeepOneWeakObserver() throws {

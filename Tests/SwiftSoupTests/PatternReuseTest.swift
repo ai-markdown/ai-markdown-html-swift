@@ -1,7 +1,7 @@
 import XCTest
 import Foundation
 import Dispatch
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class PatternReuseTest: XCTestCase {
     func testRepeatedMatchesAgreeWithFoundationRanges() throws {
@@ -113,7 +113,7 @@ final class PatternReuseTest: XCTestCase {
     }
 
     func testRegexSelectorsObserveNewInputsAfterMutation() throws {
-        let document = try SwiftSoup.parse("<main><p id='a' data-probe='word-2'>word-2</p><p id='b' data-probe='word-3'>word-3</p></main>")
+        let document = try AIMarkdownHTML.parse("<main><p id='a' data-probe='word-2'>word-2</p><p id='b' data-probe='word-3'>word-3</p></main>")
         let pattern = Pattern.compile("^word-(2|4)$")
         let b = try XCTUnwrap(document.getElementById("b"))
         for pass in 0..<8 {
@@ -129,7 +129,7 @@ final class PatternReuseTest: XCTestCase {
     }
 
     func testPublicRegexOverloadsStillRejectInvalidExpressions() throws {
-        let document = try SwiftSoup.parse("<p data-probe='value'>text</p>")
+        let document = try AIMarkdownHTML.parse("<p data-probe='value'>text</p>")
         XCTAssertThrowsError(try document.getElementsByAttributeValueMatching("data-probe", "["))
         XCTAssertThrowsError(try document.getElementsMatchingText("["))
         XCTAssertThrowsError(try document.getElementsMatchingOwnText("["))

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class EmptyCharacterNodesTest: XCTestCase {
     func testClearingTextRestoresEmptySelectorAcrossCacheAndTrackingModes() throws {
@@ -18,7 +18,7 @@ final class EmptyCharacterNodesTest: XCTestCase {
     }
 
     func testEmptyDataNodesAndCommentsDoNotPreventEmptyMatching() throws {
-        let doc = try SwiftSoup.parse("<script id='target'></script>")
+        let doc = try AIMarkdownHTML.parse("<script id='target'></script>")
         let target = try XCTUnwrap(doc.getElementById("target"))
         let data = DataNode([], [])
         try target.appendChild(data)

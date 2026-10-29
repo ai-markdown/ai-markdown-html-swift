@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class StringSearchBoundaryTest: XCTestCase {
     // Deliberately use Character arrays and independently constructed windows,
@@ -122,7 +122,7 @@ final class StringSearchBoundaryTest: XCTestCase {
         let saved = QueryParser.cache
         QueryParser.cache = nil
         defer { QueryParser.cache = saved }
-        let root = try SwiftSoup.parse("<ul><li>a</li><li>b</li><li>c</li></ul>")
+        let root = try AIMarkdownHTML.parse("<ul><li>a</li><li>b</li><li>c</li></ul>")
         for count in [1, 64, 512, 2048] {
             let query = "li:eq(" + String(repeating: "0", count: count) + "1)"
             let eval = try QueryParser.parse(query)

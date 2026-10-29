@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 class NodeTraversorTest: XCTestCase {
     func testTraverseOrder() {
@@ -17,7 +17,7 @@ class NodeTraversorTest: XCTestCase {
         }
 
         let html = "<p id=1><b id=2>3</b>4</p><p id=5>6</p>"
-        let doc = try! SwiftSoup.parse(html)
+        let doc = try! AIMarkdownHTML.parse(html)
 
         let tv = TestVisitor()
         try! doc.body()!.traverse(tv)
@@ -50,12 +50,12 @@ class NodeTraversorTest: XCTestCase {
         }
 
         let html = "<p id=1>2</p><p id=3>4</p><p id=5>6</p>"
-        let doc = try! SwiftSoup.parse(html)
+        let doc = try! AIMarkdownHTML.parse(html)
 
         try! doc.body()!.traverse(TestVisitor())
 
         let expectedHtml = "<p id=1>2</p><p id=5>6</p>"
-        let expectedDoc = try! SwiftSoup.parse(expectedHtml)
+        let expectedDoc = try! AIMarkdownHTML.parse(expectedHtml)
         XCTAssertEqual(try! expectedDoc.body()!.html(), try! doc.body()!.html())
     }
 

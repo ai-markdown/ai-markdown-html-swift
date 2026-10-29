@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class TextareaValueTest: XCTestCase {
     func testSetterWritesTextForEveryTextareaSpelling() throws {
@@ -29,7 +29,7 @@ final class TextareaValueTest: XCTestCase {
     }
 
     func testRetaggedParsedTextareasRetainValueSemantics() throws {
-        let document = try SwiftSoup.parse("<textarea>one &amp; two</textarea>")
+        let document = try AIMarkdownHTML.parse("<textarea>one &amp; two</textarea>")
         let textarea = try XCTUnwrap(document.select("textarea").first())
         for name in ["TEXTAREA", "TeXtArEa", "textarea"] {
             try textarea.tagName(name)

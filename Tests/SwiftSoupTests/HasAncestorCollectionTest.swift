@@ -1,10 +1,10 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class HasAncestorCollectionTest: XCTestCase {
     func testOverlappingMatchesPreserveScopeAndDocumentOrder() throws {
-        let doc = try SwiftSoup.parseXML("<outside class='hit'><root class='hit'><a class='hit'><b class='hit'/><c><d class='hit'/></c></a><e><f class='hit'/></e><empty/></root><sibling class='hit'/></outside>")
+        let doc = try AIMarkdownHTML.parseXML("<outside class='hit'><root class='hit'><a class='hit'><b class='hit'/><c><d class='hit'/></c></a><e><f class='hit'/></e><empty/></root><sibling class='hit'/></outside>")
         let root = try XCTUnwrap(doc.select("root").first())
         let evaluator = StructuralEvaluator.Has(Evaluator.Class("hit"))
         for scope in [doc, root] {
@@ -20,7 +20,7 @@ final class HasAncestorCollectionTest: XCTestCase {
     func testDeepAndBranchedMatchesAreCollectedOnce() throws {
         let depth = 256
         let xml = "<root>" + String(repeating: "<level class='hit'><leaf class='hit'/>", count: depth) + String(repeating: "</level>", count: depth) + "</root>"
-        let doc = try SwiftSoup.parseXML(xml)
+        let doc = try AIMarkdownHTML.parseXML(xml)
         let root = try XCTUnwrap(doc.children().first())
         let evaluator = StructuralEvaluator.Has(Evaluator.Class("hit"))
         let matches = try Collector.collect(evaluator, root).array()
@@ -38,7 +38,7 @@ final class HasAncestorCollectionTest: XCTestCase {
         let depth = max(1, Int(env["SWIFTSOUP_HAS_PROFILE_DEPTH"] ?? "1000") ?? 1000)
         let iterations = max(1, Int(env["SWIFTSOUP_HAS_PROFILE_ITERATIONS"] ?? "50") ?? 50)
         let xml = "<root>" + String(repeating: "<level class='hit'>", count: depth) + String(repeating: "</level>", count: depth) + "</root>"
-        let doc = try SwiftSoup.parseXML(xml)
+        let doc = try AIMarkdownHTML.parseXML(xml)
         let root = try XCTUnwrap(doc.children().first())
         let evaluator = StructuralEvaluator.Has(Evaluator.Class("hit"))
         for _ in 0..<2 { XCTAssertEqual(try Collector.collect(evaluator, root).size(), depth) }

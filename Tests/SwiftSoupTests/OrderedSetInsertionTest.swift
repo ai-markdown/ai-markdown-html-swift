@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class OrderedSetInsertionTest: XCTestCase {
     private final class Item: Hashable {

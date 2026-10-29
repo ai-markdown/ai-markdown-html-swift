@@ -134,7 +134,7 @@ public class XmlTreeBuilder: TreeBuilder {
                 // Declaration attributes must obey the same normalization and
                 // retention settings as attributes on ordinary XML elements.
                 let declarationParser = Parser(declarationBuilder).settings(settings)
-                let doc: Document = try SwiftSoup.parse("<" + data.substring(1, data.count - 2) + ">", String(decoding: baseUri, as: UTF8.self), declarationParser)
+                let doc: Document = try AIMarkdownHTML.parse("<" + data.substring(1, data.count - 2) + ">", String(decoding: baseUri, as: UTF8.self), declarationParser)
                 // Malformed declarations may parse as text or comments only.
                 // Keep the original bogus comment when there is no target element.
                 if let el = doc.children().first() {

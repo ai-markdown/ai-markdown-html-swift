@@ -1,10 +1,10 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class ElementWrapNoOpTest: XCTestCase {
     func testNonElementWrappersLeaveTheElementAndTreeUnchanged() throws {
         for wrapper in ["plain text", "<!-- note -->", "text<div></div>"] {
-            let document = try SwiftSoup.parse("<main><p id=target>value</p><b>after</b></main>")
+            let document = try AIMarkdownHTML.parse("<main><p id=target>value</p><b>after</b></main>")
             let target = try XCTUnwrap(document.getElementById("target"))
             let parent = target.parent()
             let before = try document.outerHtml()
@@ -15,7 +15,7 @@ final class ElementWrapNoOpTest: XCTestCase {
     }
 
     func testValidWrapperAndEmptyInputKeepTheirBehavior() throws {
-        let document = try SwiftSoup.parse("<p id=target>value</p>")
+        let document = try AIMarkdownHTML.parse("<p id=target>value</p>")
         let target = try XCTUnwrap(document.getElementById("target"))
         XCTAssertTrue(try target.wrap("<section><div></div></section>") === target)
         XCTAssertEqual(target.parent()?.tagName(), "div")

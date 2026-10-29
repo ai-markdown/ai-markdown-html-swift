@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class DeferredAttributeLegacyContractTest: XCTestCase {
     private func pending(_ pairs: [(String, String?)]) throws -> Attributes {
@@ -83,7 +83,7 @@ final class DeferredAttributeLegacyContractTest: XCTestCase {
     func testDuplicateIdsAndClassesAgreeWithWarmedSelectors() throws {
         let html = "<p id='old' id='new' class='before' class='after' data-v='one' data-v='two'></p>"
         for firstRead in 0..<4 {
-            let doc = try SwiftSoup.parse(html)
+            let doc = try AIMarkdownHTML.parse(html)
             let p = try XCTUnwrap(doc.body()?.child(0))
             let attrs = try XCTUnwrap(p.getAttributes())
             // HTML5 tokenizer: repeated attribute names are dropped, the first occurrence wins.
@@ -110,7 +110,7 @@ final class DeferredAttributeLegacyContractTest: XCTestCase {
     }
 
     func testAmbiguousDeferredReadsMaterializeWithoutDirtyingOwners() throws {
-        let doc = try SwiftSoup.parse("<p id='old' id='new' class='before' class='after'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='old' id='new' class='before' class='after'></p>")
         let p = try XCTUnwrap(doc.body()?.child(0))
         let attrs = try XCTUnwrap(p.getAttributes())
         XCTAssertTrue(attrs.attributes.isEmpty)
@@ -144,7 +144,7 @@ final class DeferredAttributeLegacyContractTest: XCTestCase {
 
     func testReadsPreserveSourceReuseAndStableRegeneratedSerialization() throws {
         let html = "<p id='old' id='new' class='before' class='after'>日本語</p>"
-        let doc = try SwiftSoup.parse(html)
+        let doc = try AIMarkdownHTML.parse(html)
         let p = try XCTUnwrap(doc.body()?.child(0))
         let settings = doc.outputSettings().prettyPrint(pretty: false)
         let original = try p.outerHtmlUTF8Internal(settings, allowRawSource: true)
@@ -155,13 +155,13 @@ final class DeferredAttributeLegacyContractTest: XCTestCase {
         XCTAssertEqual(try p.outerHtmlUTF8Internal(settings, allowRawSource: true), original)
         XCTAssertEqual(try p.outerHtmlUTF8Internal(settings, allowRawSource: false), regenerated)
         try p.attr("id", "edited")
-        let edited = try SwiftSoup.parse(String(decoding: p.outerHtmlUTF8Internal(settings, allowRawSource: true), as: UTF8.self))
+        let edited = try AIMarkdownHTML.parse(String(decoding: p.outerHtmlUTF8Internal(settings, allowRawSource: true), as: UTF8.self))
         XCTAssertEqual(try edited.select("#edited.before").size(), 1)
         XCTAssertEqual(try edited.select("#old, #new, .after").size(), 0)
     }
 
     func testTextBytePresenceOnParsedNodesDoesNotDirtySourceOrRestoreRemovedText() throws {
-        let doc = try SwiftSoup.parse("<p>日本語</p>")
+        let doc = try AIMarkdownHTML.parse("<p>日本語</p>")
         let p = try XCTUnwrap(doc.body()?.child(0))
         let text = try XCTUnwrap(p.getChildNodes().first as? TextNode)
         let dirty = text.sourceRangeDirty

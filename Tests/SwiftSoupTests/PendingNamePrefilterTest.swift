@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class PendingNamePrefilterTest: XCTestCase {
     private func pending(_ names: [String], bytes: Bool) -> Attributes {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class EvaluatorCompatibilityAuditTest: XCTestCase {
     private enum Failure: Error { case deliberate }
@@ -26,7 +26,7 @@ final class EvaluatorCompatibilityAuditTest: XCTestCase {
     }
 
     func testThrowingAndPredicatesKeepEstablishedCompositeSemantics() throws {
-        let doc = try SwiftSoup.parse("<p>one</p><p>two</p><i>three</i>")
+        let doc = try AIMarkdownHTML.parse("<p>one</p><p>two</p><i>three</i>")
         let and = CombiningEvaluator.And([Evaluator.Tag("p"), Throwing()])
         let expected = try doc.getAllElements().array().filter { and.matches(doc, $0) }
         XCTAssertEqual(try Collector.collect(and, doc).array().map(ObjectIdentifier.init), expected.map(ObjectIdentifier.init))
@@ -34,7 +34,7 @@ final class EvaluatorCompatibilityAuditTest: XCTestCase {
     }
 
     func testHasSkipsIndividualFailuresButKeepsOtherMatches() throws {
-        let doc = try SwiftSoup.parse("<main><section><p>x</p></section><aside></aside></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section><p>x</p></section><aside></aside></main>")
         for nested in [Throwing(), MatchOrThrow()] as [Evaluator] {
             let has = StructuralEvaluator.Has(nested)
             let expected = try doc.getAllElements().array().filter { try has.matches(doc, $0) }
@@ -46,7 +46,7 @@ final class EvaluatorCompatibilityAuditTest: XCTestCase {
     // These superclass extension points are available to same-module/testable
     // subclasses; the base classes are not open to normal external imports.
     func testSameModuleEvaluatorOverridesAreNotReplacedByIndexes() throws {
-        let doc = try SwiftSoup.parse("<p>one</p>")
+        let doc = try AIMarkdownHTML.parse("<p>one</p>")
         let cases: [Evaluator] = [NeverTag("p"), NeverRoot(), NeverHas(Evaluator.Tag("p")),
                                   CombiningEvaluator.And([NeverTag("p"), Evaluator.AllElements()])]
         for evaluator in cases {

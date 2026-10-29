@@ -1,7 +1,7 @@
 import XCTest
 import Foundation
 import Dispatch
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class MatcherCaptureRegressionTest: XCTestCase {
     private func assertCapture(

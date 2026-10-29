@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CssCollectorRefinementTest: XCTestCase {
     private func assertQuery(_ doc: Document, _ query: String, _ expected: [String],
@@ -16,7 +16,7 @@ final class CssCollectorRefinementTest: XCTestCase {
     }
 
     func testAttributePresenceSeedRetainsValuePredicates() throws {
-        let doc = try SwiftSoup.parse("<main><p id='hit' data-value='prefix-middle-suffix'></p><p id='miss' data-value='other'></p><p id='missing'></p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='hit' data-value='prefix-middle-suffix'></p><p id='miss' data-value='other'></p><p id='missing'></p></main>")
         for selector in ["[data-value^=prefix]", "[data-value$=suffix]", "[data-value*=middle]"] {
             for suffix in [":not(#absent)", #":not(#\61 bsent)"#, "[id]"] {
                 try assertQuery(doc, selector + suffix, ["hit"])
@@ -25,7 +25,7 @@ final class CssCollectorRefinementTest: XCTestCase {
     }
 
     func testAttributePresenceSeedRetainsRegexPredicate() throws {
-        let doc = try SwiftSoup.parse("<main><p id='hit' data-value='item42'></p><p id='miss' data-value='other'></p><p id='missing'></p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='hit' data-value='item42'></p><p id='miss' data-value='other'></p><p id='missing'></p></main>")
         for suffix in [":not(#absent)", #":not(#\61 bsent)"#, "[id]"] {
             try assertQuery(doc, #"[data-value~=^item\d+$]"# + suffix, ["hit"])
         }
@@ -33,7 +33,7 @@ final class CssCollectorRefinementTest: XCTestCase {
 
     func testBareIdPunctuationUsesTheSameParserAsCompoundQueries() throws {
         for id in ["x]", "x(", "x)", "x'", "x\"", "x/", "x=", "x$", "x@", "x!", "x;", "x\u{B}"] {
-            let doc = try SwiftSoup.parse("<p></p>")
+            let doc = try AIMarkdownHTML.parse("<p></p>")
             let target = try XCTUnwrap(doc.select("p").first())
             try target.attr("id", id)
             XCTAssertThrowsError(try QueryParser.parse("#" + id), id.debugDescription)
@@ -44,7 +44,7 @@ final class CssCollectorRefinementTest: XCTestCase {
     }
 
     func testSinglePredicateAndRetainsItsAttributeValueCheck() throws {
-        let doc = try SwiftSoup.parse("<p id='hit' class='present' data-value='item42'></p><p id='miss' data-value='other'></p><p id='missing'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='hit' class='present' data-value='item42'></p><p id='miss' data-value='other'></p><p id='missing'></p>")
         for query in ["[data-value^=item]", "[data-value$=42]", "[data-value*=tem4]", #"[data-value~=^item\d+$]"#] {
             let predicate = try QueryParser.parse(query)
             let combined = CombiningEvaluator.And([predicate])
@@ -58,7 +58,7 @@ final class CssCollectorRefinementTest: XCTestCase {
     }
 
     func testAttributePresenceSeedDoesNotHideVirtualAbsoluteAttributes() throws {
-        let doc = try SwiftSoup.parse("<a id='hit' href='/item42'></a><a id='miss' href='/other'></a><a id='missing'></a>", "https://example.com")
+        let doc = try AIMarkdownHTML.parse("<a id='hit' href='/item42'></a><a id='miss' href='/other'></a><a id='missing'></a>", "https://example.com")
         for query in ["[abs:href^=https://example.com/item]", "[abs:href$=42]", "[abs:href*=item]", #"[abs:href~=item\d+$]"#] {
             try assertQuery(doc, query, ["hit"])
             try assertQuery(doc, query + ":not(#absent)", ["hit"])
@@ -68,7 +68,7 @@ final class CssCollectorRefinementTest: XCTestCase {
     }
 
     func testAttributePresenceSeedTracksMutationsAfterCachePromotion() throws {
-        let doc = try SwiftSoup.parse("<p id='first' data-value='item42'></p><p id='second' data-value='other'></p><p id='missing'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='first' data-value='item42'></p><p id='second' data-value='other'></p><p id='missing'></p>")
         let first = try XCTUnwrap(doc.getElementById("first"))
         let second = try XCTUnwrap(doc.getElementById("second"))
         let queries = ["[data-value^=item]:not(#absent)", #"[data-value~=^item\d+$]:not(#\61 bsent)"#]
@@ -81,14 +81,14 @@ final class CssCollectorRefinementTest: XCTestCase {
     }
 
     func testAttributeNegationRetainsElementsWithoutTheAttribute() throws {
-        let doc = try SwiftSoup.parse("<main><p id='hit' data-value='item42'></p><p id='miss' data-value='other'></p><p id='missing'></p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='hit' data-value='item42'></p><p id='miss' data-value='other'></p><p id='missing'></p></main>")
         try assertQuery(doc, "p[data-value!=item42]", ["miss", "missing"])
         try assertQuery(doc, "p:not([data-value^=item]:not(#absent))", ["miss", "missing"])
         try assertQuery(doc, "main:has([data-value^=item]:not(#hit))", [])
     }
 
     func testAttributePresenceSeedRespectsEachRootAndDeduplicatesOverlaps() throws {
-        let doc = try SwiftSoup.parse("<main><section id='left'><p id='a' data-value='item42'></p><p id='b' data-value='other'></p></section><section id='right'><p id='c' data-value='item99'></p></section></main>")
+        let doc = try AIMarkdownHTML.parse("<main><section id='left'><p id='a' data-value='item42'></p><p id='b' data-value='other'></p></section><section id='right'><p id='c' data-value='item99'></p></section></main>")
         let left = try XCTUnwrap(doc.getElementById("left"))
         let right = try XCTUnwrap(doc.getElementById("right"))
         for query in ["[data-value^=item]:not(#absent)", #"[data-value~=^item\d+$]:not(#\61 bsent)"#] {
@@ -103,7 +103,7 @@ final class CssCollectorRefinementTest: XCTestCase {
 
 
     func testVirtualAttributePresenceUsesResolvedUrlsAndTracksBaseChanges() throws {
-        let doc = try SwiftSoup.parse("<a id='hit' href='/item42'></a><a id='absolute' href='https://example.com/other'></a><a id='missing'></a>")
+        let doc = try AIMarkdownHTML.parse("<a id='hit' href='/item42'></a><a id='absolute' href='https://example.com/other'></a><a id='missing'></a>")
         try assertQuery(doc, "[abs:href]", ["absolute"])
         XCTAssertEqual(doc.getElementsByAttributeNormalized(Array("abs:href".utf8)).array().map { $0.id() }, ["absolute"])
         try doc.setBaseUri("https://example.com")
@@ -118,7 +118,7 @@ final class CssCollectorRefinementTest: XCTestCase {
 
 
     func testSubtreeBaseUriChangesInvalidateAncestorAndDescendantResults() throws {
-        let doc = try SwiftSoup.parse("<main><section id='left'><div><a id='a' href='/item42'></a></div></section><section id='right'><a id='b' href='/other'></a></section></main>", "https://old.example")
+        let doc = try AIMarkdownHTML.parse("<main><section id='left'><div><a id='a' href='/item42'></a></div></section><section id='right'><a id='b' href='/other'></a></section></main>", "https://old.example")
         let left = try XCTUnwrap(doc.getElementById("left"))
         let inner = try XCTUnwrap(left.select("div").first())
         let newQuery = "[abs:href^=https://new.example]"

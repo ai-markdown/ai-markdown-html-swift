@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class FragmentAppendTest: XCTestCase {
     private func chunks(_ count: Int) -> [[UInt8]] {
@@ -97,7 +97,7 @@ final class FragmentAppendTest: XCTestCase {
         XCTAssertEqual(String(decoding: attribute.lowerTrimmedValueSlice(), as: UTF8.self), "before after next end")
     }
     func testTextAttributeBackedPathAndMutationToken() throws {
-        let doc = try SwiftSoup.parse("<p>initial</p>")
+        let doc = try AIMarkdownHTML.parse("<p>initial</p>")
         let p = try XCTUnwrap(doc.getElementsByTag("p").first())
         let text = try XCTUnwrap(p.childNode(0) as? TextNode)
         _ = text.getAttributes()

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class AttributeCopyAllocationTest: XCTestCase {
     func testCopyPreservesOrderCaseValuesAndBooleans() throws {
@@ -51,7 +51,7 @@ final class AttributeCopyAllocationTest: XCTestCase {
     func testDeferredAttributesAndDuplicateKeysMaterializeTheSameWay() throws {
         for count in [0, 1, 15, 16, 17, 64] {
             let markup = (0..<count).map { "data-\($0)='\($0)'" }.joined(separator: " ")
-            let document = try SwiftSoup.parse("<p \(markup) title='a &amp; 日本語' title='last'></p>")
+            let document = try AIMarkdownHTML.parse("<p \(markup) title='a &amp; 日本語' title='last'></p>")
             let source = try XCTUnwrap(document.getElementsByTag("p").first()?.getAttributes())
             let copy = source.clone()
             XCTAssertEqual(try source.html(), try copy.html())
@@ -60,7 +60,7 @@ final class AttributeCopyAllocationTest: XCTestCase {
         }
     }
     func testCopyStartsWithFreshLookupCachesAndNoOwner() throws {
-        let document = try SwiftSoup.parse("<p ID='a' data-x='1' data-y='2' data-z='3'></p>")
+        let document = try AIMarkdownHTML.parse("<p ID='a' data-x='1' data-y='2' data-z='3'></p>")
         let source = try XCTUnwrap(document.getElementsByTag("p").first()?.getAttributes())
         _ = source.get(key: "data-x")
         _ = try source.getIgnoreCase(key: "DATA-Y")

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class PlaintextByteProgressTest: XCTestCase {
     func testEveryByteMakesProgressInPlaintextState() throws {

@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CssDirectAttributeMutationTest: XCTestCase {
     // Deliberately avoid Collector and all query indexes for the reference walk.
@@ -34,7 +34,7 @@ final class CssDirectAttributeMutationTest: XCTestCase {
     }
 
     func testDirectAttributeObjectsInvalidateIndexedSelections() throws {
-        let doc = try SwiftSoup.parse("<p id='hit' class='x' data-v='item42'></p><p id='miss'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='hit' class='x' data-v='item42'></p><p id='miss'></p>")
         let hit = try XCTUnwrap(doc.getElementById("hit"))
         let attributes = try XCTUnwrap(hit.getAttributes())
         let value = try XCTUnwrap(attributes.first { $0.getKey() == "data-v" })

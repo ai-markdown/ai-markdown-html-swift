@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 /// Opt-in release benchmarks for small DOM operations. Setup is not timed.
 ///
@@ -26,7 +26,7 @@ final class DOMOperationBenchmarkTest: XCTestCase {
         let paragraphs = (0..<count).map {
             "<p id='p\($0)' class='entry' data-n='\($0)'><b>日本語</b>text</p>"
         }.joined()
-        let document = try SwiftSoup.parse("<main>\(paragraphs)</main>")
+        let document = try AIMarkdownHTML.parse("<main>\(paragraphs)</main>")
         document.outputSettings().prettyPrint(pretty: false)
         return document
     }

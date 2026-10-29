@@ -44,7 +44,7 @@ def main():
     key = 'DYLD_LIBRARY_PATH' if sys.platform == 'darwin' else 'LD_LIBRARY_PATH'
     metadata = {'argv': sys.argv, 'platform': platform.platform(), 'python': sys.version,
                 'affinity_cpu': affinity, 'aa': a.aa, 'client': client, 'client_sha256': digest(client),
-                'libraries': {k: {'path': str(v), 'sha256': digest(v / ('libSwiftSoup.' + ext))} for k, v in libs.items()}}
+                'libraries': {k: {'path': str(v), 'sha256': digest(v / ('libAIMarkdownHTML.' + ext))} for k, v in libs.items()}}
     (a.output / 'metadata.json').write_text(json.dumps(metadata, indent=2) + '\n')
 
     def run(label, workload, iterations, verify=False):

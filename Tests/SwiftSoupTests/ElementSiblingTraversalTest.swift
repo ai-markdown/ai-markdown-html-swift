@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 private final class ReorderedChildrenElement: Element {
     override func children() -> Elements {
@@ -26,7 +26,7 @@ final class ElementSiblingTraversalTest: XCTestCase {
     }
 
     func testMixedNodesBothDirectionsAndDetachedElement() throws {
-        let doc = try SwiftSoup.parse("<main>start<!--before--><p>one</p>between<!--gap--><span>two</span>text<p>three</p><!--end-->last</main>")
+        let doc = try AIMarkdownHTML.parse("<main>start<!--before--><p>one</p>between<!--gap--><span>two</span>text<p>three</p><!--end-->last</main>")
         let root = try XCTUnwrap(doc.getElementsByTag("main").first())
         try assertSiblings(root)
         let detached = try XCTUnwrap(root.children().first())
@@ -37,7 +37,7 @@ final class ElementSiblingTraversalTest: XCTestCase {
     }
 
     func testPubliclyChangedSiblingIndexFallsBackToIdentitySearch() throws {
-        let doc = try SwiftSoup.parse("<main>text<p>a</p><!--gap--><span>b</span><p>c</p>tail</main>")
+        let doc = try AIMarkdownHTML.parse("<main>text<p>a</p><!--gap--><span>b</span><p>c</p>tail</main>")
         let root = try XCTUnwrap(doc.getElementsByTag("main").first())
         for element in root.children() {
             let realIndex = element.siblingIndex
@@ -50,7 +50,7 @@ final class ElementSiblingTraversalTest: XCTestCase {
     }
 
     func testReorderingInsertionReplacementAndCrossParentMove() throws {
-        let doc = try SwiftSoup.parse("<main><p>a</p>gap<p>b</p><!--c--><p>c</p></main><aside><span>x</span></aside>")
+        let doc = try AIMarkdownHTML.parse("<main><p>a</p>gap<p>b</p><!--c--><p>c</p></main><aside><span>x</span></aside>")
         let root = try XCTUnwrap(doc.getElementsByTag("main").first())
         let aside = try XCTUnwrap(doc.getElementsByTag("aside").first())
         let first = try XCTUnwrap(root.children().first())
@@ -72,7 +72,7 @@ final class ElementSiblingTraversalTest: XCTestCase {
     }
 
     func testAdjacentGeneralAndLastChildSelectorsSkipNonElements() throws {
-        let doc = try SwiftSoup.parse("<main>t<p id='a'></p><!--gap-->t<p id='b'></p><span id='c'></span>t<p id='d'></p>tail<!--end--></main>")
+        let doc = try AIMarkdownHTML.parse("<main>t<p id='a'></p><!--gap-->t<p id='b'></p><span id='c'></span>t<p id='d'></p>tail<!--end--></main>")
         let root = try XCTUnwrap(doc.getElementsByTag("main").first())
         func ids(_ query: String) throws -> [String] {
             try Collector.collect(QueryParser.parse(query), root).map { try $0.attr("id") }

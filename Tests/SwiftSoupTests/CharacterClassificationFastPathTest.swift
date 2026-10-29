@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class CharacterClassificationFastPathTest: XCTestCase {
     // Preserve the pre-optimization definition, including normalization before
@@ -97,7 +97,7 @@ final class CharacterClassificationFastPathTest: XCTestCase {
     }
 
     func testSelectorResultsSurviveWarmupAndMutation() throws {
-        let document = try SwiftSoup.parse("<main><section id='s'><p id='a'>日本語</p><p id='b'>two</p></section></main>")
+        let document = try AIMarkdownHTML.parse("<main><section id='s'><p id='a'>日本語</p><p id='b'>two</p></section></main>")
         let query = "main > section p:nth-child(2n + 1)"
         for _ in 0..<3 { XCTAssertEqual(try document.select(query).array().map { $0.id() }, ["a"]) }
         let before = try document.outerHtml()

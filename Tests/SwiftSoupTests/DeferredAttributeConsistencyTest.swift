@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class DeferredAttributeConsistencyTest: XCTestCase {
     private func item(_ key: String, _ value: String, bytes: Bool = false) -> Attributes.PendingAttribute {
@@ -139,7 +139,7 @@ final class DeferredAttributeConsistencyTest: XCTestCase {
     }
 
     func testPublicParsedDuplicateAttributeLookupIsReadOrderIndependent() throws {
-        let doc = try SwiftSoup.parse("<p id='old' id='new' class='before' class='after'></p>")
+        let doc = try AIMarkdownHTML.parse("<p id='old' id='new' class='before' class='after'></p>")
         let p = try XCTUnwrap(doc.body()?.getChildNodes().first as? Element)
         let attrs = try XCTUnwrap(p.getAttributes())
         // HTML5 tokenizer: repeated attribute names are dropped, the first occurrence wins.

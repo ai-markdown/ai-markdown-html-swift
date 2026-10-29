@@ -1,6 +1,6 @@
 import Foundation
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class RcdataMixedCaseEndTagTest: XCTestCase {
     private let content = "alpha<b>literal</b>&amp;日本😀"
@@ -38,11 +38,11 @@ final class RcdataMixedCaseEndTagTest: XCTestCase {
     func testStringDataAndBorrowedInputParsersPreserveLiteralMarkup() throws {
         for (tag, closing) in [("title", "TiTlE"), ("textarea", "TeXtArEa")] {
             let input = markup(tag, closing)
-            try checkDOM(SwiftSoup.parse(input))
-            try checkDOM(SwiftSoup.parse(Data(input.utf8)))
+            try checkDOM(AIMarkdownHTML.parse(input))
+            try checkDOM(AIMarkdownHTML.parse(Data(input.utf8)))
             try checkDOM(Parser.htmlParser().parseInput(Array(input.utf8), ""))
             let bytes = Array(input.utf8)
-            let document = try SwiftSoup.parse(withBytes: { parse in
+            let document = try AIMarkdownHTML.parse(withBytes: { parse in
                 try bytes.withUnsafeBufferPointer { try parse($0) }
             })
             try checkDOM(document)
@@ -51,13 +51,13 @@ final class RcdataMixedCaseEndTagTest: XCTestCase {
 
     func testMutationAndBothSerializersRetainTheCorrectDOM() throws {
         for (tag, closing) in [("title", "TiTlE"), ("textarea", "TeXtArEa")] {
-            let document = try SwiftSoup.parse(markup(tag, closing))
+            let document = try AIMarkdownHTML.parse(markup(tag, closing))
             try checkDOM(document)
             let target = try XCTUnwrap(document.getElementById("target"))
             try target.attr("data-edited", "yes")
             document.outputSettings().prettyPrint(pretty: false)
             for bytes in [try document.outerHtmlUTF8(), try document.outerHtmlUTF8WithoutSourceReuse()] {
-                let reparsed = try SwiftSoup.parse(String(decoding: bytes, as: UTF8.self))
+                let reparsed = try AIMarkdownHTML.parse(String(decoding: bytes, as: UTF8.self))
                 try checkDOM(reparsed)
                 XCTAssertEqual(try reparsed.getElementById("target")?.attr("data-edited"), "yes")
             }
@@ -66,7 +66,7 @@ final class RcdataMixedCaseEndTagTest: XCTestCase {
 
     func testMissingAndUnrelatedClosingTagsRetainLegacyRecovery() throws {
         for tail in ["", "</TeXtArEa>"] {
-            let document = try SwiftSoup.parse("<title>alpha<b>literal\(tail)<p id='after'>tail</p>")
+            let document = try AIMarkdownHTML.parse("<title>alpha<b>literal\(tail)<p id='after'>tail</p>")
             XCTAssertEqual(try document.select("title").text(), "alpha")
             XCTAssertEqual(try document.select("b").size(), 1)
             XCTAssertEqual(try document.getElementById("after")?.text(), "tail")
@@ -94,7 +94,7 @@ final class RcdataMixedCaseEndTagTest: XCTestCase {
                 try target.attr("data-edited", "yes")
                 document.outputSettings().prettyPrint(pretty: false)
                 for bytes in [try document.outerHtmlUTF8(), try document.outerHtmlUTF8WithoutSourceReuse()] {
-                    let reparsed = try SwiftSoup.parse(String(decoding: bytes, as: UTF8.self))
+                    let reparsed = try AIMarkdownHTML.parse(String(decoding: bytes, as: UTF8.self))
                     let value = try XCTUnwrap(reparsed.getElementById("target"))
                     XCTAssertEqual(value.textNodes().map { $0.getWholeText() }.joined(), expected)
                 }
@@ -103,7 +103,7 @@ final class RcdataMixedCaseEndTagTest: XCTestCase {
     }
 
     func testTextareaReturnsToBodyAndDoesNotReconstructFormattingInsideIt() throws {
-        let document = try SwiftSoup.parse("<form><b><textarea id='target' name='message'>x<i>y</i>&amp;z</TeXtArEa>after</b><input name='next'></form>")
+        let document = try AIMarkdownHTML.parse("<form><b><textarea id='target' name='message'>x<i>y</i>&amp;z</TeXtArEa>after</b><input name='next'></form>")
         let target = try XCTUnwrap(document.getElementById("target"))
         XCTAssertEqual(try target.val(), "x<i>y</i>&z")
         XCTAssertTrue(target.children().isEmpty)

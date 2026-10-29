@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class RegionCursorTest: XCTestCase {
     // Character arrays provide an independent positional model (not String offsets).
@@ -112,7 +112,7 @@ final class RegionCursorTest: XCTestCase {
     }
 
     func testActualSelectorsAndMutationRetainOutputs() throws {
-        let doc = try SwiftSoup.parse("<main><p id='a' class='日本語'>École</p><p id='b'>other</p></main>")
+        let doc = try AIMarkdownHTML.parse("<main><p id='a' class='日本語'>École</p><p id='b'>other</p></main>")
         for _ in 0..<4 {
             XCTAssertEqual(try doc.select("MAIN > P.日本語:contains(école)").array().map { $0.id() }, ["a"])
             XCTAssertEqual(try doc.select("main > p:nth-child(2n + 1)").array().map { $0.id() }, ["a"])

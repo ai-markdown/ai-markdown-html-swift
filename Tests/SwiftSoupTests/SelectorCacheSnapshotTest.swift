@@ -1,14 +1,14 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class SelectorCacheSnapshotTest: XCTestCase {
     func testDescendantCacheFollowsMovedAncestor() throws {
-        let destination = try SwiftSoup.parse("<aside></aside>")
+        let destination = try AIMarkdownHTML.parse("<aside></aside>")
         let root: Element
         let text: TextNode
         weak var releasedDocument: Document?
         do {
-            let original = try SwiftSoup.parse("<main><section><p>before</p></section></main>")
+            let original = try AIMarkdownHTML.parse("<main><section><p>before</p></section></main>")
             releasedDocument = original
             let moved = try XCTUnwrap(original.select("main").first())
             root = try XCTUnwrap(moved.select("section").first())
@@ -67,7 +67,7 @@ final class SelectorCacheSnapshotTest: XCTestCase {
     func testWildcardDocumentCanBeReleased() throws {
         weak var observed: Document?
         do {
-            let doc = try SwiftSoup.parse("<p>one</p>")
+            let doc = try AIMarkdownHTML.parse("<p>one</p>")
             observed = doc
             for _ in 0..<4 { XCTAssertTrue(try doc.select("*").first() === doc) }
         }
@@ -75,7 +75,7 @@ final class SelectorCacheSnapshotTest: XCTestCase {
     }
 
     func testMutatingAdmittedMissDoesNotChangeLaterResults() throws {
-        let doc = try SwiftSoup.parse("<p>one</p><span>two</span>")
+        let doc = try AIMarkdownHTML.parse("<p>one</p><span>two</span>")
         _ = try doc.select("p")
         let admitted = try doc.select("p")
         let paragraph = try XCTUnwrap(admitted.first())
@@ -90,7 +90,7 @@ final class SelectorCacheSnapshotTest: XCTestCase {
     func testMutatingCacheHitDoesNotPoisonResultsOrRetainOwner() throws {
         weak var observed: Document?
         do {
-            let doc = try SwiftSoup.parse("<p>one</p><span>two</span>")
+            let doc = try AIMarkdownHTML.parse("<p>one</p><span>two</span>")
             observed = doc
             for _ in 0..<4 { _ = try doc.select("p") }
             let returned = try doc.select("p")
@@ -105,7 +105,7 @@ final class SelectorCacheSnapshotTest: XCTestCase {
     }
 
     func testSnapshotsPreserveLiveNodeIdentityAndRetainedCollections() throws {
-        let doc = try SwiftSoup.parse("<p>one</p><p>two</p>")
+        let doc = try AIMarkdownHTML.parse("<p>one</p><p>two</p>")
         for _ in 0..<4 { _ = try doc.select("p") }
         let first = try doc.select("p")
         let second = try doc.select("p")

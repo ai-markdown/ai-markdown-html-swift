@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class OrderedSetSinglePassSubsetTest: XCTestCase {
     /// A valid single-pass Sequence: every iterator shares one input cursor.

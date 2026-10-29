@@ -1,5 +1,5 @@
 import XCTest
-import SwiftSoup
+import AIMarkdownHTML
 
 final class OrderedSetMoveShiftTest: XCTestCase {
     private final class Item: Hashable {
@@ -113,7 +113,7 @@ final class OrderedSetMoveShiftTest: XCTestCase {
     }
 
     func testElementIdentityAndDOMAreIndependentOfCollectionMoves() throws {
-        let doc = try SwiftSoup.parse("<main><i id=a>A</i><b id=b>B</b><em id=c>C</em></main>")
+        let doc = try AIMarkdownHTML.parse("<main><i id=a>A</i><b id=b>B</b><em id=c>C</em></main>")
         let elements = try doc.select("main > *").array()
         let set = OrderedSet(sequence: elements)
         let before = try doc.outerHtml()

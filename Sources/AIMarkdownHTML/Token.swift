@@ -11,6 +11,10 @@ open class Token {
     var type: TokenType = TokenType.Doctype
     @usableFromInline
     internal var sourceRange: SourceRange? = nil
+    // A direct HAST CHARACTER emission is not a tokenizer-classified whitespace token.
+    @usableFromInline internal var sourceCharacterInjection = false
+    @usableFromInline internal var sourceEventID: Int?
+    @usableFromInline internal var sourceEventPieces: [SourceEventPiece] = []
     
     private init() {
     }
@@ -55,6 +59,7 @@ open class Token {
         @discardableResult
         override func reset() -> Token {
             sourceRange = nil
+            sourceEventID = nil; sourceEventPieces = []; sourceCharacterInjection = false
             Token.reset(name)
             pubSysKey = nil
             Token.reset(publicIdentifier)
@@ -383,6 +388,7 @@ open class Token {
         @inline(__always)
         override func reset() -> Tag {
             sourceRange = nil
+            sourceEventID = nil; sourceEventPieces = []; sourceCharacterInjection = false
             if _tagName != nil {
                 _tagName!.removeAll(keepingCapacity: true)
             } else {
@@ -1204,7 +1210,7 @@ open class Token {
     
     final class StartTag: Tag {
         @usableFromInline
-        var resolvedTag: SwiftSoup.Tag? = nil
+        var resolvedTag: AIMarkdownHTML.Tag? = nil
         @usableFromInline
         var resolvedTagPreservesCase: Bool = false
         @usableFromInline
@@ -1226,21 +1232,21 @@ open class Token {
         }
 
         @inline(__always)
-        func resolveTag(_ settings: ParseSettings, isSelfClosing: Bool) throws -> SwiftSoup.Tag {
+        func resolveTag(_ settings: ParseSettings, isSelfClosing: Bool) throws -> AIMarkdownHTML.Tag {
             if let cached = resolvedTag,
                resolvedTagPreservesCase == settings.preservesTagCase(),
                resolvedTagIsSelfClosing == isSelfClosing {
                 return cached
             }
-            let resolved: SwiftSoup.Tag
+            let resolved: AIMarkdownHTML.Tag
             if settings.preservesTagCase() {
-                resolved = try SwiftSoup.Tag.valueOf(try name(), settings, isSelfClosing: isSelfClosing)
-            } else if let fastTag = SwiftSoup.Tag.valueOfTagId(tagId) {
+                resolved = try AIMarkdownHTML.Tag.valueOf(try name(), settings, isSelfClosing: isSelfClosing)
+            } else if let fastTag = AIMarkdownHTML.Tag.valueOfTagId(tagId) {
                 resolved = fastTag
             } else if let normalName = normalName() {
-                resolved = try SwiftSoup.Tag.valueOfNormalized(normalName, isSelfClosing: isSelfClosing)
+                resolved = try AIMarkdownHTML.Tag.valueOfNormalized(normalName, isSelfClosing: isSelfClosing)
             } else {
-                resolved = try SwiftSoup.Tag.valueOf(try name(), settings, isSelfClosing: isSelfClosing)
+                resolved = try AIMarkdownHTML.Tag.valueOf(try name(), settings, isSelfClosing: isSelfClosing)
             }
             resolvedTag = resolved
             resolvedTagPreservesCase = settings.preservesTagCase()
@@ -1292,6 +1298,7 @@ open class Token {
         @inline(__always)
         override func reset() -> Token {
             sourceRange = nil
+            sourceEventID = nil; sourceEventPieces = []; sourceCharacterInjection = false
             Token.reset(data)
             bogus = false
             return self
@@ -1336,6 +1343,7 @@ open class Token {
         @inline(__always)
         override func reset() -> Token {
             sourceRange = nil
+            sourceEventID = nil; sourceEventPieces = []; sourceCharacterInjection = false
             data = nil
             dataSlice = nil
             return self
@@ -1399,6 +1407,7 @@ open class Token {
         @inline(__always)
         override func reset() -> Token {
             sourceRange = nil
+            sourceEventID = nil; sourceEventPieces = []; sourceCharacterInjection = false
             return self
         }
     }

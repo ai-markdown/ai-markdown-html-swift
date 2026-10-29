@@ -1,7 +1,7 @@
 // Build against a release SwiftSoup library without -enable-testing.
 import Foundation
 import Dispatch
-import SwiftSoup
+import AIMarkdownHTML
 #if canImport(Glibc)
 import Glibc
 #else
@@ -29,7 +29,7 @@ case "text-japanese", "textnode", "owntext", "parse-text", "raw":
 default: fatalError("Unknown workload: \(workload)")
 }
 let html = "<main>" + pieces.map { "<p>\($0)</p>" }.joined() + "</main>"
-let doc = try SwiftSoup.parse(html)
+let doc = try AIMarkdownHTML.parse(html)
 let root = try doc.select("main").first()!
 let paragraphs = try doc.select("p").array()
 let nodes = pieces.map { TextNode($0, "") }
@@ -37,7 +37,7 @@ let run: () throws -> Int
 switch workload {
 case "textnode": run = { nodes.reduce(0) { $0 &+ $1.text().utf8.count } }
 case "owntext": run = { paragraphs.reduce(0) { $0 &+ $1.ownText().utf8.count } }
-case "parse-text": run = { try SwiftSoup.parse(html).text().utf8.count }
+case "parse-text": run = { try AIMarkdownHTML.parse(html).text().utf8.count }
 case "raw": run = { try root.text(trimAndNormaliseWhitespace: false).utf8.count }
 default: run = { try root.text().utf8.count }
 }

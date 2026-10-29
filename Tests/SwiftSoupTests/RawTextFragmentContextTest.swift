@@ -1,5 +1,5 @@
 import XCTest
-@testable import SwiftSoup
+@testable import AIMarkdownHTML
 
 final class RawTextFragmentContextTest: XCTestCase {
     private let literalSource = "alpha&amp;<b>literal</b>&#x41;日本😀"
