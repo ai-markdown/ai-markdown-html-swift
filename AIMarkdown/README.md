@@ -23,3 +23,9 @@ This repository is both the implementation source and the Swift Package distribu
 Maintain custom changes on `ai-markdown`. Evaluate upstream upgrades separately from maintenance work, reviewing semantic differences, source tracking, lifecycle behavior, and coexistence with official SwiftSoup. Do not remove assertions or treat skipped benchmark cases as performance acceptance.
 
 Run `swift test` and `swift test -c release` for the upstream and custom test suites. Preserve meaningful multilingual test data when editing documentation or comments. Keep full logs and one-time migration records in local build output or CI artifacts rather than the source tree.
+
+## Reproducible checks
+
+`python3 scripts/verify-source.py` checks the current runtime file set, Package manifest, and license against `scripts/source-manifest.json`. After reviewing and testing an intentional change, use `--record-current` to update the hashes; updating hashes does not itself prove compatibility.
+
+`python3 scripts/verify-consumer.py` installs this fork and the pinned official SwiftSoup revision through distinct local Git URLs, then builds and runs a coexistence probe. It checks seven complete output trees (six equal and one separately asserted existing foster-placement difference), the public source-event API, and linked module symbols. This local probe does not establish remote release availability.

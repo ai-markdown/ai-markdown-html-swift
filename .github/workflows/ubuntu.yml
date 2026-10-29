@@ -3,10 +3,11 @@ name: Ubuntu Swift
 
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "ai-markdown" ]
   pull_request:
-    branches: [ "master", "fix/**" ]
+    branches: [ "master", "ai-markdown", "fix/**" ]
 
 jobs:
   build:
@@ -14,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        swift: ["6.1", "6.0"]
+        swift: ["6.2"]
         
     runs-on: ${{ matrix.os }}
 

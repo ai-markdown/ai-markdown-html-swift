@@ -3,6 +3,8 @@
 
 # Swift Package Manager
 .build
+.swiftpm/
+__pycache__/
 /Derived/
 Package.resolved
 

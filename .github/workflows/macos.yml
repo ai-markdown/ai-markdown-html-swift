@@ -3,17 +3,18 @@ name: macOS Swift
 
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "ai-markdown" ]
   pull_request:
-    branches: [ "master", "fix/**" ]
+    branches: [ "master", "ai-markdown", "fix/**" ]
 
 jobs:
   build:
     name: Swift on ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-15]
+        os: [macos-26]
         
     runs-on: ${{ matrix.os }}
 
@@ -25,5 +26,7 @@ jobs:
       run: swift build -v
     - name: Run tests
       run: swift test -v
-    - name: Build Xcode framework
-      run: xcodebuild -project SwiftSoup.xcodeproj -target SwiftSoup -configuration Release -sdk macosx CODE_SIGNING_ALLOWED=NO build
+    - name: Run release package tests
+      run: swift test -c release
+    - name: Verify current source manifest
+      run: python3 scripts/verify-source.py
