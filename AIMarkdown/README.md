@@ -29,3 +29,5 @@ Run `swift test` and `swift test -c release` for the upstream and custom test su
 `python3 scripts/verify-source.py` checks the current runtime file set, Package manifest, and license against `scripts/source-manifest.json`. After reviewing and testing an intentional change, use `--record-current` to update the hashes; updating hashes does not itself prove compatibility.
 
 `python3 scripts/verify-consumer.py` installs this fork and the pinned official SwiftSoup revision through distinct local Git URLs, then builds and runs a coexistence probe. It checks seven complete output trees (six equal and one separately asserted existing foster-placement difference), the public source-event API, and linked module symbols. This local probe does not establish remote release availability.
+
+Use [BENCHMARKS.md](BENCHMARKS.md) for the original upstream performance methodology. Historical executable/product names in that protocol must be adapted to the current SwiftPM targets.
