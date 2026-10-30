@@ -155,11 +155,12 @@ class HtmlParserTest: XCTestCase {
 	}
 
 	func testParsesUnterminatedTextarea() throws {
-		// don't parse right to end, but break on <p>
+		// Spec/parse5 behavior (AI Markdown fork): RCDATA runs to EOF when no matching end tag follows; jsoup's
+		// early breakout on a start tag is not kept.
 		let doc: Document = try AIMarkdownHTML.parse("<body><p><textarea>one<p>two")
 		let t: Element = try doc.select("textarea").first()!
-		XCTAssertEqual("one", try t.text())
-		XCTAssertEqual("two", try doc.select("p").get(1).text())
+		XCTAssertEqual("one<p>two", try t.text())
+		XCTAssertEqual(1, try doc.select("p").size())
 	}
 
 	func testParsesUnterminatedOption() throws {
@@ -245,7 +246,9 @@ class HtmlParserTest: XCTestCase {
 		XCTAssertEqual(expect, try el.text())
 		XCTAssertEqual(expect, try el.val())
 		XCTAssertEqual(expect, try el.html())
-		XCTAssertEqual("<textarea>\n\t" + expect + "\n</textarea>", try el.outerHtml()) // but preserved in round-trip html
+		// The first LF after the start tag is dropped by parsing (HTML spec / parse5); the rest round-trips.
+		XCTAssertEqual("\t" + expect + "\n", el.textNodes().map { $0.getWholeText() }.joined())
+		XCTAssertEqual("<textarea>\t" + expect + "\n</textarea>", try el.outerHtml())
 	}
 
 	func testPreservesSpaceInScript() throws {

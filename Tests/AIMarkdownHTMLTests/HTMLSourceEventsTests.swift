@@ -73,7 +73,7 @@ struct HTMLSourceEventsTests {
         #expect(oracle.cases.count == 95)
         #expect(differences == observations.webDifferent)
         #expect(Set(["formatting-reconstruct", "adoption-replacement", "adoption-adopter"]).isSubset(of: copies))
-        #expect(mergeCount == 11)
+        #expect(mergeCount == 7, "\(mergeCount)")
     }
 
     private func validate(_ trace: HTMLSourceSnapshot, input: String) throws {
@@ -209,12 +209,15 @@ struct HTMLSourceEventsTests {
         #expect(throws: (any Error).self) {
             try HTMLSourceParser.parseFragment([SourceInputEmission(id: "bad", kind: "raw", role: "author-raw", value: "中", rawUTF8Start: 0, rawUTF8End: 1)], tracking: true)
         }
-        #expect(throws: (any Error).self) {
-            try HTMLSourceParser.parseFragment([
-                SourceInputEmission(id: "a", kind: "raw", role: "author-raw", value: "<p>A", rawUTF8Start: 0, rawUTF8End: 4),
-                SourceInputEmission(id: "b", kind: "characters", role: "hast-generated-text", value: "x", rawUTF8Start: 4, rawUTF8End: 4),
-                SourceInputEmission(id: "c", kind: "raw", role: "author-raw", value: "B</p>", rawUTF8Start: 4, rawUTF8End: 9),
-            ], tracking: true)
-        }
+        // Generated text between two raw character runs is an ordinary hast-util-raw sequence: the pending raw
+        // characters are flushed before the CHARACTER token and all three runs merge into one text node.
+        let merged = try HTMLSourceParser.parseFragment([
+            SourceInputEmission(id: "a", kind: "raw", role: "author-raw", value: "<p>A", rawUTF8Start: 0, rawUTF8End: 4),
+            SourceInputEmission(id: "b", kind: "characters", role: "hast-generated-text", value: "x", rawUTF8Start: 4, rawUTF8End: 4),
+            SourceInputEmission(id: "c", kind: "raw", role: "author-raw", value: "B</p>", rawUTF8Start: 4, rawUTF8End: 9),
+        ], tracking: true)
+        #expect(try merged.roots.map { try $0.outerHtml() } == ["<p>AxB</p>"])
+        let text = try #require(merged.trace?.nodes.first { $0.name == "#text" })
+        #expect(text.pieces.flatMap(\.emissions) == ["a", "b", "c"])
     }
 }

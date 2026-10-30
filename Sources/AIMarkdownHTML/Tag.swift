@@ -591,6 +591,11 @@ open class Tag: Hashable, @unchecked Sendable {
         "summary", "command", "device", "area", "basefont", "bgsound", "menuitem", "param", "source", "track",
         "data", "bdi"
     ].map { $0.utf8Array }
+    /// Whether the normalized name is an HTML void element (`emptyTags`), independent of the tag registry.
+    static func isKnownVoid(_ normalizedTagName: [UInt8]) -> Bool {
+        emptyTags.contains(normalizedTagName)
+    }
+
     private static let emptyTags: Set<[UInt8]> = Set([
         "meta", "link", "base", "frame", "img", "br", "wbr", "embed", "hr", "input", "keygen", "col", "command",
         "device", "area", "basefont", "bgsound", "menuitem", "param", "source", "track"

@@ -347,6 +347,106 @@
   {
    "id": "null-char",
    "html": "<p>a\u0000b</p>"
+  },
+  {
+   "id": "pre-leading-lf",
+   "html": "<pre>\nX</pre>"
+  },
+  {
+   "id": "pre-leading-lf-double",
+   "html": "<pre>\n\nX</pre>"
+  },
+  {
+   "id": "pre-space-then-lf",
+   "html": "<pre> \nX</pre>"
+  },
+  {
+   "id": "pre-entity-lf",
+   "html": "<pre>&#10;X</pre>"
+  },
+  {
+   "id": "pre-entity-cr",
+   "html": "<pre>&#13;X</pre>"
+  },
+  {
+   "id": "pre-crlf",
+   "html": "<pre>\r\nX</pre>"
+  },
+  {
+   "id": "pre-only-lf",
+   "html": "<pre>\n</pre>"
+  },
+  {
+   "id": "pre-br-then-lf",
+   "html": "<pre><br>\nX</pre>"
+  },
+  {
+   "id": "pre-comment-then-lf",
+   "html": "<pre><!--c-->\nX</pre>"
+  },
+  {
+   "id": "pre-span-then-lf",
+   "html": "<pre><span>\nX</span></pre>"
+  },
+  {
+   "id": "pre-in-table",
+   "html": "<table><pre>\nX</pre></table>"
+  },
+  {
+   "id": "pre-after-p",
+   "html": "<p>a<pre>\nX</pre>"
+  },
+  {
+   "id": "listing-leading-lf",
+   "html": "<listing>\nX</listing>"
+  },
+  {
+   "id": "textarea-leading-lf",
+   "html": "<textarea>\nX</textarea>"
+  },
+  {
+   "id": "textarea-leading-lf-double",
+   "html": "<textarea>\n\nX</textarea>"
+  },
+  {
+   "id": "textarea-comment-text-lf",
+   "html": "<textarea><!--c-->\nX</textarea>"
+  },
+  {
+   "id": "textarea-entity-lf",
+   "html": "<textarea>&#10;X</textarea>"
+  },
+  {
+   "id": "rcdata-title-tags",
+   "html": "<title>x<p>y</title>z"
+  },
+  {
+   "id": "rcdata-textarea-unclosed",
+   "html": "<textarea>a<b>c"
+  },
+  {
+   "id": "rcdata-title-partial-end",
+   "html": "<title>a</titl>b</title>c"
+  },
+  {
+   "id": "null-between-text",
+   "html": "a\u0000b"
+  },
+  {
+   "id": "null-in-table",
+   "html": "<table>\u0000</table>"
+  },
+  {
+   "id": "null-in-rcdata",
+   "html": "<title>a\u0000b</title>"
+  },
+  {
+   "id": "null-leading",
+   "html": "\u0000<p>x</p>"
+  },
+  {
+   "id": "null-in-cell",
+   "html": "<td>a\u0000b</td>"
   }
  ]
 }

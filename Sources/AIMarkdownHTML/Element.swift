@@ -2626,8 +2626,16 @@ open class Element: Node {
             }
         } else {
             accum.append(UTF8Arrays.tagEnd)
+            // HTML fragment serialization: a <pre>, <textarea> or <listing> whose first child text starts with LF gets
+            // one extra LF, because parsing drops the first LF after these start tags (parse5 `skipNextNewLine`).
+            if out.syntax() == OutputSettings.Syntax.html, Element.leadingNewlineSensitiveTags.contains(tagNameNormalUTF8()),
+               let first = childNodes.first as? TextNode, first.getWholeTextUTF8().first == 0x0A {
+                accum.append(0x0A)
+            }
         }
     }
+
+    private static let leadingNewlineSensitiveTags: Set<[UInt8]> = [Array("pre".utf8), Array("textarea".utf8), Array("listing".utf8)]
     
     @inline(__always)
     override func outerHtmlTail(_ accum: StringBuilder, _ depth: Int, _ out: OutputSettings) {

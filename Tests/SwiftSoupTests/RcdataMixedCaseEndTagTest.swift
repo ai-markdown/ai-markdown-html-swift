@@ -64,12 +64,14 @@ final class RcdataMixedCaseEndTagTest: XCTestCase {
         }
     }
 
-    func testMissingAndUnrelatedClosingTagsRetainLegacyRecovery() throws {
+    func testMissingAndUnrelatedClosingTagsReadRCDATAToEOF() throws {
+        // Spec/parse5 behavior (AI Markdown fork): without a matching end tag, RCDATA runs to EOF and unrelated
+        // markup stays literal text; jsoup's early breakout on a start tag is not kept.
         for tail in ["", "</TeXtArEa>"] {
             let document = try AIMarkdownHTML.parse("<title>alpha<b>literal\(tail)<p id='after'>tail</p>")
-            XCTAssertEqual(try document.select("title").text(), "alpha")
-            XCTAssertEqual(try document.select("b").size(), 1)
-            XCTAssertEqual(try document.getElementById("after")?.text(), "tail")
+            XCTAssertEqual(try document.select("title").text(), "alpha<b>literal\(tail)<p id='after'>tail</p>")
+            XCTAssertEqual(try document.select("b").size(), 0)
+            XCTAssertNil(try document.getElementById("after"))
         }
     }
 
@@ -83,10 +85,12 @@ final class RcdataMixedCaseEndTagTest: XCTestCase {
         XCTAssertEqual(closing.getPos(), 0)
     }
 
-    func testTextareaPreservesLegacyInitialWhitespaceOnRoundTrip() throws {
+    func testTextareaDropsTheFirstNewlineAndRoundTrips() throws {
+        // parse5 `skipNextNewLine`: one LF directly after <textarea> is ignored; serialization re-emits a protective
+        // LF when the text starts with LF, so the value survives a round trip.
         for trackSource in [false, true] {
-            for (input, expected) in [("\n\n日本", "\n\n日本"), ("\n日本", "\n日本"),
-                                      ("\n", "\n"), (" 日本\n", " 日本\n")] {
+            for (input, expected) in [("\n\n日本", "\n日本"), ("\n日本", "日本"),
+                                      ("\n", ""), (" 日本\n", " 日本\n")] {
                 let parser = Parser.htmlParser().settings(ParseSettings(false, false, trackSource))
                 let document = try parser.parseInput("<textarea id='target'>\(input)</textarea>", "")
                 let target = try XCTUnwrap(document.getElementById("target"))

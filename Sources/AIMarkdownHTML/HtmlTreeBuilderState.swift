@@ -571,8 +571,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
             case Token.TokenType.Char:
                 let c: Token.Char = t.asCharacter()
                 let data = c.getDataSlice()
-                if let data, data.count == 1, data.first == TokeniserStateVars.nullByte {
-                    // todo confirm that check
+                if let data, data.count == 1, data.first == TokeniserStateVars.nullByte, !c.sourceCharacterInjection {
+                    // parse5 ignores NULL_CHARACTER tokens in body; a generated CHARACTER token keeps its value.
                     tb.error(self)
                     return false
                 }
@@ -748,7 +748,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                 case .pre, .listing:
                     try closePIfInButtonScope()
                     try tb.insert(startTag)
-                    // todo: ignore LF if next token
+                    // parse5 preStartTagInBody: a following LF character token is ignored.
+                    tb.skipNextNewLine = true
                     tb.framesetOk(false)
                 case .applet, .marquee, .object:
                     try reconstructFormattingIfNeeded()
@@ -818,7 +819,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                     return try tb.process(t, .InHead)
                 case .textarea:
                     try HtmlTreeBuilderState.handleRcData(startTag, tb)
-                    // Retain SwiftSoup's existing leading-whitespace policy.
+                    // parse5 textareaStartTagInBody: a following LF character token is ignored.
+                    tb.skipNextNewLine = true
                     tb.framesetOk(false)
                 case .iframe:
                     tb.framesetOk(false)
@@ -1539,6 +1541,12 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
             }
 
             if (t.isCharacter()) {
+                // parse5 characterInTable: characters are buffered as pending table text only while the current node
+                // is a table structure element; otherwise they take the "anything else" path (foster parenting as
+                // needed). jsoup always buffered them, which differed once no EOF flushed the buffer (hast-util-raw).
+                guard let cur = tb.currentElement(), TagSets.table.contains(cur.nodeNameUTF8()) else {
+                    return try anythingElse(t, tb)
+                }
                 tb.newPendingTableCharacters()
                 tb.markInsertionMode()
                 tb.transition(.InTableText)

@@ -8,25 +8,6 @@
     "merge-ignored-doctype",
     "merge-select",
     "nul",
-    "foreign",
-    "prefix-entity-1",
-    "prefix-entity-5",
-    "prefix-entity-6",
-    "prefix-entity-7",
-    "prefix-entity-8",
-    "prefix-entity-11",
-    "prefix-entity-12",
-    "prefix-table-1",
-    "prefix-table-8",
-    "prefix-table-9",
-    "prefix-table-10",
-    "prefix-table-11",
-    "prefix-table-13",
-    "prefix-table-18",
-    "prefix-table-19",
-    "prefix-table-23",
-    "prefix-table-24",
-    "prefix-table-28",
-    "prefix-table-29"
+    "foreign"
   ]
 }

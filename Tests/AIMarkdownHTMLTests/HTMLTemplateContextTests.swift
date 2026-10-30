@@ -5,10 +5,13 @@ import Testing
 
 /// Differential oracle for the `<template>` fragment context: `Fixtures/template-context.json` is produced by
 /// `scripts/template-context-oracle/export.mjs` with parse5 7.3.0 (`parseFragment` without a context element, the
-/// configuration hast-util-raw 9.1.3 uses). Every corpus entry must build the same tree here.
+/// configuration hast-util-raw 9.1.3 uses). Every corpus entry records two trees: `tree`/`digest` from `parseFragment`
+/// (EOF included), which the string entry point must reproduce, and `rawTree`/`rawDigest` from the hast-util-raw
+/// driving sequence for one raw node (no EOF: an unfinished token at the end is dropped and pending table characters
+/// are never inserted), which `HTMLSourceParser` must reproduce.
 struct HTMLTemplateContextTests {
     private struct Oracle: Decodable { let parse5: String; let cases: [Item] }
-    private struct Item: Decodable { let id: String; let html: String; let tree: [TreeNode]?; let digest: String; let leadingLFDigest: String }
+    private struct Item: Decodable { let id: String; let html: String; let tree: [TreeNode]?; let digest: String; let rawTree: [TreeNode]?; let rawDigest: String }
     private indirect enum TreeNode: Decodable, Equatable, CustomStringConvertible {
         case text(String)
         case comment(String)
@@ -94,63 +97,46 @@ struct HTMLTemplateContextTests {
         SHA256.hash(data: Data(tree.map(\.serialized).joined().utf8)).map { String(format: "%02x", $0) }.joined()
     }
 
-    /// Pre-existing tree-builder differences that are not part of the template fragment context and stay enumerated
-    /// by id: each listed case must still differ, so a fix here is noticed and the list shrinks.
+    /// Tree-builder differences from parse5 that stay enumerated by id: each listed case must still differ, so a fix is
+    /// noticed and the list shrinks. The leading-LF rule (`skipNextNewLine`), spec RCDATA handling (no jsoup early
+    /// breakout) and separate U+0000 character tokens landed; what remains is foreign content.
     static let enumeratedDifferences: [String: String] = [
-        "rcdata-unclosed": rcdataBreakout,
-        "null-char": "U+0000 inside character data is kept; parse5 drops NULL character tokens in body",
-        // Boundary-oracle frames with an unclosed <title> or <textarea> (same RCDATA breakout).
-        "boundary/fuzz-hazard-11#7": rcdataBreakout, "boundary/fuzz-hazard-11#8": rcdataBreakout, "boundary/fuzz-hazard-11#21": rcdataBreakout,
-        "boundary/fuzz-hazard-48#15": rcdataBreakout, "boundary/fuzz-hazard-48#16": rcdataBreakout, "boundary/fuzz-hazard-48#17": rcdataBreakout,
-        "boundary/fuzz-hazard-48#18": rcdataBreakout, "boundary/fuzz-hazard-48#19": rcdataBreakout, "boundary/fuzz-hazard-48#20": rcdataBreakout,
-        "boundary/fuzz-hazard-51#7": rcdataBreakout, "boundary/fuzz-hazard-51#8": rcdataBreakout, "boundary/fuzz-hazard-51#15": rcdataBreakout,
+        "boundary/fuzz-hazard-11#21": foreignContentBreakout,
     ]
-    static let rcdataBreakout = "jsoup/SwiftSoup leave RCDATA early when no matching end tag follows (<title>x<p>y); parse5 reads to EOF"
+    /// parse5 pops the open `<svg>`/`<math>` subtree when a start tag such as `<h2>` arrives in foreign content
+    /// (`startTagInForeignContent` / `causesExit`); jsoup/SwiftSoup have no foreign content handling and keep nesting.
+    static let foreignContentBreakout = "parse5 exits foreign content (<svg>) on an HTML breakout start tag; this tree builder keeps nesting inside <svg>"
 
-    /// The second enumerated class is parse5's `skipNextNewLine` (one LF dropped after <pre>, <listing> and <textarea>
-    /// start tags), which this tree builder does not implement yet (see HTMLRawEOLTests `leading-pre-LF`). A corpus entry
-    /// whose trees become equal once that single LF is dropped on both sides belongs to this class only.
-    private static func droppingLeadingLF(_ nodes: [TreeNode]) -> [TreeNode] {
-        nodes.map { node in
-            guard case let .element(name, attributes, original) = node else { return node }
-            var children = droppingLeadingLF(original)
-            if ["pre", "listing", "textarea"].contains(name), case let .text(value)? = children.first, value.hasPrefix("\n") {
-                let rest = String(value.dropFirst())
-                if rest.isEmpty { children.removeFirst() } else { children[0] = .text(rest) }
-            }
-            return .element(name: name, attributes: attributes, children: children)
-        }
-    }
+    private struct Difference { let id: String; let report: String }
 
-    private struct Difference { let id: String; let leadingLFOnly: Bool; let report: String }
-
-    /// Lists the corpus entries whose Swift tree differs from parse5; empty means full parity. Digest-only entries
-    /// (boundary frames) are re-parsed through parse5's recorded digest, so `leadingLFOnly` is decided by re-digesting
-    /// the LF-normalized Swift tree against the LF-normalized parse5 tree when the latter is stored, and otherwise by
-    /// the entry's `leadingLFDigest`.
-    private static func differences(_ oracle: Oracle, parse: (String) throws -> [Node]) rethrows -> [Difference] {
+    /// Lists the corpus entries whose Swift tree differs from parse5; empty means full parity. `raw` selects the
+    /// hast-util-raw trees (`rawTree`/`rawDigest`) instead of the `parseFragment` trees.
+    private static func differences(_ oracle: Oracle, raw: Bool, parse: (String) throws -> [Node]) rethrows -> [Difference] {
         var failures: [Difference] = []
         for item in oracle.cases {
             let actual = canonical(try parse(item.html))
-            if let tree = item.tree {
+            let expectedTree = raw ? item.rawTree : item.tree, expectedDigest = raw ? item.rawDigest : item.digest
+            if let tree = expectedTree {
                 guard actual != tree else { continue }
-                failures.append(Difference(id: item.id, leadingLFOnly: droppingLeadingLF(actual) == droppingLeadingLF(tree),
-                                           report: "\(item.id)\n  html:   \(item.html.debugDescription)\n  parse5: \(tree.map(\.description).joined())\n  swift:  \(actual.map(\.description).joined())"))
-            } else if digest(actual) != item.digest {
-                failures.append(Difference(id: item.id, leadingLFOnly: digest(droppingLeadingLF(actual)) == item.leadingLFDigest,
-                                           report: "\(item.id)\n  html:   \(item.html.debugDescription)\n  swift:  \(actual.map(\.description).joined())"))
+                failures.append(Difference(id: item.id, report: "\(item.id)\n  html:   \(item.html.debugDescription)\n  parse5: \(tree.map(\.description).joined())\n  swift:  \(actual.map(\.description).joined())"))
+            } else if digest(actual) != expectedDigest {
+                failures.append(Difference(id: item.id, report: "\(item.id)\n  html:   \(item.html.debugDescription)\n  swift:  \(actual.map(\.description).joined())"))
             }
         }
         return failures
     }
 
-    private static func check(_ failures: [Difference], _ label: String) -> (leadingLF: Int, enumerated: Int) {
-        let unexpected = failures.filter { !$0.leadingLFOnly && enumeratedDifferences[$0.id] == nil }
+    private static func check(_ failures: [Difference], _ label: String) {
+        let unexpected = failures.filter { enumeratedDifferences[$0.id] == nil }
+        if let path = ProcessInfo.processInfo.environment["HTML_TEMPLATE_CONTEXT_REPORT"], !unexpected.isEmpty {
+            try? (unexpected.map(\.report).joined(separator: "\n\n") + "\n").write(to: URL(fileURLWithPath: path).appendingPathExtension(label.replacingOccurrences(of: "=", with: "-")), atomically: true, encoding: .utf8)
+        }
         #expect(unexpected.isEmpty, Comment(rawValue: "\(label): \(unexpected.count) unexpected difference(s):\n" + unexpected.map(\.report).sorted().joined(separator: "\n")))
         for (id, reason) in enumeratedDifferences {
             #expect(failures.contains { $0.id == id }, "\(label): \(id) no longer differs (\(reason)); remove it from enumeratedDifferences")
         }
-        return (failures.filter(\.leadingLFOnly).count, failures.filter { !$0.leadingLFOnly }.count)
+        // Pinned so the enumerated class cannot grow silently.
+        #expect(failures.count == enumeratedDifferences.count, "\(label): \(failures.map(\.id))")
     }
 
     @Test func templateFragmentContextMatchesParse5OnTheWholeCorpus() throws {
@@ -158,22 +144,23 @@ struct HTMLTemplateContextTests {
         #expect(oracle.parse5 == "7.3.0")
         #expect(oracle.cases.count > 2000)
         #expect(oracle.cases.allSatisfy { $0.tree == nil || Self.digest($0.tree!) == $0.digest }, "digest serialization must match export.mjs")
-        let counts = Self.check(try Self.differences(oracle) { try Parser.parseTemplateFragment(Self.normalizedLineEndings($0)) }, "parseTemplateFragment")
-        // Pinned so the enumerated classes cannot grow silently; lower them when the leading-LF rule lands.
-        #expect(counts.leadingLF == Self.expectedLeadingLFOnly && counts.enumerated == Self.enumeratedDifferences.count, "\(counts)")
+        #expect(oracle.cases.allSatisfy { $0.rawTree == nil || Self.digest($0.rawTree!) == $0.rawDigest }, "digest serialization must match export.mjs")
+        Self.check(try Self.differences(oracle, raw: false) { try Parser.parseTemplateFragment(Self.normalizedLineEndings($0)) }, "parseTemplateFragment")
     }
 
-    /// Corpus entries that differ only by parse5's leading-LF rule (see `droppingLeadingLF`).
-    static let expectedLeadingLFOnly = 35
-
+    /// `HTMLSourceParser` follows hast-util-raw: no EOF reaches tree construction. The corpus entries whose
+    /// `parseFragment` and hast-util-raw trees differ are exactly the ones ending in an unfinished token (dropped) or
+    /// with pending table characters (never inserted); both entry points must match their own oracle.
     @Test func sourceParserTemplateContextBuildsTheSameTreesWithAndWithoutTracking() throws {
         let oracle = try Self.fixture()
+        let eofSensitive = oracle.cases.filter { $0.digest != $0.rawDigest }.map(\.id)
+        #expect(eofSensitive.count == 21, "\(eofSensitive)")
+        #expect(Set(["unfinished-comment", "unfinished-pi", "entity-at-end", "tr-first", "boundary/fuzz-hazard-51#1"]).isSubset(of: eofSensitive))
         for mode in [false, true] {
-            let counts = Self.check(try Self.differences(oracle) { html in
+            Self.check(try Self.differences(oracle, raw: true) { html in
                 let emission = SourceInputEmission(id: "raw", kind: "raw", role: "author-raw", value: html, rawUTF8Start: 0, rawUTF8End: html.utf8.count)
                 return try HTMLSourceParser.parseFragment([emission], tracking: mode, context: .template).roots
             }, "HTMLSourceParser tracking=\(mode)")
-            #expect(counts.leadingLF == Self.expectedLeadingLFOnly && counts.enumerated == Self.enumeratedDifferences.count, "\(counts)")
         }
     }
 

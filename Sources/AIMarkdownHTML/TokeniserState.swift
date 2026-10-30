@@ -236,7 +236,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 case TokeniserStateVars.slashByte: // "/"
                     r.advanceAscii()
                     if r.isEmpty() {
-                        t.eofError(self)
+                        try t.eofError(self)
                         t.clearTagStart()
                         t.emit(UTF8Arrays.endTagStart)
                         t.transition(.Data)
@@ -368,7 +368,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .EndTagOpen:
             if (r.isEmpty()) {
-                t.eofError(self)
+                try t.eofError(self)
                 t.clearTagStart()
                 t.emit(UTF8Arrays.endTagStart)
                 t.transition(.Data)
@@ -395,39 +395,11 @@ enum TokeniserState: TokeniserStateProtocol {
             try TokeniserState.readTagName(self, t, r)
             break
         case .RcdataLessthanSign:
-            if let byte = r.currentByte() {
-                if byte == TokeniserStateVars.slashByte {
-                    t.createTempBuffer()
-                    t.advanceTransition(.RCDATAEndTagOpen)
-                } else if byte < TokeniserStateVars.asciiUpperLimitByte {
-                    if TokeniserStateVars.isAsciiAlpha(byte),
-                       let endTagName = t.appropriateEndTagName(),
-                       !r.containsAsciiCaseInsensitive(prefix: UTF8Arrays.endTagStart, suffix: endTagName) {
-                        // diverge from spec: got a start tag, but there's no appropriate end tag (</title>), so rather than
-                        // consuming to EOF break out here
-                        t.tagPending = t.createTagPending(false).name(endTagName)
-                        try t.emitTagPending()
-                        r.unconsume() // undo UnicodeScalar.LessThan
-                        t.transition(.Data)
-                    } else {
-                        t.clearTagStart()
-                        t.emit(UnicodeScalar.LessThan)
-                        t.transition(.Rcdata)
-                    }
-                } else if r.matchesLetter(),
-                          let endTagName = t.appropriateEndTagName(),
-                          !r.containsAsciiCaseInsensitive(prefix: UTF8Arrays.endTagStart, suffix: endTagName) {
-                    // diverge from spec: got a start tag, but there's no appropriate end tag (</title>), so rather than
-                    // consuming to EOF break out here
-                    t.tagPending = t.createTagPending(false).name(endTagName)
-                    try t.emitTagPending()
-                    r.unconsume() // undo UnicodeScalar.LessThan
-                    t.transition(.Data)
-                } else {
-                    t.clearTagStart()
-                    t.emit(UnicodeScalar.LessThan)
-                    t.transition(.Rcdata)
-                }
+            // Spec (and parse5) behavior: anything but "/" is RCDATA text. jsoup's divergence that synthesized the
+            // appropriate end tag when no "</title>" followed is intentionally not kept; the text runs to EOF.
+            if let byte = r.currentByte(), byte == TokeniserStateVars.slashByte {
+                t.createTempBuffer()
+                t.advanceTransition(.RCDATAEndTagOpen)
             } else {
                 t.clearTagStart()
                 t.emit(UnicodeScalar.LessThan)
@@ -435,6 +407,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
             break
         case .RCDATAEndTagOpen:
+            try TokeniserState.waitIfSpecialEndTagHibernates(t, r, self)
             if let byte = r.currentByte(), byte < TokeniserStateVars.asciiUpperLimitByte {
                 if TokeniserStateVars.isAsciiAlpha(byte) {
                     t.createTagPending(false)
@@ -543,6 +516,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
             break
         case .RawtextEndTagOpen:
+            try TokeniserState.waitIfSpecialEndTagHibernates(t, r, self)
             TokeniserState.readEndTag(t, r, .RawtextEndTagName, .Rawtext)
             break
         case .RawtextEndTagName:
@@ -580,6 +554,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
             break
         case .ScriptDataEndTagOpen:
+            try TokeniserState.waitIfSpecialEndTagHibernates(t, r, self)
             TokeniserState.readEndTag(t, r, .ScriptDataEndTagName, .ScriptData)
             break
         case .ScriptDataEndTagName:
@@ -603,7 +578,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .ScriptDataEscaped:
             if (r.isEmpty()) {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 return
             }
@@ -635,7 +610,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .ScriptDataEscapedDash:
             if (r.isEmpty()) {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 return
             }
@@ -676,7 +651,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .ScriptDataEscapedDashDash:
             if (r.isEmpty()) {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 return
             }
@@ -778,7 +753,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .ScriptDataDoubleEscaped:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -805,7 +780,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .ScriptDataDoubleEscapedDash:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -846,7 +821,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .ScriptDataDoubleEscapedDashDash:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -929,7 +904,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
 
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -974,7 +949,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
 
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -1017,7 +992,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
 
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -1070,7 +1045,7 @@ enum TokeniserState: TokeniserStateProtocol {
         case .AfterAttributeValue_quoted:
             // CharacterReferenceInAttributeValue state handled inline
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -1096,7 +1071,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .SelfClosingStartTag:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.transition(.Data)
                 break
             }
@@ -1111,7 +1086,7 @@ enum TokeniserState: TokeniserStateProtocol {
             default:
                 let c = r.consume()
                 if c == TokeniserStateVars.eof {
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.transition(.Data)
                 } else {
                     t.error(self)
@@ -1127,6 +1102,8 @@ enum TokeniserState: TokeniserStateProtocol {
             let comment: Token.Comment = Token.Comment()
             comment.bogus = true
             comment.data.append(r.consumeToSlice(UTF8Arrays.tagEnd))
+            // At EOF the comment is emitted; at an emission boundary `eofError` makes the state wait instead.
+            if r.isEmpty() { try t.eofError(self) }
             // todo: replace nullChar with replaceChar
             try t.emit(comment)
             t.advanceTransition(.Data)
@@ -1149,7 +1126,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .CommentStart:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 try t.emitCommentPending()
                 t.transition(.Data)
                 break
@@ -1180,7 +1157,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 } else {
                     let c = r.consume()
                     if c == TokeniserStateVars.eof {
-                        t.eofError(self)
+                        try t.eofError(self)
                         try t.emitCommentPending()
                         t.transition(.Data)
                     } else {
@@ -1192,7 +1169,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .CommentStartDash:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 try t.emitCommentPending()
                 t.transition(.Data)
                 break
@@ -1223,7 +1200,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 } else {
                     let c = r.consume()
                     if c == TokeniserStateVars.eof {
-                        t.eofError(self)
+                        try t.eofError(self)
                         try t.emitCommentPending()
                         t.transition(.Data)
                     } else {
@@ -1235,7 +1212,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .Comment:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 try t.emitCommentPending()
                 t.transition(.Data)
                 break
@@ -1258,7 +1235,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .CommentEndDash:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 try t.emitCommentPending()
                 t.transition(.Data)
                 break
@@ -1283,7 +1260,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 } else {
                     let c = r.consume()
                     if c == TokeniserStateVars.eof {
-                        t.eofError(self)
+                        try t.eofError(self)
                         try t.emitCommentPending()
                         t.transition(.Data)
                     } else {
@@ -1295,7 +1272,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .CommentEnd:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 try t.emitCommentPending()
                 t.transition(.Data)
                 break
@@ -1332,7 +1309,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 } else {
                     let c = r.consume()
                     if c == TokeniserStateVars.eof {
-                        t.eofError(self)
+                        try t.eofError(self)
                         try t.emitCommentPending()
                         t.transition(.Data)
                     } else {
@@ -1345,7 +1322,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .CommentEndBang:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 try t.emitCommentPending()
                 t.transition(.Data)
                 break
@@ -1376,7 +1353,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 } else {
                     let c = r.consume()
                     if c == TokeniserStateVars.eof {
-                        t.eofError(self)
+                        try t.eofError(self)
                         try t.emitCommentPending()
                         t.transition(.Data)
                     } else {
@@ -1388,7 +1365,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .Doctype:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.error(self)
                 t.createDoctypePending()
                 t.doctypePending.forceQuirks = true
@@ -1418,7 +1395,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.BeforeDoctypeName)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     // note: fall through to > case
                     fallthrough
                 case ">": // catch invalid <!DOCTYPE>
@@ -1447,7 +1424,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 return
             }
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.createDoctypePending()
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
@@ -1481,7 +1458,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.DoctypeName)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.createDoctypePending()
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
@@ -1507,7 +1484,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 return
             }
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1542,7 +1519,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.doctypePending.name.append(TokeniserStateVars.replacementChar)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1554,7 +1531,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .AfterDoctypeName:
             if (r.isEmpty()) {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1584,7 +1561,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .AfterDoctypePublicKeyword:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1634,7 +1611,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.Data)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1648,7 +1625,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .BeforeDoctypePublicIdentifier:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1693,7 +1670,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.Data)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1715,7 +1692,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.doctypePending.publicIdentifier.append(value)
             }
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1739,7 +1716,7 @@ enum TokeniserState: TokeniserStateProtocol {
             default:
                 let c = r.consume()
                 if c == TokeniserStateVars.eof {
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1758,7 +1735,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.doctypePending.publicIdentifier.append(value)
             }
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1782,7 +1759,7 @@ enum TokeniserState: TokeniserStateProtocol {
             default:
                 let c = r.consume()
                 if c == TokeniserStateVars.eof {
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1793,7 +1770,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .AfterDoctypePublicIdentifier:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1839,7 +1816,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.DoctypeSystemIdentifier_singleQuoted)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1853,7 +1830,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .BetweenDoctypePublicAndSystemIdentifiers:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1898,7 +1875,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.DoctypeSystemIdentifier_singleQuoted)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1912,7 +1889,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .AfterDoctypeSystemKeyword:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -1962,7 +1939,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.DoctypeSystemIdentifier_singleQuoted)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -1976,7 +1953,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .BeforeDoctypeSystemIdentifier:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -2021,7 +1998,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.Data)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -2043,7 +2020,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.doctypePending.systemIdentifier.append(value)
             }
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -2067,7 +2044,7 @@ enum TokeniserState: TokeniserStateProtocol {
             default:
                 let c = r.consume()
                 if c == TokeniserStateVars.eof {
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -2086,7 +2063,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 t.doctypePending.systemIdentifier.append(value)
             }
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -2110,7 +2087,7 @@ enum TokeniserState: TokeniserStateProtocol {
             default:
                 let c = r.consume()
                 if c == TokeniserStateVars.eof {
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -2121,7 +2098,7 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .AfterDoctypeSystemIdentifier:
             if r.isEmpty() {
-                t.eofError(self)
+                try t.eofError(self)
                 t.doctypePending.forceQuirks = true
                 try t.emitDoctypePending()
                 t.transition(.Data)
@@ -2149,7 +2126,7 @@ enum TokeniserState: TokeniserStateProtocol {
                     t.transition(.Data)
                     break
                 case TokeniserStateVars.eof:
-                    t.eofError(self)
+                    try t.eofError(self)
                     t.doctypePending.forceQuirks = true
                     try t.emitDoctypePending()
                     t.transition(.Data)
@@ -2296,7 +2273,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
         }
         if r.isEmpty() {
-            t.eofError(state)
+            try t.eofError(state)
             t.transition(.Data)
             return
         }
@@ -2442,12 +2419,12 @@ enum TokeniserState: TokeniserStateProtocol {
                 i &+= 1
             }
             r.pos = r.end
-            t.eofError(.TagName)
+            try t.eofError(.TagName)
             t.transition(.Data)
             return true
         }
         if r.isEmpty() {
-            t.eofError(.TagName)
+            try t.eofError(.TagName)
             t.transition(.Data)
             return true
         }
@@ -2492,7 +2469,7 @@ enum TokeniserState: TokeniserStateProtocol {
 
         if r.isEmpty() {
             t.finaliseAttributeName()
-            t.eofError(state)
+            try t.eofError(state)
             t.transition(.Data)
             return
         }
@@ -2547,7 +2524,7 @@ enum TokeniserState: TokeniserStateProtocol {
         var afterName = (state == .AfterAttributeName)
         while true {
             if r.isEmpty() {
-                t.eofError(state)
+                try t.eofError(state)
                 t.transition(.Data)
                 return true
             }
@@ -2555,7 +2532,7 @@ enum TokeniserState: TokeniserStateProtocol {
             if byte == TokeniserStateVars.tabByte || byte == TokeniserStateVars.newLineByte || byte == TokeniserStateVars.carriageReturnByte || byte == TokeniserStateVars.formFeedByte || byte == TokeniserStateVars.spaceByte {
                 r.advanceAsciiWhitespace()
                 if r.isEmpty() {
-                    t.eofError(state)
+                    try t.eofError(state)
                     t.transition(.Data)
                     return true
                 }
@@ -2637,7 +2614,7 @@ enum TokeniserState: TokeniserStateProtocol {
         }
         if r.isEmpty() {
             t.finaliseAttributeName()
-            t.eofError(.AttributeName)
+            try t.eofError(.AttributeName)
             t.transition(.Data)
             return true
         }
@@ -2649,7 +2626,7 @@ enum TokeniserState: TokeniserStateProtocol {
             afterWhitespace = true
             r.advanceAsciiWhitespace()
             if r.isEmpty() {
-                t.eofError(.AfterAttributeName)
+                try t.eofError(.AfterAttributeName)
                 t.transition(.Data)
                 return true
             }
@@ -2695,7 +2672,7 @@ enum TokeniserState: TokeniserStateProtocol {
     @inline(__always)
     private static func consumeAttributeValueFast(_ t: Tokeniser, _ r: CharacterReader) throws -> Bool {
         if r.isEmpty() {
-            t.eofError(.BeforeAttributeValue)
+            try t.eofError(.BeforeAttributeValue)
             try t.emitTagPending()
             t.transition(.Data)
             return true
@@ -2704,7 +2681,7 @@ enum TokeniserState: TokeniserStateProtocol {
         if byte == TokeniserStateVars.tabByte || byte == TokeniserStateVars.newLineByte || byte == TokeniserStateVars.carriageReturnByte || byte == TokeniserStateVars.formFeedByte || byte == TokeniserStateVars.spaceByte {
             r.advanceAsciiWhitespace()
             if r.isEmpty() {
-                t.eofError(.BeforeAttributeValue)
+                try t.eofError(.BeforeAttributeValue)
                 try t.emitTagPending()
                 t.transition(.Data)
                 return true
@@ -2753,7 +2730,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
 
             if r.isEmpty() {
-                t.eofError(state)
+                try t.eofError(state)
                 t.transition(.Data)
                 return true
             }
@@ -2799,7 +2776,7 @@ enum TokeniserState: TokeniserStateProtocol {
             }
 
             if r.isEmpty() {
-                t.eofError(.AttributeValue_unquoted)
+                try t.eofError(.AttributeValue_unquoted)
                 t.transition(.Data)
                 return true
             }
@@ -2839,7 +2816,7 @@ enum TokeniserState: TokeniserStateProtocol {
                 } else {
                     let c = r.consume()
                     if c == TokeniserStateVars.eof {
-                        t.eofError(.AttributeValue_unquoted)
+                        try t.eofError(.AttributeValue_unquoted)
                         t.transition(.Data)
                         return true
                     }
@@ -2889,7 +2866,7 @@ enum TokeniserState: TokeniserStateProtocol {
     @inline(__always)
     private static func handleAfterQuotedValueFast(_ t: Tokeniser, _ r: CharacterReader) throws -> Bool {
         if r.isEmpty() {
-            t.eofError(.AfterAttributeValue_quoted)
+            try t.eofError(.AfterAttributeValue_quoted)
             t.transition(.Data)
             return true
         }
@@ -2915,6 +2892,19 @@ enum TokeniserState: TokeniserStateProtocol {
 
     @inline(__always)
     static func readCharRef(_ t: Tokeniser, _ advance: TokeniserState)throws {
+        // parse5 decodes character references incrementally and waits for more input when the chunk ends inside a
+        // possible reference (hast-util-raw continues with the next raw node or drops it with the next generated node).
+        if t.emissionBoundaryActive {
+            let r = t.readerRef
+            var index = r.pos
+            while index < r.end, TokeniserStateVars.isAsciiAlpha(r.input[index]) || (r.input[index] >= 0x30 && r.input[index] <= 0x39) || r.input[index] == TokeniserStateVars.hashByte { index += 1 }
+            if index >= r.end {
+                // The unfinished reference is dropped like parse5's hibernated decoder; a raw node continuing it is
+                // not reconstructed (the serializer never splits a reference across raw nodes).
+                r.pos = r.end
+                try t.eofError(advance == .Rcdata ? .CharacterReferenceInRcdata : .CharacterReferenceInData)
+            }
+        }
         let sourceStart = t.readerRef.pos - 1
         let sourcePieceStart = t.sourceEventPieces.count
         defer { t.sourceReference(start: sourceStart, pieceStart: sourcePieceStart) }
@@ -2942,6 +2932,19 @@ enum TokeniserState: TokeniserStateProtocol {
             t.emit(c!)
         }
         t.transition(advance)
+    }
+
+    /// parse5 `handleSpecialEndTag` looks ahead for `lastStartTagName` plus one character after `</` in RCDATA, RAWTEXT
+    /// and script data. When the raw node ends inside that window the tokenizer hibernates (the characters after
+    /// `</` are unconsumed and lost with the chunk); hast-util-raw then drops them with the next node. Only emission
+    /// boundaries behave this way; at real EOF the state reads the end tag as usual.
+    private static func waitIfSpecialEndTagHibernates(_ t: Tokeniser, _ r: CharacterReader, _ state: TokeniserState) throws {
+        guard t.emissionBoundaryActive, let byte = r.currentByte(), TokeniserStateVars.isAsciiAlpha(byte),
+              let name = t.appropriateEndTagName() else { return }
+        let remaining = r.end - r.pos
+        guard remaining < name.count || (remaining == name.count && r.matchesIgnoreCase(name)) else { return }
+        r.pos = r.end
+        try t.eofError(state)
     }
 
     private static func readEndTag(_ t: Tokeniser, _ r: CharacterReader, _ a: TokeniserState, _ b: TokeniserState) {

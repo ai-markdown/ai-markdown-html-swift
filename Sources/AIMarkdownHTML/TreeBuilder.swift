@@ -17,7 +17,8 @@ public class TreeBuilder {
     public var errors: ParseErrorList // null when not tracking errors
     public var settings: ParseSettings
     @usableFromInline var sourceEvents: SourceEventRecorder?
-    var sourceEventInjections: [SourceInputEmission] = []
+    /// hast-util-raw node sequence for `HTMLSourceParser`; empty for plain string parsing.
+    var emissionSegments: [EmissionSegment] = []
     @usableFromInline var coalescesSourceCharacters = false
     public var tracksSourceRanges: Bool = false
     public var tracksErrors: Bool = false
@@ -78,7 +79,7 @@ public class TreeBuilder {
                               normalizesHtmlNumericReferences: !(self is XmlTreeBuilder))
         sourceEvents?.created(doc, token: nil, generated: "parser-document")
         tokeniser.sourceEvents = sourceEvents
-        tokeniser.sourceEventCapturesCharacters = sourceEvents != nil || !sourceEventInjections.isEmpty
+        tokeniser.sourceEventCapturesCharacters = sourceEvents != nil
         stack = Array<Element>()
         self.baseUri = baseUri
         pendingAttributeElements.removeAll(keepingCapacity: true)
@@ -104,7 +105,7 @@ public class TreeBuilder {
                               normalizesHtmlNumericReferences: !(self is XmlTreeBuilder))
         sourceEvents?.created(doc, token: nil, generated: "parser-document")
         tokeniser.sourceEvents = sourceEvents
-        tokeniser.sourceEventCapturesCharacters = sourceEvents != nil || !sourceEventInjections.isEmpty
+        tokeniser.sourceEventCapturesCharacters = sourceEvents != nil
         stack = Array<Element>()
         self.baseUri = baseUri
         pendingAttributeElements.removeAll(keepingCapacity: true)
@@ -158,28 +159,119 @@ public class TreeBuilder {
         }
     }
     
+    /// One hast node as hast-util-raw sees it. Raw segments cover `[start, end)` of the reader buffer; generated text
+    /// has no bytes in the buffer and is injected as a character token.
+    struct EmissionSegment {
+        enum Kind {
+            /// Author `raw` node: tokenized in the current state; the end is a hard boundary (`resetTokenizer`).
+            case authorRaw
+            /// Serializer-generated markup (start/end tags): tokenized on its own in the data state and processed as
+            /// synthetic tokens (`startTag`/`endTag` in hast-util-raw) without disturbing the current tokenizer state.
+            case generatedMarkup
+            /// Generated text already encoded as raw HTML (`encodedHTML` input mode): continues the current state.
+            case encodedText
+            /// Generated text injected as one CHARACTER token (`text` in hast-util-raw).
+            case characters(value: [UInt8], id: String)
+        }
+        let kind: Kind
+        let end: Int
+    }
+
     public func runParser() throws {
-        while (true) {
-            let token: Token = try tokeniser.read()
-            let position = token.sourceRange?.start ?? token.sourceEventPieces.compactMap { $0.range?.first }.first ?? (token.isEOF() ? reader.pos : nil)
-            while let emission = sourceEventInjections.first, emission.rawUTF8Start == position {
-                sourceEventInjections.removeFirst()
-                let generated = Token.Char().data(Array(emission.value.utf8))
-                generated.sourceCharacterInjection = true
-                generated.sourceEventPieces = [SourceEventPiece(bytes: Array(emission.value.utf8), range: nil, kind: "hast-generated-text", emissions: [emission.id])]
-                sourceEvents?.token(generated, generated: true)
-                let before = stack
-                try process(generated)
-                sourceEvents?.stackChanged(before: before, after: stack)
+        if emissionSegments.isEmpty {
+            while true {
+                let token: Token = try tokeniser.read()
+                try receive(token, synthetic: false)
+                if token.type == .EOF { break }
             }
-            sourceEvents?.token(token)
-            let before = stack
-            try process(token)
-            sourceEvents?.stackChanged(before: before, after: stack)
-            if (token.type == Token.TokenType.EOF) {
-                break
+            return
+        }
+        // hast-util-raw `handleRaw` only resets the preprocessor: consecutive raw nodes continue one tokenizer run,
+        // including an unfinished tag or comment and the pending character token. `resetTokenizer` runs before every
+        // generated node and once after the last node (flush pending characters, drop an unfinished token); the parser
+        // never receives EOF, so pending table characters at the end are not inserted.
+        for (index, segment) in emissionSegments.enumerated() {
+            switch segment.kind {
+            case .authorRaw, .encodedText:
+                let nextIsRaw: Bool
+                if index + 1 < emissionSegments.count, case .authorRaw = emissionSegments[index + 1].kind { nextIsRaw = true }
+                else if index + 1 < emissionSegments.count, case .encodedText = emissionSegments[index + 1].kind { nextIsRaw = true }
+                else { nextIsRaw = false }
+                tokeniser.beginEmission(end: segment.end, flushing: !nextIsRaw)
+                try drainEmission()
+                if nextIsRaw { tokeniser.continueAfterEmission() } else { tokeniser.resetAtEmissionBoundary() }
+            case .generatedMarkup:
+                try processGeneratedMarkup(end: segment.end)
+            case let .characters(value, id):
+                tokeniser.prepareForGeneratedText()
+                let generated = Token.Char().data(value)
+                generated.sourceCharacterInjection = true
+                generated.sourceEventPieces = [SourceEventPiece(bytes: value, range: nil, kind: "hast-generated-text", emissions: [id])]
+                try receive(generated, synthetic: true, generatedCharacters: true)
             }
         }
+        tokeniser.endEmissions()
+    }
+
+    /// Tokenizes up to the current emission boundary; pending characters are returned as a token before the boundary.
+    private func drainEmission() throws {
+        while true {
+            let token: Token = try tokeniser.read()
+            if tokeniser.reachedEmissionBoundary { return }
+            try receive(token, synthetic: false)
+            if token.type == .EOF { return }
+        }
+    }
+
+    /// hast-util-raw `startTag`/`endTag`: generated markup never passes through the current tokenizer state. The chunk is
+    /// tokenized in the data state and each token is handed to the tree builder with the real tokenizer state in place,
+    /// so `<textarea>`/`<title>` switch to RCDATA as usual, and a generated end tag that names the last start tag leaves
+    /// RCDATA/RAWTEXT/script data. PLAINTEXT swallows generated markup like hast-util-raw does.
+    private func processGeneratedMarkup(end: Int) throws {
+        var current = tokeniser.getState()
+        if current == .PLAINTEXT {
+            reader.pos = end
+            return
+        }
+        tokeniser.transition(.Data)
+        tokeniser.beginEmission(end: end)
+        while true {
+            let token: Token = try tokeniser.read()
+            if tokeniser.reachedEmissionBoundary { break }
+            tokeniser.transition(current)
+            switch token.type {
+            case .EndTag:
+                let endTag = token.asEndTag()
+                if endTag.normalName().map({ Tag.isKnownVoid($0) }) == true {
+                    // hast-util-raw ignores end tags of void elements outside foreign content.
+                    sourceEvents?.token(token)
+                    sourceEvents?.event("void-end-tag-ignored", token: token.sourceEventID)
+                } else {
+                    try receive(token, synthetic: true)
+                    if tokeniser.isInTextContentState, tokeniser.isLastStartTag(endTag) { tokeniser.transition(.Data) }
+                }
+            case .Char:
+                // Text inside a generated markup chunk is generated text (a CHARACTER token), never author whitespace.
+                token.asCharacter().sourceCharacterInjection = true
+                try receive(token, synthetic: true)
+            default:
+                try receive(token, synthetic: true)
+            }
+            current = tokeniser.getState()
+            tokeniser.transition(.Data)
+        }
+        tokeniser.continueAfterEmission()
+        tokeniser.transition(current)
+    }
+
+    /// Hands one token to tree construction. `synthetic` marks tokens that hast-util-raw builds from hast nodes (they
+    /// bypass parse5's `onStartTag`); the HTML tree builder uses it for the leading-newline rule. `generatedCharacters`
+    /// records the token as an injected generated text token.
+    func receive(_ token: Token, synthetic: Bool, generatedCharacters: Bool = false) throws {
+        sourceEvents?.token(token, generated: generatedCharacters)
+        let before = stack
+        try process(token)
+        sourceEvents?.stackChanged(before: before, after: stack)
     }
 
     @discardableResult

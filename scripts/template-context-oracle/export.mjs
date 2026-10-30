@@ -3,6 +3,11 @@
 // (`parseFragment` without a context element, i.e. `Parser.getFragmentParser(undefined)` as used by
 // hast-util-raw 9.1.3) and record the canonical tree the Swift tree builder must reproduce.
 //
+// Two trees are recorded per entry: `tree`/`digest` from `parseFragment` (the whole string, EOF included; the Swift
+// string entry point `parseTemplateFragment` must match it) and `rawTree`/`rawDigest` from the hast-util-raw driving
+// sequence for one raw node (`tokenizer.write(html, false)`, flush of the pending character token, `getFragment()`
+// without EOF; `HTMLSourceParser.parseFragment` must match it).
+//
 // Usage: node export.mjs <parse5-package-dir> <corpus.json>... > ../../Tests/AIMarkdownHTMLTests/Fixtures/template-context.json
 //
 // The corpus files hold `{ "cases": [{ "id": string, "html": string }] }`. The resulting fixture is read by
@@ -20,6 +25,27 @@ if (!parse5Dir || corpusFiles.length === 0) {
 const require = createRequire(import.meta.url);
 const parse5 = require(resolve(parse5Dir));
 const version = require(resolve(parse5Dir, 'package.json')).version;
+
+// hast-util-raw 9.1.3 `lib/index.js` for a root with a single `raw` child: `handleRaw` writes the value as a
+// non-final chunk, `resetTokenizer` flushes the pending character token (it always has a location because
+// hast-util-raw enables `sourceCodeLocationInfo`), and `raw` takes `getFragment()` without ever writing EOF.
+function parseRaw(html) {
+  const parser = parse5.Parser.getFragmentParser(undefined, {sourceCodeLocationInfo: true, scriptingEnabled: false});
+  const tokenizer = parser.tokenizer;
+  tokenizer.write(html, false);
+  tokenizer._runParsingLoop();
+  const token = tokenizer.currentCharacterToken;
+  if (token && token.location) {
+    parser.currentToken = token;
+    parser._processToken(token);
+  }
+  tokenizer.paused = false;
+  tokenizer.inLoop = false;
+  tokenizer.active = false;
+  tokenizer.currentCharacterToken = null;
+  tokenizer.currentToken = null;
+  return parser.getFragment();
+}
 
 function canonical(node) {
   switch (node.nodeName) {
@@ -62,19 +88,6 @@ function serialize(node) {
 function depth(nodes) {
   return nodes.reduce((max, node) => Math.max(max, node.type === 'element' ? 1 + depth(node.children) : 1), 0);
 }
-// Mirror of HTMLTemplateContextTests.droppingLeadingLF: remove the LF parse5 skips after <pre>/<listing>/<textarea>.
-function droppingLeadingLF(nodes) {
-  return nodes.map((node) => {
-    if (node.type !== 'element') return node;
-    const children = droppingLeadingLF(node.children);
-    if (['pre', 'listing', 'textarea'].includes(node.name) && children.length > 0 && children[0].type === 'text' && children[0].value.startsWith('\n')) {
-      const rest = children[0].value.slice(1);
-      if (rest === '') children.shift();
-      else children[0] = {type: 'text', value: rest};
-    }
-    return {...node, children};
-  });
-}
 function digest(tree) {
   return createHash('sha256').update(utf8(tree.map(serialize).join(''))).digest('hex');
 }
@@ -88,15 +101,15 @@ for (const file of corpusFiles) {
     seen.add(item.id);
     const fragment = parse5.parseFragment(item.html, {scriptingEnabled: false});
     const tree = fragment.childNodes.map(canonical);
+    const rawTree = parseRaw(item.html).childNodes.map(canonical);
     // Boundary-oracle frames are numerous and some Web-oracle trees nest deeper than Foundation's JSON reader allows;
-    // those keep only the digest, the hand-written and remaining Web-oracle cases keep the full tree.
-    const compact = item.id.startsWith('boundary/') || depth(tree) > 64;
-    // `leadingLFDigest` lets the Swift test classify a digest-only mismatch as parse5's leading-LF rule alone.
-    const entry = {id: item.id, html: item.html, digest: digest(tree), leadingLFDigest: digest(droppingLeadingLF(tree))};
-    cases.push(compact ? entry : {...entry, tree});
+    // those keep only the digests, the hand-written and remaining Web-oracle cases keep the full trees.
+    const compact = item.id.startsWith('boundary/') || depth(tree) > 64 || depth(rawTree) > 64;
+    const entry = {id: item.id, html: item.html, digest: digest(tree), rawDigest: digest(rawTree)};
+    cases.push(compact ? entry : {...entry, tree, rawTree});
   }
 }
 const corpusDigest = createHash('sha256').update(JSON.stringify(cases.map((c) => c.html))).digest('hex');
 process.stdout.write(
-  JSON.stringify({schemaVersion: 1, parse5: version, options: {scriptingEnabled: false, fragmentContext: 'template'}, corpusSHA256: corpusDigest, cases}) + '\n'
+  JSON.stringify({schemaVersion: 2, parse5: version, options: {scriptingEnabled: false, fragmentContext: 'template'}, corpusSHA256: corpusDigest, cases}) + '\n'
 );

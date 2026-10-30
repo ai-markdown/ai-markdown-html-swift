@@ -16,7 +16,10 @@ public final class CharacterReader {
     public var pos: Int
     private var mark: Int
     private let start: Int
-    public let end: Int
+    /// Current read limit. Equals `inputEnd` unless an emission boundary (`setEnd`) narrows the visible input.
+    public private(set) var end: Int
+    /// End of the underlying input; `end` never exceeds it.
+    public let inputEnd: Int
     
     private static let letters = ParsingStrings("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".map { String($0) })
     private static let digits = ParsingStrings(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
@@ -85,6 +88,7 @@ public final class CharacterReader {
         self.pos = 0
         self.mark = 0
         self.end = input.count
+        self.inputEnd = input.count
     }
 
     init(_ input: UnsafeBufferPointer<UInt8>, storage: ByteStorage? = nil, owner: AnyObject? = nil) {
@@ -101,6 +105,13 @@ public final class CharacterReader {
         self.pos = 0
         self.mark = 0
         self.end = input.count
+        self.inputEnd = input.count
+    }
+
+    /// Narrows or restores the visible end of the input. The tokenizer uses it to stop at hast-util-raw emission
+    /// boundaries; every scan and EOF check reads `end`, so no state may look past the limit.
+    func setEnd(_ newEnd: Int) {
+        end = Swift.min(Swift.max(newEnd, pos), inputEnd)
     }
 
     public convenience init(_ input: UnsafeBufferPointer<UInt8>, owner: AnyObject? = nil) {

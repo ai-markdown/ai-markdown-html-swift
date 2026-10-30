@@ -62,41 +62,39 @@ struct HTMLRawEOLTests {
             stack.append(contentsOf: node.getChildNodes().reversed())
         }
     }
+    /// Every Web-recorded raw/characters/generated-tag sequence parses through the hast-util-raw emission loop (no
+    /// character injection is rejected any more) and builds the recorded tree; differences are listed by id.
     @MainActor @Test func completeWebRawEOLMatrixKeepsOriginalSourceAndExplicitAdmissionGaps() throws {
         let cases = try rows()
-        var failures: [String] = [], differences: [String] = [], oldFailures: [String] = [], fixed: [String] = [], traces: [[String: Any]] = []
+        var differences: [String] = [], traces: [[String: Any]] = []
         for item in cases {
-            let old = Result { try LegacyHTMLSourceParser.parseFragment(item.segments, tracking: true) }
-            if case .failure = old { oldFailures.append(item.id) }
-            do {
-                let on = try HTMLSourceParser.parseFragment(item.segments, tracking: true)
-                let trace = try #require(on.trace), off = try HTMLSourceParser.parseFragment(item.segments)
-                #expect(try encoded(trace.semantic) == encoded(SourceEventRecorder(bytes: [], emissions: []).result(off.roots).semantic))
-                try validate(trace, roots: on.roots, item: item)
-                let equal = try encoded(trace.semantic) == encoded(item.semantic)
-                if !equal { differences.append(item.id) }
-                if case let .success(before) = old, let before = before.trace, equal, try encoded(before.semantic) != encoded(item.semantic) { fixed.append(item.id) }
-                var object = try #require(JSONSerialization.jsonObject(with: encoded(trace)) as? [String: Any])
-                object.removeValue(forKey: "scope")
-                traces.append(["id": item.id, "trace": object])
-            } catch {
-                #expect(String(describing: error).contains("Uncovered character injection boundary"), "\(item.id): \(error)")
-                failures.append(item.id)
+            // The Web matrix was recorded through hast-util-raw, whose fragment context is <template>.
+            let on = try HTMLSourceParser.parseFragment(item.segments, tracking: true, context: .template)
+            let trace = try #require(on.trace), off = try HTMLSourceParser.parseFragment(item.segments, context: .template)
+            #expect(try encoded(trace.semantic) == encoded(SourceEventRecorder(bytes: [], emissions: []).result(off.roots).semantic))
+            try validate(trace, roots: on.roots, item: item)
+            if try encoded(trace.semantic) != encoded(item.semantic) {
+                differences.append(item.id)
+                print("html-eol difference \(item.id)\n  web:   \(String(decoding: try encoded(item.semantic), as: UTF8.self))\n  swift: \(String(decoding: try encoded(trace.semantic), as: UTF8.self))")
             }
+            var object = try #require(JSONSerialization.jsonObject(with: encoded(trace)) as? [String: Any])
+            object.removeValue(forKey: "scope")
+            traces.append(["id": item.id, "trace": object])
         }
-        #expect(cases.count == 259 && failures.count == 161 && fixed.count == 93)
-        #expect(failures == oldFailures)
-        #expect(differences == ["leading-pre-LF", "leading-pre-split"])
-        let diagnostics: [String: Any] = ["cases": cases.count, "failures": failures, "oldFailures": oldFailures, "differences": differences, "fixed": fixed, "traces": traces]
+        #expect(cases.count == 259)
+        #expect(differences == Self.expectedDifferences, "\(differences)")
+        let diagnostics: [String: Any] = ["cases": cases.count, "differences": differences, "traces": traces]
         if let path = ProcessInfo.processInfo.environment["HTML_EOL_PROBE_OUTPUT"] { try canonical(diagnostics).write(to: URL(fileURLWithPath: path)) }
         else {
             let url = try #require(Bundle.module.url(forResource: "html-eol-native", withExtension: "json", subdirectory: "Fixtures"))
             #expect(try canonical(diagnostics) == canonical(JSONSerialization.jsonObject(with: Data(contentsOf: url))))
         }
     }
+    /// Remaining differences from the Web matrix, by id (empty means full parity).
+    static let expectedDifferences: [String] = []
+
     @MainActor @Test func trackingDocumentAndFastModesUseTheSameRawNormalization() throws {
         for item in try rows() {
-            if (try? HTMLSourceParser.parseFragment(item.segments)) == nil { continue } // The same complete matrix already fixes every rejected ID.
             for trackRanges in [true, false] {
                 if !trackRanges, item.segments.contains(where: { $0.kind == "characters" }) { continue }
                 let on = try HTMLSourceParser.parse(item.segments, tracking: true, document: true, trackRanges: trackRanges)

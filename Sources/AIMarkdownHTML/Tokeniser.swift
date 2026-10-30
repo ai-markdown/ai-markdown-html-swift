@@ -207,6 +207,17 @@ final class Tokeniser {
     }
     private var pendingTagStartPos: Int? = nil
     private let charsBuilder: StringBuilder = StringBuilder(256) // buffers characters to output as one token, if more than one emit per read
+    /// Set while the reader's `end` marks a hast-util-raw emission boundary rather than the end of input. Reaching it
+    /// does not produce EOF handling: `read()` first flushes pending characters, then reports the boundary.
+    private(set) var emissionBoundaryActive = false
+    /// True after `read()` returned because the emission boundary was reached (the returned token must be ignored).
+    private(set) var reachedEmissionBoundary = false
+    /// Whether pending characters are returned as a token when the boundary is reached (hast-util-raw flushes them in
+    /// `resetTokenizer`, which runs before generated nodes and at the end, but not between consecutive raw nodes).
+    private var flushesAtEmissionBoundary = true
+    /// Set when pending characters must be returned as their own token before the tokenizer continues (parse5 emits
+    /// U+0000 as a separate NULL_CHARACTER token that tree construction drops, so it must not merge with neighbors).
+    private var charsBreakPending = false
     let dataBuffer: StringBuilder = StringBuilder(4 * 1024) // buffers data looking for </script>
     
     var tagPending: Token.Tag = Token.Tag() // tag we are building up
@@ -312,19 +323,32 @@ final class Tokeniser {
         }
         
         while (!isEmitPendingFast) {
-            if isDataState {
-                if trackSourceRanges {
-                    repeat {
-                        try readDataStateTracked()
-                    } while (!isEmitPendingFast && isDataState)
-                } else {
-                    repeat {
-                        try readDataStateFast()
-                    } while (!isEmitPendingFast && isDataState)
-                }
-                continue
+            if atEmissionBoundary {
+                if hasPendingCharacters && flushesAtEmissionBoundary { break }
+                reachedEmissionBoundary = true
+                return eofToken.reset()
             }
-            try state.read(self, reader)
+            do {
+                if isDataState {
+                    if trackSourceRanges {
+                        repeat {
+                            try readDataStateTracked()
+                        } while (!isEmitPendingFast && isDataState && !atEmissionBoundary)
+                    } else {
+                        repeat {
+                            try readDataStateFast()
+                        } while (!isEmitPendingFast && isDataState && !atEmissionBoundary)
+                    }
+                } else {
+                    try state.read(self, reader)
+                }
+            } catch is EmissionBoundaryReached {
+                // The state consumed up to the boundary; the loop head reports it.
+            }
+        }
+        if charsBreakPending {
+            charsBreakPending = false
+            isEmitPendingFast = false
         }
         
         if !charsBuilder.isEmpty {
@@ -395,6 +419,106 @@ final class Tokeniser {
         }
     }
 
+
+    // MARK: - hast-util-raw emission boundaries
+
+    @inline(__always)
+    var atEmissionBoundary: Bool { emissionBoundaryActive && reader.pos >= reader.end }
+
+    @inline(__always)
+    private var hasPendingCharacters: Bool { !charsBuilder.isEmpty || charsSlice != nil || !pendingSlices.isEmpty }
+
+    /// Tokenizer states whose text is character data: parse5 keeps them across hast-util-raw node boundaries. Every
+    /// other state is inside a tag, comment, doctype or character reference and is abandoned at a boundary.
+    @inline(__always)
+    private var isCharacterDataState: Bool {
+        switch state {
+        case .Data, .Rcdata, .Rawtext, .ScriptData, .PLAINTEXT: return true
+        default: return false
+        }
+    }
+
+    /// Makes the input end at `end` for the current emission; `read()` reports the boundary instead of EOF there.
+    /// With `flushing` false, characters pending at the boundary stay pending and continue into the next raw node.
+    func beginEmission(end: Int, flushing: Bool = true) {
+        reader.setEnd(end)
+        emissionBoundaryActive = true
+        reachedEmissionBoundary = false
+        flushesAtEmissionBoundary = flushing
+    }
+
+    /// Ends the current emission without touching tokenizer state: consecutive raw nodes share one tokenizer run.
+    func continueAfterEmission() {
+        reachedEmissionBoundary = false
+    }
+
+    /// hast-util-raw `resetTokenizer` at the end of an author raw node: pending characters were already returned by
+    /// `read()`, an unfinished tag, comment, doctype or character reference is dropped, and a state inside such a token
+    /// returns to data (parse5 keeps the state but the next text node resets it; the next generated tag is processed
+    /// directly, so the two are equivalent for serializer output).
+    func resetAtEmissionBoundary() {
+        reachedEmissionBoundary = false
+        pendingTagStartPos = nil
+        selfClosingFlagAcknowledged = true
+        if !isCharacterDataState { transition(.Data) }
+    }
+
+    /// hast-util-raw `text`: a generated text node switches a tokenizer that is inside a tag-like state back to data.
+    func prepareForGeneratedText() {
+        if !isCharacterDataState { transition(.Data) }
+    }
+
+    /// Leaves emission mode. hast-util-raw never writes EOF: it resets the tokenizer after the last node and takes the
+    /// fragment as built, so no EOF token reaches tree construction.
+    func endEmissions() {
+        reader.setEnd(reader.inputEnd)
+        emissionBoundaryActive = false
+        reachedEmissionBoundary = false
+    }
+
+    /// Whether `state` is RCDATA, RAWTEXT or script data (hast-util-raw leaves them after a matching generated end tag).
+    var isInTextContentState: Bool {
+        switch state {
+        case .Rcdata, .Rawtext, .ScriptData: return true
+        default: return false
+        }
+    }
+
+    /// Whether `endTag` names the last emitted start tag (hast-util-raw compares `tokenizer.lastStartTagName`).
+    func isLastStartTag(_ endTag: Token.Tag) -> Bool {
+        if lastStartTagId != .none {
+            if endTag.tagId == .none, let slice = endTag.normalNameSlice() { endTag.setTagIdFromSlice(slice) }
+            if endTag.tagId != .none { return endTag.tagId == lastStartTagId }
+            guard let lastName = Token.Tag.tagIdName(lastStartTagId), let name = endTag.normalName() else { return false }
+            return Tokeniser.equalsIgnoreCase(ByteSlice.fromArray(name), lastName)
+        }
+        guard let lastStartTag, let name = endTag.normalName() else { return false }
+        return Tokeniser.equalsIgnoreCase(ByteSlice.fromArray(name), lastStartTag)
+    }
+
+    /// Returns pending characters as their own token before anything else is tokenized.
+    @inline(__always)
+    private func breakCharacters() {
+        if hasPendingCharacters {
+            charsBreakPending = true
+            isEmitPendingFast = true
+        }
+    }
+
+    /// Data state U+0000: parse5 emits it as a separate NULL_CHARACTER token, so pending characters are returned first
+    /// and the NUL byte never merges with the characters around it. Returns false when the caller must retry.
+    @inline(__always)
+    private func emitDataStateNull() -> Bool {
+        if hasPendingCharacters {
+            breakCharacters()
+            return false
+        }
+        error(.Data)
+        reader.advanceAscii()
+        emit(TokeniserStateVars.nullScalr)
+        breakCharacters()
+        return true
+    }
     
     func emit(_ token: Token) throws {
         try Validate.isFalse(val: isEmitPending, msg: "There is an unread token pending!")
@@ -464,7 +588,7 @@ final class Tokeniser {
             return
         }
         if reader.pos >= reader.end {
-            try emitEOF()
+            if !emissionBoundaryActive { try emitEOF() }
             return
         }
         try handleDataStateDelimiterTracked()
@@ -482,6 +606,7 @@ final class Tokeniser {
             markTagStart(reader.pos)
             reader.advanceAscii()
             if reader.pos >= reader.end {
+                if emissionBoundaryActive { transition(.TagOpen); return } // unfinished at the boundary: dropped by the reset
                 error(.Data)
                 clearTagStart()
                 emit(UnicodeScalar.LessThan)
@@ -501,7 +626,8 @@ final class Tokeniser {
             case TokeniserStateVars.slashByte: // "/"
                 reader.advanceAscii()
                 if reader.isEmpty() {
-                    eofError(.Data)
+                    if emissionBoundaryActive { transition(.EndTagOpen); return }
+                    try eofError(.Data)
                     clearTagStart()
                     emit(UTF8Arrays.endTagStart)
                     transition(.Data)
@@ -528,9 +654,7 @@ final class Tokeniser {
                 transition(.Data)
             }
         case TokeniserStateVars.nullByte:
-            error(.Data)
-            reader.advanceAscii()
-            emit(TokeniserStateVars.nullScalr)
+            _ = emitDataStateNull()
         default:
             break
         }
@@ -539,7 +663,7 @@ final class Tokeniser {
     @inline(__always)
     private func readDataStateFast() throws {
         if reader.pos >= reader.end {
-            try emitEOF()
+            if !emissionBoundaryActive { try emitEOF() }
             return
         }
         let first = reader.input[reader.pos]
@@ -555,7 +679,7 @@ final class Tokeniser {
             return
         }
         if reader.pos >= reader.end {
-            try emitEOF()
+            if !emissionBoundaryActive { try emitEOF() }
             return
         }
         try handleDataStateDelimiter()
@@ -572,6 +696,7 @@ final class Tokeniser {
         case TokeniserStateVars.lessThanByte: // "<"
             reader.advanceAscii()
             if reader.pos >= reader.end {
+                if emissionBoundaryActive { transition(.TagOpen); return } // unfinished at the boundary: dropped by the reset
                 error(.Data)
                 emit(UnicodeScalar.LessThan)
                 transition(.Data)
@@ -590,7 +715,8 @@ final class Tokeniser {
             case TokeniserStateVars.slashByte: // "/"
                 reader.advanceAscii()
                 if reader.isEmpty() {
-                    eofError(.Data)
+                    if emissionBoundaryActive { transition(.EndTagOpen); return }
+                    try eofError(.Data)
                     emit(UTF8Arrays.endTagStart)
                     transition(.Data)
                     return
@@ -614,9 +740,7 @@ final class Tokeniser {
                 transition(.Data)
             }
         case TokeniserStateVars.nullByte:
-            error(.Data)
-            reader.advanceAscii()
-            emit(TokeniserStateVars.nullScalr)
+            _ = emitDataStateNull()
         default:
             break
         }
@@ -1218,7 +1342,18 @@ final class Tokeniser {
         }
     }
     
-    func eofError(_ state: TokeniserState) {
+    /// Thrown from `eofError` when the reader stands at an emission boundary rather than at the end of input: the
+    /// state must not run its EOF handling (drop or emit the unfinished token); `read()` reports the boundary instead
+    /// and the state resumes with the next raw node or is reset by `resetAtEmissionBoundary`.
+    struct EmissionBoundaryReached: Error {}
+
+    func eofError(_ state: TokeniserState) throws {
+        if atEmissionBoundary {
+            // The fast paths run several logical states in one call without transitioning; the state they report
+            // here is where tokenization resumes with the next raw node.
+            transition(state)
+            throw EmissionBoundaryReached()
+        }
         if !trackErrors {
             return
         }

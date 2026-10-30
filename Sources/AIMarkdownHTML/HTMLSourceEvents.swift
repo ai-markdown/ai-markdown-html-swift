@@ -474,8 +474,22 @@ public enum HTMLSourceParser {
         let builder = HtmlTreeBuilder()
         builder.sourceEvents = recorder
         defer { builder.sourceEvents = nil }
-        builder.sourceEventInjections = normalized.emissions.filter { $0.kind == "characters" }
-        builder.coalescesSourceCharacters = !builder.sourceEventInjections.isEmpty
+        // Every emission is one hast node for the tree builder's hast-util-raw loop (see `TreeBuilder.runParser`).
+        // Serializer directories keep their own granularity (one tag may span several generated-markup emissions, such
+        // as `<a href="` + url + `">`), so consecutive generated-markup emissions form one markup chunk.
+        var segments: [TreeBuilder.EmissionSegment] = []
+        for emission in normalized.emissions {
+            switch (emission.kind, emission.role) {
+            case ("characters", _): segments.append(.init(kind: .characters(value: Array(emission.value.utf8), id: emission.id), end: emission.rawUTF8End))
+            case (_, "hast-generated-tag"):
+                if let last = segments.last, case .generatedMarkup = last.kind { segments[segments.count - 1] = .init(kind: .generatedMarkup, end: emission.rawUTF8End) }
+                else { segments.append(.init(kind: .generatedMarkup, end: emission.rawUTF8End)) }
+            case (_, "serialized-generated-text"): segments.append(.init(kind: .encodedText, end: emission.rawUTF8End))
+            default: segments.append(.init(kind: .authorRaw, end: emission.rawUTF8End))
+            }
+        }
+        builder.emissionSegments = segments
+        builder.coalescesSourceCharacters = normalized.emissions.contains { $0.kind == "characters" }
         let settings = ParseSettings(false, false, trackRanges)
         let roots: [Node]
         if document {
@@ -485,7 +499,6 @@ public enum HTMLSourceParser {
             let contextElement = try Element(Tag.valueOf(context == .template ? "template" : "body"), "")
             roots = try builder.parseFragment(normalized.bytes, contextElement, [], ParseErrorList.noTracking(), settings)
         }
-        if !builder.sourceEventInjections.isEmpty { throw Exception.Error(type: .IllegalArgumentException, Message: "Uncovered character injection boundary") }
         recorder?.activeToken = nil
         // Return independent fragment roots by explicitly detaching the temporary container, keeping events consistent with returned parent relationships.
         for root in roots { try root.remove() }

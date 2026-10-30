@@ -1389,6 +1389,29 @@ open class Token {
             return nil
         }
 
+        /// First byte of the character data, if any.
+        var firstByte: UInt8? { dataSlice?.first ?? data?.first }
+
+        /// Removes the first byte (parse5 `skipNextNewLine`: one LF after `<pre>`, `<listing>`, `<textarea>`), keeping
+        /// the source range and the recorded pieces consistent with the remaining bytes.
+        func dropLeadingByte() {
+            if let slice = dataSlice {
+                dataSlice = ByteSlice(storage: slice.storage, start: slice.start + 1, end: slice.end)
+            } else if let array = data, !array.isEmpty {
+                data = Array(array.dropFirst())
+            }
+            if let range = sourceRange { sourceRange = SourceRange(start: range.start + 1, end: range.end) }
+            guard !sourceEventPieces.isEmpty else { return }
+            var first = sourceEventPieces[0]
+            first.bytes.removeFirst()
+            if first.bytes.isEmpty {
+                sourceEventPieces.removeFirst()
+            } else {
+                if let range = first.range, first.kind == "copy" { first.range = [range[0] + 1, range[1]] } else { first.range = nil }
+                sourceEventPieces[0] = first
+            }
+        }
+
         
         @inline(__always)
         public override func toString() throws -> String {

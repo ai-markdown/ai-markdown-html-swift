@@ -57,6 +57,9 @@ class HtmlTreeBuilder: TreeBuilder {
     private var emptyEnd: Token.EndTag = Token.EndTag() // reused empty end tag
     
     private var _framesetOk: Bool = true // if ok to go into frameset
+    /// parse5 `skipNextNewLine`: set when a `<pre>`, `<listing>` or `<textarea>` start tag is inserted in body; the next
+    /// tokenizer token clears it, and a tokenizer character token starting with LF loses that LF.
+    var skipNextNewLine = false
     private var fosterInserts: Bool = false // if next inserts should be fostered
     private var fragmentParsing: Bool = false // if parsing a fragment of html
     /// Stack of template insertion modes (parse5 `tmplInsertionModeStack`; the last element is the current one).
@@ -91,6 +94,7 @@ class HtmlTreeBuilder: TreeBuilder {
         pendingTableCharacters.removeAll(keepingCapacity: true)
         emptyEnd.reset()
         _framesetOk = true
+        skipNextNewLine = false
         fosterInserts = false
         fragmentParsing = false
         constructingFragment = false
@@ -177,6 +181,43 @@ class HtmlTreeBuilder: TreeBuilder {
     }
 
     
+    /// parse5 token handlers: `onCharacter`, `onNullCharacter`, `onComment`, `onDoctype`, `onStartTag` and `onEndTag`
+    /// clear `skipNextNewLine`; `onWhitespaceCharacter` drops one leading LF. hast-util-raw builds hast start tags
+    /// itself and dispatches them through `_processToken`, which skips `onStartTag`, so synthetic start tags keep the
+    /// flag; generated text is a CHARACTER token and keeps its LF.
+    override func receive(_ token: Token, synthetic: Bool, generatedCharacters: Bool = false) throws {
+        if skipNextNewLine {
+            switch token.type {
+            case .StartTag:
+                if !synthetic { skipNextNewLine = false }
+            case .Char:
+                skipNextNewLine = false
+                let character = token.asCharacter()
+                if !synthetic, !character.sourceCharacterInjection, character.firstByte == TokeniserStateVars.newLineByte {
+                    let only = (character.getDataSlice()?.count ?? 0) == 1
+                    let dropped = character.sourceRange.map { [$0.start, $0.start + 1] } ?? character.sourceEventPieces.first?.range.map { [$0[0], $0[0] + 1] }
+                    if only {
+                        sourceEvents?.token(token)
+                        sourceEvents?.event("leading-newline-ignored", token: token.sourceEventID, note: dropped.map { "\($0[0])-\($0[1])" })
+                        return
+                    }
+                    character.dropLeadingByte()
+                    sourceEvents?.token(token)
+                    sourceEvents?.event("leading-newline-ignored", token: token.sourceEventID, note: dropped.map { "\($0[0])-\($0[1])" })
+                    let before = stack
+                    try process(token)
+                    sourceEvents?.stackChanged(before: before, after: stack)
+                    return
+                }
+            case .EOF:
+                break
+            default:
+                skipNextNewLine = false
+            }
+        }
+        try super.receive(token, synthetic: synthetic, generatedCharacters: generatedCharacters)
+    }
+
     @discardableResult
     public override func process(_ token: Token)throws->Bool {
         if !tracksErrors, !tracksSourceRanges, _state == .InBody {
@@ -184,7 +225,7 @@ class HtmlTreeBuilder: TreeBuilder {
             case .Char:
                 let c = token.asCharacter()
                 let data = c.getDataSlice()
-                if let data, data.count == 1, data.first == TokeniserStateVars.nullByte {
+                if let data, data.count == 1, data.first == TokeniserStateVars.nullByte, !c.sourceCharacterInjection {
                     return false
                 }
                 let wasFramesetOk = framesetOk()
