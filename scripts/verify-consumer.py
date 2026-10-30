@@ -22,6 +22,9 @@ for input in inputs {
     if input == "<table>a<tr><td>x</td></tr>b</table>" {
         // The existing foster-placement fix differs from official output; assert both complete results instead of skipping the difference.
         agrees = actual.utf8.elementsEqual("<html>\n <head></head>\n <body>\n  ab\n  <table>\n   <tbody>\n    <tr>\n     <td>x</td>\n    </tr>\n   </tbody>\n  </table>\n </body>\n</html>".utf8) && expected.utf8.elementsEqual("<html>\n <head></head>\n <body>\n  <table>\n   a\n   <tbody>\n    <tr>\n     <td>x</td>\n    </tr>b\n   </tbody>\n  </table>\n </body>\n</html>".utf8)
+    } else if input == "<textarea>\nx</textarea>" {
+        // parse5 `skipNextNewLine`: this fork drops the first LF after <textarea> (official SwiftSoup keeps it).
+        agrees = actual.utf8.elementsEqual("<html>\n <head></head>\n <body>\n  <textarea>x</textarea>\n </body>\n</html>".utf8) && expected.utf8.elementsEqual("<html>\n <head></head>\n <body>\n  <textarea>\nx</textarea>\n </body>\n</html>".utf8)
     } else {
         agrees = actual.utf8.elementsEqual(expected.utf8)
     }
@@ -38,7 +41,7 @@ if traced.trace == nil || traced.trace!.inputNormalizations.count != 1 {
     throw NSError(domain: "TraceMismatch", code: 1)
 }
 precondition(!traced.roots.isEmpty)
-print("PASS: 7 full ordinary HTML trees (6 equal, 1 explicitly checked existing foster difference) and public source-event API; both modules linked")
+print("PASS: 7 full ordinary HTML trees (5 equal, 2 explicitly checked intentional differences: foster placement, textarea leading LF) and public source-event API; both modules linked")
 '''
 
 def main():
@@ -75,7 +78,7 @@ let package = Package(name: "HTMLCoexistence", platforms: [.macOS(.v26)], depend
         symbols = subprocess.check_output(['nm', '-g', str(binary)], text=True)
         assert '14AIMarkdownHTML' in symbols or '14AIMarkdownHTML' in subprocess.check_output(['swift', 'demangle'], input=symbols, text=True)
         assert '9SwiftSoup' in symbols
-        print(json.dumps({'forkRevision': revision, 'officialRevision': OFFICIAL, 'configuration': args.configuration, 'fullTreeCases': 7, 'equalCases': 6, 'explicitExistingFosterDifference': 1, 'bothModulesLinked': True, 'dependencyKind': 'file Git URLs, not path dependencies'}, ensure_ascii=False))
+        print(json.dumps({'forkRevision': revision, 'officialRevision': OFFICIAL, 'configuration': args.configuration, 'fullTreeCases': 7, 'equalCases': 5, 'explicitIntentionalDifferences': 2, 'bothModulesLinked': True, 'dependencyKind': 'file Git URLs, not path dependencies'}, ensure_ascii=False))
 
 if __name__ == '__main__':
     main()
