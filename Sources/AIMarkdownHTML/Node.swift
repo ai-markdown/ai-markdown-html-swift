@@ -866,6 +866,32 @@ open class Node: Equatable, Hashable {
         bumpTextMutationVersion()
     }
     
+    /// Detaches `nodes` with the same resulting state and side-effect order as `for node in nodes { try node.remove() }`.
+    /// When `nodes` is a leading run of one parent's children (the parser's top-level roots), the child array is
+    /// shortened and reindexed once instead of shifting and reindexing it per node, which made the loop quadratic.
+    /// The per-node detach effects (parent link, source-event move, dirty marks, mutation version) do not read the
+    /// parent's child array or sibling indexes, so applying the array update first is not observable.
+    internal static func detachInOrder(_ nodes: [Node]) throws {
+        guard let parent = nodes.first?.parentNode, nodes[0].siblingIndex == 0,
+              nodes.count <= parent.childNodes.count,
+              zip(nodes, parent.childNodes).allSatisfy({ $0 === $1 && $0.parentNode === parent }) else {
+            for node in nodes { try node.remove() }
+            return
+        }
+        parent.childNodes.removeFirst(nodes.count)
+        parent.reindexChildren(0)
+        for node in nodes {
+            // Sequential removal always takes index 0 after the previous reindex, leaving each detached node at 0.
+            node.siblingIndex = 0
+            node.parentNode = nil
+            parent.markSourceDirty()
+            if node is Element, let element = parent as? Element {
+                element.markQueryIndexesDirty()
+            }
+            parent.bumpTextMutationVersion()
+        }
+    }
+
     @inline(__always)
     public func addChildren(_ children: Node...) throws {
         //most used. short circuit addChildren(int), which hits reindex children and array copy

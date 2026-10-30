@@ -105,7 +105,10 @@ public final class SourceEventRecorder {
     public let emissions: [SourceInputEmission]
     public let scope = UUID()
     private var records: [SourceNodeRecord] = []
-    public init(bytes: [UInt8], emissions: [SourceInputEmission]) { self.bytes = bytes; self.emissions = emissions }
+    private let rawEmissions: RawEmissionIndex
+    public init(bytes: [UInt8], emissions: [SourceInputEmission]) {
+        self.bytes = bytes; self.emissions = emissions; rawEmissions = RawEmissionIndex(emissions)
+    }
     public func checked(_ range: [Int]?) -> [Int]? {
         guard let range, range.count == 2, range[0] >= 0, range[0] <= range[1], range[1] <= bytes.count else { return nil }
         func boundary(_ offset: Int) -> Bool { offset == bytes.count || bytes[offset] & 0xc0 != 0x80 }
@@ -114,7 +117,7 @@ public final class SourceEventRecorder {
     }
     public func emissionIDs(_ range: [Int]?) -> [String] {
         guard let range = checked(range) else { return [] }
-        return emissions.filter { $0.kind == "raw" && $0.rawUTF8Start < $0.rawUTF8End && $0.rawUTF8Start < range[1] && $0.rawUTF8End > range[0] }.map(\.id)
+        return rawEmissions.ids(overlapping: range)
     }
     public func event(_ kind: String, node: Int? = nil, token: Int? = nil, parent: Int? = nil, related: [Int] = [], note: String? = nil) {
         events.append(SourceEventRecord(sequence: events.count + 1, kind: kind, node: node, token: token, triggerToken: activeToken, parent: parent, related: related, note: note))
@@ -299,6 +302,36 @@ public final class SourceEventRecorder {
     }
 }
 
+/// Answers "which non-empty raw emissions overlap a UTF-8 range" in emission order. Validated parser input lays raw
+/// emissions out contiguously, so their starts and ends both increase strictly and the matches form one contiguous run
+/// found by binary search. Any other layout (only reachable through the public recorder initializer) keeps the linear scan.
+private struct RawEmissionIndex {
+    private let emissions: [SourceInputEmission]
+    private let ordered: Bool
+
+    init(_ input: [SourceInputEmission]) {
+        emissions = input.filter { $0.kind == "raw" && $0.rawUTF8Start < $0.rawUTF8End }
+        ordered = zip(emissions, emissions.dropFirst()).allSatisfy { $0.rawUTF8End <= $1.rawUTF8Start }
+    }
+
+    func ids(overlapping range: [Int]) -> [String] {
+        guard ordered else {
+            return emissions.filter { $0.rawUTF8Start < range[1] && $0.rawUTF8End > range[0] }.map(\.id)
+        }
+        var lower = 0, upper = emissions.count
+        while lower < upper {
+            let middle = lower + (upper - lower) / 2
+            if emissions[middle].rawUTF8End > range[0] { upper = middle } else { lower = middle + 1 }
+        }
+        var result: [String] = []
+        while lower < emissions.count, emissions[lower].rawUTF8Start < range[1] {
+            result.append(emissions[lower].id)
+            lower += 1
+        }
+        return result
+    }
+}
+
 /// The reader buffer may be normalized; all exposed ranges still refer to the original serialized UTF-8 buffer.
 /// hast-util-raw resets its preprocessor for each author raw node; CRLF must not collapse across emissions.
 private struct HTMLRawInputNormalization {
@@ -307,12 +340,14 @@ private struct HTMLRawInputNormalization {
     let bytes: [UInt8]
     let emissions: [SourceInputEmission]
     private let originalEmissions: [SourceInputEmission]
+    private let originalRawEmissions: RawEmissionIndex
     private let boundaries: [Int]
     private let endings: [Ending]
 
     init(_ input: [SourceInputEmission], raw: [UInt8]) {
         original = raw
         originalEmissions = input
+        originalRawEmissions = RawEmissionIndex(input)
         // Both generated roles originate in HAST; encodedHTML changes only the encoding, not generated content into author raw markup.
         func preprocesses(_ emission: SourceInputEmission) -> Bool {
             emission.kind == "raw" && emission.role == "author-raw"
@@ -360,7 +395,7 @@ private struct HTMLRawInputNormalization {
     }
     private func emissionIDs(_ range: [Int]?) -> [String] {
         guard let range else { return [] }
-        return originalEmissions.filter { $0.kind == "raw" && $0.rawUTF8Start < $0.rawUTF8End && $0.rawUTF8Start < range[1] && $0.rawUTF8End > range[0] }.map(\.id)
+        return originalRawEmissions.ids(overlapping: range)
     }
     private func firstEnding(_ offset: Int) -> Int {
         var lower = 0, upper = endings.count
@@ -501,7 +536,7 @@ public enum HTMLSourceParser {
         }
         recorder?.activeToken = nil
         // Return independent fragment roots by explicitly detaching the temporary container, keeping events consistent with returned parent relationships.
-        for root in roots { try root.remove() }
+        try Node.detachInOrder(roots)
         if copyControl, let first = roots.first { _ = first.copy() }
         let trace = recorder.map { normalized.snapshot($0.result(roots)) }
         normalized.restoreOriginalRanges(roots)
