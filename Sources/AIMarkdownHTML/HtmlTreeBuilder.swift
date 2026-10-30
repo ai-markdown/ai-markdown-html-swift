@@ -51,7 +51,7 @@ class HtmlTreeBuilder: TreeBuilder {
     private var baseUriSetFromDoc: Bool = false
     private var headElement: Element? // the current head element
     private var formElement: FormElement? // the current form element
-    private var contextElement: Element? // fragment parse context -- could be null even if fragment parsing
+    var contextElement: Element? // fragment parse context -- could be null even if fragment parsing
     private var formattingElements: Array<Element?> = Array<Element?>() // active (open) formatting elements
     private var pendingTableCharacters: Array<PendingTableCharacter> =  Array<PendingTableCharacter>() // chars in table to be shifted out
     private var emptyEnd: Token.EndTag = Token.EndTag() // reused empty end tag
@@ -60,8 +60,11 @@ class HtmlTreeBuilder: TreeBuilder {
     /// parse5 `skipNextNewLine`: set when a `<pre>`, `<listing>` or `<textarea>` start tag is inserted in body; the next
     /// tokenizer token clears it, and a tokenizer character token starting with LF loses that LF.
     var skipNextNewLine = false
+    /// The source parser and template-fragment entry point follow HTML5 non-void self-closing recovery.
+    var sourceParserHTML5Mode = false
+    var usesHTML5SelfClosing = false
     private var fosterInserts: Bool = false // if next inserts should be fostered
-    private var fragmentParsing: Bool = false // if parsing a fragment of html
+    var fragmentParsing: Bool = false // if parsing a fragment of html
     /// Stack of template insertion modes (parse5 `tmplInsertionModeStack`; the last element is the current one).
     /// A `<template>` fragment context seeds it with `.InTemplate` before the insertion mode is reset.
     private var templateModes: [HtmlTreeBuilderState] = []
@@ -95,6 +98,7 @@ class HtmlTreeBuilder: TreeBuilder {
         emptyEnd.reset()
         _framesetOk = true
         skipNextNewLine = false
+        usesHTML5SelfClosing = sourceParserHTML5Mode
         fosterInserts = false
         fragmentParsing = false
         constructingFragment = false
@@ -129,7 +133,10 @@ class HtmlTreeBuilder: TreeBuilder {
             
             // initialise the tokeniser state:
             let contextTagName = context.tagNameNormalUTF8()
-            if TagSets.titleTextarea.contains(contextTagName) {
+            if context.htmlNamespace == .html, contextTagName == UTF8Arrays.template { usesHTML5SelfClosing = true }
+            if context.htmlNamespace != .html {
+                tokeniser.transition(TokeniserState.Data)
+            } else if TagSets.titleTextarea.contains(contextTagName) {
                 tokeniser.transition(TokeniserState.Rcdata)
             } else if TagSets.frames.contains(contextTagName) {
                 tokeniser.transition(TokeniserState.Rawtext)
@@ -170,6 +177,7 @@ class HtmlTreeBuilder: TreeBuilder {
             }
         }
         
+        updateForeignTokenizerContext()
         constructingFragment = true
         defer { constructingFragment = false }
         try runParser()
@@ -220,6 +228,12 @@ class HtmlTreeBuilder: TreeBuilder {
 
     @discardableResult
     public override func process(_ token: Token)throws->Bool {
+        defer { updateForeignTokenizerContext() }
+        if let current = adjustedCurrentElement(), current.htmlNamespace != .html,
+           shouldProcessInForeignContent(token, current: current) {
+            currentToken = token
+            return try processForeignContent(token, current: current)
+        }
         if !tracksErrors, !tracksSourceRanges, _state == .InBody {
             switch token.type {
             case .Char:
@@ -348,7 +362,7 @@ class HtmlTreeBuilder: TreeBuilder {
     func insert(_ startTag: Token.StartTag) throws -> Element {
         // handle empty unknown tags
         // when the spec expects an empty tag, will directly hit insertEmpty, so won't generate this fake end tag.
-        let isSelfClosing = startTag.isSelfClosing()
+        let isSelfClosing = startTag.isSelfClosing() && !usesHTML5SelfClosing
         if isSelfClosing {
             let el: Element = try insertEmpty(startTag)
             push(el)
@@ -506,7 +520,7 @@ class HtmlTreeBuilder: TreeBuilder {
         let current = currentElement()
         let currentTag = current?._tag
         let currentTagId = currentTag?.tagId ?? .none
-        let isScriptOrStyle = currentTagId == .script || currentTagId == .style
+        let isScriptOrStyle = current?.htmlNamespace == .html && (currentTagId == .script || currentTagId == .style)
         let fosterInserts = isFosterInserts()
         let fosterCharacters = fosterInserts && [.table, .tbody, .tfoot, .thead, .tr].contains(currentTagId)
         if fosterCharacters, try insertFosteredCharacters(characterToken) { return }
@@ -862,6 +876,9 @@ class HtmlTreeBuilder: TreeBuilder {
         while i > 0 {
             i &-= 1
             let el = stack[i]
+            if el.htmlNamespace != .html {
+                continue
+            }
             let tagId = el._tag.tagId
             if tagId != .none {
                 if names.containsTagId(tagId) {
@@ -1136,7 +1153,11 @@ class HtmlTreeBuilder: TreeBuilder {
             if (pos == 0) {
                 last = true
                 //Validate node
-                node = contextElement!
+                node = contextElement ?? node
+            }
+            if node.htmlNamespace != .html {
+                if last { transition(.InBody); break }
+                continue
             }
             let name: String = String(decoding: node.nodeNameUTF8(), as: UTF8.self)
             if ("select".equals(name)) {
@@ -1193,12 +1214,16 @@ class HtmlTreeBuilder: TreeBuilder {
         }
     }
     
-    private func inSpecificScope(_ targetName: [UInt8], _ baseTypes: ParsingStrings, _ extraTypes: ParsingStrings? = nil) throws -> Bool {
+    private func inSpecificScope(_ targetName: [UInt8], _ baseTypes: ParsingStrings, _ extraTypes: ParsingStrings? = nil, tableScope: Bool = false) throws -> Bool {
         let targetTagId = Token.Tag.tagIdForBytes(targetName)
         var i = stack.count
         while i > 0 {
             i &-= 1
             let el = stack[i]
+            if el.htmlNamespace != .html {
+                if ForeignContent.isScopeBoundary(el), !tableScope { return false }
+                continue
+            }
             let tagId = el._tag.tagId
             if tagId != .none {
                 if let targetTagId, tagId == targetTagId {
@@ -1230,11 +1255,16 @@ class HtmlTreeBuilder: TreeBuilder {
     }
 
     
-    private func inSpecificScope(_ targetNames: Set<[UInt8]>, _ baseTypes: ParsingStrings, _ extraTypes: ParsingStrings? = nil) throws -> Bool {
+    private func inSpecificScope(_ targetNames: Set<[UInt8]>, _ baseTypes: ParsingStrings, _ extraTypes: ParsingStrings? = nil, tableScope: Bool = false) throws -> Bool {
         var i = stack.count
         while i > 0 {
             i &-= 1
-            let elName = stack[i].nodeNameUTF8()
+            let el = stack[i]
+            if el.htmlNamespace != .html {
+                if ForeignContent.isScopeBoundary(el), !tableScope { return false }
+                continue
+            }
+            let elName = el.nodeNameUTF8()
             if targetNames.contains(elName) {
                 return true
             }
@@ -1249,11 +1279,15 @@ class HtmlTreeBuilder: TreeBuilder {
         return false
     }
     
-    private func inSpecificScope(_ targetNames: ParsingStrings, _ baseTypes: ParsingStrings, _ extraTypes: ParsingStrings? = nil) throws -> Bool {
+    private func inSpecificScope(_ targetNames: ParsingStrings, _ baseTypes: ParsingStrings, _ extraTypes: ParsingStrings? = nil, tableScope: Bool = false) throws -> Bool {
         var i = stack.count
         while i > 0 {
             i &-= 1
             let el = stack[i]
+            if el.htmlNamespace != .html {
+                if ForeignContent.isScopeBoundary(el), !tableScope { return false }
+                continue
+            }
             let tagId = el._tag.tagId
             if tagId != .none {
                 if targetNames.containsTagId(tagId) {
@@ -1298,8 +1332,6 @@ class HtmlTreeBuilder: TreeBuilder {
     
     func inScope(_ targetName: [UInt8], _ extras: ParsingStrings? = nil) throws -> Bool {
         return try inSpecificScope(targetName, TagSets.inScope, extras)
-        // todo: in mathml namespace: mi, mo, mn, ms, mtext annotation-xml
-        // todo: in svg namespace: forignOjbect, desc, title
     }
 
     
@@ -1343,12 +1375,12 @@ class HtmlTreeBuilder: TreeBuilder {
     }
     
     func inTableScope(_ targetName: [UInt8]) throws -> Bool {
-        return try inSpecificScope(targetName, TagSets.tableScope)
+        return try inSpecificScope(targetName, TagSets.tableScope, tableScope: true)
     }
 
     
     func inTableScope(_ targetName: String) throws -> Bool {
-        return try inSpecificScope(targetName.utf8Array, TagSets.tableScope)
+        return try inSpecificScope(targetName.utf8Array, TagSets.tableScope, tableScope: true)
     }
     
     func inSelectScope(_ targetName: [UInt8]) throws -> Bool {
@@ -1461,7 +1493,7 @@ class HtmlTreeBuilder: TreeBuilder {
 
     /// parse5 `openElements.tmplCount > 0`: whether an HTML <template> element is open.
     func templateOnStack() -> Bool {
-        stack.contains { $0.nodeNameUTF8() == UTF8Arrays.template }
+        stack.contains { $0.htmlNamespace == .html && $0.nodeNameUTF8() == UTF8Arrays.template }
     }
 
     private static let impliedEndTagsThoroughly = ParsingStrings(["caption", "colgroup", "dd", "dt", "li", "optgroup", "option", "p", "rb", "rp", "rt", "rtc", "tbody", "td", "tfoot", "th", "thead", "tr"])
@@ -1511,8 +1543,7 @@ class HtmlTreeBuilder: TreeBuilder {
 
     
     func isSpecial(_ el: Element) -> Bool {
-        // todo: mathml's mi, mo, mn
-        // todo: svg's foreigObject, desc, title
+        if el.htmlNamespace != .html { return ForeignContent.isScopeBoundary(el) }
         let tagId = el._tag.tagId
         if tagId != .none {
             return TagSets.special.containsTagId(tagId)
@@ -1551,6 +1582,7 @@ class HtmlTreeBuilder: TreeBuilder {
     
     private func isSameFormattingElement(_ a: Element, _ b: Element) -> Bool {
         // same if: same namespace, tag, and attributes. Element.equals only checks tag, might in future check children
+        guard a.htmlNamespace == b.htmlNamespace else { return false }
         let aAttrs = a.getAttributes()
         let bAttrs = b.getAttributes()
         if aAttrs == nil || bAttrs == nil {
@@ -1558,9 +1590,7 @@ class HtmlTreeBuilder: TreeBuilder {
         }
         
         return a.nodeNameUTF8() == b.nodeNameUTF8() &&
-        // a.namespace().equals(b.namespace()) &&
         aAttrs!.equals(o: bAttrs!)
-        // todo: namespaces
     }
     
     func reconstructFormattingElements() throws {
@@ -1594,7 +1624,7 @@ class HtmlTreeBuilder: TreeBuilder {
             // 8. create new element from element, 9 insert into current node, onto stack
             skip = false // can only skip increment from 4.
             let newEl: Element = try insertStartTag(entry!.nodeNameUTF8())
-            // newEl.namespace(entry.namespace()) // todo: namespaces
+            newEl.htmlNamespace = entry!.htmlNamespace
             newEl.getAttributes()?.addAll(incoming: entry!.getAttributes())
             
             // 10. replace entry with new entry

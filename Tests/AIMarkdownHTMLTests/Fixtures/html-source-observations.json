@@ -7,7 +7,6 @@
     "merge-ignored-end",
     "merge-ignored-doctype",
     "merge-select",
-    "nul",
-    "foreign"
+    "nul"
   ]
 }

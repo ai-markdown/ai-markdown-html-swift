@@ -225,6 +225,18 @@ open class Tag: Hashable, @unchecked Sendable {
         return try valueOf(tagName, settings, isSelfClosing: false)
     }
 
+    /// Foreign names retain established pretty-printing traits, without HTML void/form semantics.
+    internal static func foreign(_ name: String) throws -> Tag {
+        let bytes = Array(name.utf8)
+        let original = try valueOf(bytes, ParseSettings.preserveCase)
+        var traits = original.traits
+        traits.empty = false
+        traits.selfClosing = false
+        traits.formList = false
+        traits.formSubmit = false
+        return Tag(bytes, traits: traits)
+    }
+
     @inline(__always)
     internal static func valueOfNormalized(_ normalizedTagName: [UInt8], isSelfClosing: Bool = false) throws -> Tag {
         if let tag = Self.knownTags[normalizedTagName] {

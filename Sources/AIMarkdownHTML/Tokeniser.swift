@@ -235,7 +235,7 @@ final class Tokeniser {
     let lowercaseTagNames: Bool
     private let trackSourceRanges: Bool
     private let trackErrors: Bool
-    private let isXmlParser: Bool
+    let isXmlParser: Bool
     let trackAttributes: Bool
 
     @inline(__always)
@@ -424,6 +424,7 @@ final class Tokeniser {
 
     @inline(__always)
     var atEmissionBoundary: Bool { emissionBoundaryActive && reader.pos >= reader.end }
+    var hasEmissionBoundary: Bool { emissionBoundaryActive }
 
     @inline(__always)
     private var hasPendingCharacters: Bool { !charsBuilder.isEmpty || charsSlice != nil || !pendingSlices.isEmpty }
@@ -514,8 +515,9 @@ final class Tokeniser {
             return false
         }
         error(.Data)
+        let start = reader.pos
         reader.advanceAscii()
-        emit(TokeniserStateVars.nullScalr)
+        emitRaw(reader.slice(start, reader.pos), start: start, end: reader.pos)
         breakCharacters()
         return true
     }
@@ -1221,8 +1223,8 @@ final class Tokeniser {
             endPending.reset()
             tagPending = endPending
         }
-        tagPending.setLowercaseAttributeNames(lowercaseAttributeNames)
-        tagPending.setAttributesNormalized(attributesNormalizedByDefault || lowercaseAttributeNames)
+        tagPending.setLowercaseAttributeNames(lowercaseAttributeNames && !parsesGeneratedMarkup)
+        tagPending.setAttributesNormalized(parsesGeneratedMarkup || attributesNormalizedByDefault || lowercaseAttributeNames)
         return tagPending
     }
     
@@ -1380,12 +1382,12 @@ final class Tokeniser {
         }
     }
     
-    func currentNodeInHtmlNS() -> Bool {
-        // todo: implement namespaces correctly
-        return true
-        // Element currentNode = currentNode()
-        // return currentNode != null && currentNode.namespace().equals("HTML")
-    }
+    /// Updated after tree construction, including synthetic hast tokens. Integration points use HTML tokenization.
+    var inForeignNode = false
+    /// Serialized hast-generated tags stand in for synthetic tokens: their attribute keys are already supplied values.
+    var parsesGeneratedMarkup = false
+
+    func currentNodeInHtmlNS() -> Bool { !inForeignNode }
     
     /**
      Utility method to consume reader and unescape entities found within.

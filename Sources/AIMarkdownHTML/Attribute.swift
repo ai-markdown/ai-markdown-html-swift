@@ -11,6 +11,10 @@ open class Attribute {
     // Installed only when a mutable reference escapes to a caller or is shared.
     // Weak ownership preserves the lifetime of detached attributes and DOM trees.
     internal var mutationOwners: [Weak<Attributes>]? = nil
+    /// Namespace metadata for foreign XML attributes. The public key keeps its qualified spelling.
+    internal var foreignAttributeNamespace: ForeignAttributeNamespace = .none
+    internal var foreignNamespace: String? { foreignAttributeNamespace.uri }
+    internal var foreignPrefix: String? { foreignAttributeNamespace.prefix }
 
     /// The element type of a dictionary: a tuple containing an individual
     /// key-value pair.
@@ -428,6 +432,7 @@ open class Attribute {
     
     // Copy immutable byte storage without sharing the mutable Attribute object or observers.
     internal init(copying other: Attribute) {
+        foreignAttributeNamespace = other.foreignAttributeNamespace
         keySlice = other.keySlice
         valueSlice = other.valueSlice
         valueSlices = other.valueSlices

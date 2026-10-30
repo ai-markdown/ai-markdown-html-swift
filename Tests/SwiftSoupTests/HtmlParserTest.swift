@@ -372,20 +372,23 @@ class HtmlParserTest: XCTestCase {
 	}
 
 	func testHandlesCdata() throws {
-		// todo: as this is html namespace, should actually treat as bogus comment, not cdata. keep as cdata for now
+		// AI Markdown fork: HTML CDATA declarations are bogus comments; only foreign namespaces allow CDATA.
 		let h = "<div id=1><![CDATA[<html>\n<foo><&amp;]]></div>" // the &amp; in there should remain literal
 		let doc: Document = try AIMarkdownHTML.parse(h)
 		let div: Element = try doc.getElementById("1")!
-		XCTAssertEqual("<html> <foo><&amp;", try div.text())
-		XCTAssertEqual(0, div.children().size())
-		XCTAssertEqual(1, div.childNodeSize()) // no elements, one text node
+		XCTAssertEqual("<&]]>", try div.text())
+		XCTAssertEqual(1, div.children().size())
+		XCTAssertEqual(3, div.childNodeSize()) // comment ends at the first >; the remaining markup is parsed normally
+		XCTAssertEqual("[CDATA[<html", (div.getChildNodes()[0] as? Comment)?.getData())
+		XCTAssertEqual("foo", try div.child(0).tagName())
 	}
 
 	func testHandlesUnclosedCdataAtEOF() throws {
 		// https://github.com/jhy/jsoup/issues/349 would crash, as character reader would try to seek past EOF
 		let h = "<![CDATA[]]"
 		let doc = try AIMarkdownHTML.parse(h)
-		XCTAssertEqual(1, doc.body()!.childNodeSize())
+		XCTAssertEqual(0, doc.body()!.childNodeSize())
+		XCTAssertEqual("[CDATA[]]", (doc.getChildNodes()[0] as? Comment)?.getData())
 	}
 
 	func testHandlesInvalidStartTags() throws {

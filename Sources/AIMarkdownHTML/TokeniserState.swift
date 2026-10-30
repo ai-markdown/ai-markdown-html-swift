@@ -179,6 +179,8 @@ enum TokeniserState: TokeniserStateProtocol {
     case AfterDoctypeSystemIdentifier
     case BogusDoctype
     case CdataSection
+    case CdataSectionBracket
+    case CdataSectionEnd
 
     private static let attrAmpersandQueryStringScanLimit: Int = 32
 
@@ -1109,15 +1111,21 @@ enum TokeniserState: TokeniserStateProtocol {
             t.advanceTransition(.Data)
             break
         case .MarkupDeclarationOpen:
+            // parse5 suspends a CDATA lookahead at the raw-node boundary. hast-util-raw then replaces the
+            // preprocessor buffer; the partial declaration bytes do not reappear in the next raw node.
+            if t.hasEmissionBoundary, !r.isEmpty(), r.end - r.pos < TokeniserStateVars.cdataStartUTF8.count {
+                let remaining = Array(r.slice(r.pos, r.end))
+                if Array(TokeniserStateVars.cdataStartUTF8.prefix(remaining.count)) == remaining {
+                    r.pos = r.end
+                    try t.eofError(self)
+                }
+            }
             if (r.matchConsume(TokeniserStateVars.commentStartUTF8)) {
                 t.createCommentPending()
                 t.transition(.CommentStart)
             } else if (r.matchConsumeIgnoreCase(TokeniserStateVars.doctypeUTF8)) {
                 t.transition(.Doctype)
-            } else if (r.matchConsume(TokeniserStateVars.cdataStartUTF8)) {
-                // todo: should actually check current namepspace, and only non-html allows cdata. until namespace
-                // is implemented properly, keep handling as cdata
-                //} else if (!t.currentNodeInHtmlNS() && r.matchConsume("[CDATA[")) {
+            } else if (!t.currentNodeInHtmlNS() || t.isXmlParser), r.matchConsume(TokeniserStateVars.cdataStartUTF8) {
                 t.transition(.CdataSection)
             } else {
                 t.error(self)
@@ -2154,11 +2162,53 @@ enum TokeniserState: TokeniserStateProtocol {
             }
             break
         case .CdataSection:
-            let dataStart = r.pos
-            let data = r.consumeToSlice(TokeniserStateVars.cdataEndUTF8)
-            t.emitRaw(data, start: dataStart, end: r.pos)
-            r.matchConsume(TokeniserStateVars.cdataEndUTF8)
-            t.transition(.Data)
+            if t.isXmlParser {
+                let start = r.pos
+                let data = r.consumeToSlice(TokeniserStateVars.cdataEndUTF8)
+                t.emitRaw(data, start: start, end: r.pos)
+                r.matchConsume(TokeniserStateVars.cdataEndUTF8)
+                t.transition(.Data)
+                break
+            }
+            if r.isEmpty() { try t.emitEOF(); break }
+            let start = r.pos
+            switch r.currentByte()! {
+            case 93: // ]
+                r.advanceAscii()
+                t.transition(.CdataSectionBracket)
+            case 0:
+                r.advanceAscii()
+                let pieceStart = t.sourceEventPieces.count
+                t.emit(TokeniserStateVars.replacementStr)
+                if t.sourceEventCapturesCharacters {
+                    t.sourceEventPieces.removeSubrange(pieceStart...)
+                    t.sourcePiece(TokeniserStateVars.replacementStr, range: [start, r.pos], kind: "replacement-character")
+                }
+            default:
+                let data = r.consumeToAnyOfTwoSlice(93, 0)
+                t.emitRaw(data, start: start, end: r.pos)
+            }
+        case .CdataSectionBracket:
+            if r.isEmpty() { try t.eofError(self) }
+            if r.currentByte() == 93 {
+                r.advanceAscii()
+                t.transition(.CdataSectionEnd)
+            } else {
+                t.emitRaw(r.slice(r.pos - 1, r.pos), start: r.pos - 1, end: r.pos)
+                t.transition(.CdataSection)
+            }
+        case .CdataSectionEnd:
+            if r.isEmpty() { try t.eofError(self) }
+            if r.currentByte() == 62 {
+                r.advanceAscii()
+                t.transition(.Data)
+            } else if r.currentByte() == 93 {
+                t.emitRaw(r.slice(r.pos - 2, r.pos - 1), start: r.pos - 2, end: r.pos - 1)
+                r.advanceAscii()
+            } else {
+                t.emitRaw(r.slice(r.pos - 2, r.pos), start: r.pos - 2, end: r.pos)
+                t.transition(.CdataSection)
+            }
             break
         }
     }
@@ -2267,7 +2317,7 @@ enum TokeniserState: TokeniserStateProtocol {
         } else {
             t.tagPending.appendTagName(tagName, hasUppercase: hasUppercase)
             if !hasUppercase {
-                t.tagPending.setTagIdFromSlice(tagName)
+                if let fullName = t.tagPending.tagNameSlice() { t.tagPending.setTagIdFromSlice(fullName) }
             } else {
                 t.tagPending.tagId = .none
             }
@@ -2323,7 +2373,7 @@ enum TokeniserState: TokeniserStateProtocol {
         } else {
             t.tagPending.appendTagName(tagName, hasUppercase: hasUppercase)
             if !hasUppercase {
-                t.tagPending.setTagIdFromSlice(tagName)
+                if let fullName = t.tagPending.tagNameSlice() { t.tagPending.setTagIdFromSlice(fullName) }
             } else {
                 t.tagPending.tagId = .none
             }

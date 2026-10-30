@@ -234,6 +234,8 @@ public class TreeBuilder {
             return
         }
         tokeniser.transition(.Data)
+        tokeniser.parsesGeneratedMarkup = true
+        defer { tokeniser.parsesGeneratedMarkup = false }
         tokeniser.beginEmission(end: end)
         while true {
             let token: Token = try tokeniser.read()

@@ -387,6 +387,9 @@ open class Element: Node {
     @usableFromInline
     internal static let selectorResultCacheScanHitRatePermille: Int = 20 // 2%
     @usableFromInline
+    /// HTML tree-construction namespace; standalone and XML-parser elements retain the HTML default.
+    internal var htmlNamespace: HTMLNamespace = .html
+    @usableFromInline
     internal var selectorResultCache: SelectorResultCache? = nil
     @usableFromInline
     internal var selectorResultTextVersion: Int = 0
@@ -2595,6 +2598,7 @@ open class Element: Node {
     /// character references and added whitespace would become literal content.
     @inline(__always)
     internal func serializesAsRawText() -> Bool {
+        guard htmlNamespace == .html else { return false }
         switch _tag.tagId {
         case .script, .style, .iframe, .noembed, .noframes, .plaintext:
             return true
@@ -2628,7 +2632,7 @@ open class Element: Node {
             accum.append(UTF8Arrays.tagEnd)
             // HTML fragment serialization: a <pre>, <textarea> or <listing> whose first child text starts with LF gets
             // one extra LF, because parsing drops the first LF after these start tags (parse5 `skipNextNewLine`).
-            if out.syntax() == OutputSettings.Syntax.html, Element.leadingNewlineSensitiveTags.contains(tagNameNormalUTF8()),
+            if htmlNamespace == .html, out.syntax() == OutputSettings.Syntax.html, Element.leadingNewlineSensitiveTags.contains(tagNameNormalUTF8()),
                let first = childNodes.first as? TextNode, first.getWholeTextUTF8().first == 0x0A {
                 accum.append(0x0A)
             }
@@ -2731,6 +2735,7 @@ open class Element: Node {
     @inline(__always)
     public override func copy(with zone: NSZone? = nil) -> Any {
         let clone = Element(_tag, baseUri!, skipChildReserve: true)
+        clone.htmlNamespace = htmlNamespace
         if let treeBuilder {
             clone.treeBuilder = treeBuilder
         }
@@ -2740,6 +2745,7 @@ open class Element: Node {
     @inline(__always)
     public override func copy(parent: Node?) -> Node {
         let clone = Element(_tag, baseUri!, skipChildReserve: true)
+        clone.htmlNamespace = htmlNamespace
         if let treeBuilder {
             clone.treeBuilder = treeBuilder
         }
@@ -2749,6 +2755,7 @@ open class Element: Node {
     @inline(__always)
     override func copyForDeepClone(parent: Node?) -> Node {
         let clone = Element(_tag, baseUri!, skipChildReserve: true)
+        clone.htmlNamespace = htmlNamespace
         if let treeBuilder {
             clone.treeBuilder = treeBuilder
         }

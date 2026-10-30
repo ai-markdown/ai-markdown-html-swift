@@ -12,5 +12,8 @@
     "scripts/html-vendor/HTMLSourceEvents.swift": "54adaa3f4e4dd4bdd9be7dc9a4c220eb4485993ce069d412e53aa073a55aaaa5",
     "scripts/vendor-html.py": "5ca1dc01b1737686d2b956d328a6d51f5e4a00cdf328bcc69eebb322bd590b05"
   },
-  "description": "Original implementation sources and SHA256 digests. Paths refer to the pinned source repository. Semantic changes are maintained directly in this fork, not reapplied during builds."
+  "description": "Original implementation sources and SHA256 digests. Paths refer to the pinned source repository. Semantic changes are maintained directly in this fork, not reapplied during builds.",
+  "additionalImplementationProvenance": [
+    "foreign-content-provenance.json"
+  ]
 }

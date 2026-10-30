@@ -606,6 +606,11 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                 return false
             case Token.TokenType.StartTag:
                 let startTag: Token.StartTag = t.asStartTag()
+                if startTag.tagId == .none, let name = startTag.normalName(), name == UTF8Arrays.svg || name == UTF8Arrays.math {
+                    if tb.lastFormattingElement() != nil { try tb.reconstructFormattingElements() }
+                    try tb.insertForeign(startTag, namespace: name == UTF8Arrays.svg ? .svg : .mathml)
+                    return true
+                }
                 let currentTagId = tb.currentElement()?._tag.tagId
                 var hasFormattingChecked = false
                 var hasFormatting = false
@@ -2610,8 +2615,8 @@ enum HtmlTreeBuilderState: String, HtmlTreeBuilderStateProtocol {
                 }
                 return true
         case .ForeignContent:
-            return true
-            // todo: implement. Also how do we get here?
+            guard let current = tb.adjustedCurrentElement() else { return true }
+            return try tb.processForeignContent(t, current: current)
         }
 
     }

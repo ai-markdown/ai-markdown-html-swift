@@ -97,15 +97,8 @@ struct HTMLTemplateContextTests {
         SHA256.hash(data: Data(tree.map(\.serialized).joined().utf8)).map { String(format: "%02x", $0) }.joined()
     }
 
-    /// Tree-builder differences from parse5 that stay enumerated by id: each listed case must still differ, so a fix is
-    /// noticed and the list shrinks. The leading-LF rule (`skipNextNewLine`), spec RCDATA handling (no jsoup early
-    /// breakout) and separate U+0000 character tokens landed; what remains is foreign content.
-    static let enumeratedDifferences: [String: String] = [
-        "boundary/fuzz-hazard-11#21": foreignContentBreakout,
-    ]
-    /// parse5 pops the open `<svg>`/`<math>` subtree when a start tag such as `<h2>` arrives in foreign content
-    /// (`startTagInForeignContent` / `causesExit`); jsoup/SwiftSoup have no foreign content handling and keep nesting.
-    static let foreignContentBreakout = "parse5 exits foreign content (<svg>) on an HTML breakout start tag; this tree builder keeps nesting inside <svg>"
+    /// All formerly enumerated template-context differences now match the pinned parse5 oracle.
+    static let enumeratedDifferences: [String: String] = [:]
 
     private struct Difference { let id: String; let report: String }
 

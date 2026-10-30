@@ -233,7 +233,8 @@ public final class SourceEventRecorder {
     }
     public func closed(_ node: Node, token: Token?) {
         let identity = id(node)
-        let matching = (token as? Token.EndTag)?.normalName().map { $0 == node.nodeNameUTF8() } == true
+        let closeName = (node as? Element).flatMap { $0.htmlNamespace == .html ? nil : $0.tagNameNormalUTF8() } ?? node.nodeNameUTF8()
+        let matching = (token as? Token.EndTag)?.normalName().map { $0 == closeName } == true
         if matching, let tokenID = token?.sourceEventID, token?.sourceRange != nil {
             if !records[identity - 1].endTokens.contains(tokenID) { records[identity - 1].endTokens.append(tokenID) }
             event("explicit-close", node: identity, token: tokenID)
@@ -478,8 +479,9 @@ private struct HTMLRawInputNormalization {
     }
 }
 
-/// Fragment context for `HTMLSourceParser`: `<body>` keeps the historical SwiftSoup behavior; `<template>` reproduces
-/// parse5 7.3 `Parser.getFragmentParser(undefined)` as used by hast-util-raw (see `Parser.parseTemplateFragment`).
+/// Fragment insertion context for `HTMLSourceParser`: `<body>` retains the body-context table rules; `<template>`
+/// reproduces parse5 7.3 `Parser.getFragmentParser(undefined)` as used by hast-util-raw. Source-token injection and
+/// HTML5 self-closing recovery apply in both contexts (the ordinary `parseBodyFragment` API keeps legacy recovery).
 public enum HTMLFragmentContext: String, Sendable {
     case body
     case template
@@ -523,6 +525,7 @@ public enum HTMLSourceParser {
             default: segments.append(.init(kind: .authorRaw, end: emission.rawUTF8End))
             }
         }
+        builder.sourceParserHTML5Mode = true
         builder.emissionSegments = segments
         builder.coalescesSourceCharacters = normalized.emissions.contains { $0.kind == "characters" }
         let settings = ParseSettings(false, false, trackRanges)

@@ -98,7 +98,11 @@ struct HTMLSourceEventsTests {
             if ["parser-generated-start-tag", "fragment-root", "parser-document"].contains(node.kind) {
                 #expect(node.startTokens.isEmpty)
             }
-            for token in node.endTokens { #expect(tokens[token]?.name == node.name) }
+            for token in node.endTokens {
+                let name = try #require(tokens[token]?.name)
+                // Tokens keep the tokenizer's lowercase name; SVG tree construction adjusts the DOM spelling.
+                #expect(name == node.name || ForeignContent.svgTags[name] == node.name)
+            }
             if let path = node.finalPath, ["#text", "#data"].contains(node.name) {
                 var semantic = trace.semantic
                 for index in path { semantic = try #require(semantic.children?[index]) }
