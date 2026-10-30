@@ -233,8 +233,10 @@ public final class SourceEventRecorder {
     }
     public func closed(_ node: Node, token: Token?) {
         let identity = id(node)
-        let closeName = (node as? Element).flatMap { $0.htmlNamespace == .html ? nil : $0.tagNameNormalUTF8() } ?? node.nodeNameUTF8()
-        let matching = (token as? Token.EndTag)?.normalName().map { $0 == closeName } == true
+        let matching = (token as? Token.EndTag)?.normalName().map { name in
+            if let element = node as? Element, element.htmlNamespace != .html { return ForeignContent.matchesEndTag(element, name: name) }
+            return name == node.nodeNameUTF8()
+        } == true
         if matching, let tokenID = token?.sourceEventID, token?.sourceRange != nil {
             if !records[identity - 1].endTokens.contains(tokenID) { records[identity - 1].endTokens.append(tokenID) }
             event("explicit-close", node: identity, token: tokenID)

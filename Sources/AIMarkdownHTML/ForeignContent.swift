@@ -48,6 +48,30 @@ internal enum ForeignContent {
         return result
     }()
 
+    /// parse5 lowercases only the DOM name when matching a foreign end tag. Swift's context-free lowercase
+    /// needs the JavaScript Final_Sigma rule: ignore case-ignorable scalars when finding the surrounding cased ones.
+    static func matchesEndTag(_ element: Element, name: [UInt8]) -> Bool {
+        let bytes = element.tagNameUTF8()
+        if !bytes.contains(where: { $0 >= 128 }) { return element.tagNameNormalUTF8() == name }
+        let scalars = Array(element.tagName().unicodeScalars)
+        var finalCandidates = Array(repeating: false, count: scalars.count)
+        var following = false
+        for index in scalars.indices.reversed() {
+            let scalar = scalars[index]
+            finalCandidates[index] = scalar.value == 0x3A3 && !following
+            if !scalar.properties.isCaseIgnorable { following = scalar.properties.isCased }
+        }
+        var result = ""
+        var preceding = false
+        for index in scalars.indices {
+            let scalar = scalars[index]
+            if finalCandidates[index], preceding { result.unicodeScalars.append("\u{3C2}") }
+            else { result += scalar.properties.lowercaseMapping }
+            if !scalar.properties.isCaseIgnorable { preceding = scalar.properties.isCased }
+        }
+        return result.utf8.elementsEqual(name)
+    }
+
     static func isHTMLIntegrationPoint(_ element: Element) -> Bool {
         if element.htmlNamespace == .svg { return svgIntegration.contains(element.tagName()) }
         if element.htmlNamespace == .mathml, element.tagNameNormal() == "annotation-xml" {
@@ -166,7 +190,7 @@ extension HtmlTreeBuilder {
             while index > 0 {
                 let element = stack[index]
                 if element.htmlNamespace == .html { return try process(token, state()) }
-                if element.tagNameNormalUTF8() == name {
+                if ForeignContent.matchesEndTag(element, name: name) {
                     // Keep source closing ranges compatible with adjusted camelCase SVG names.
                     if let range = token.sourceRange { element.setSourceRangeEnd(range.end) }
                     while stack.count > index { pop() }

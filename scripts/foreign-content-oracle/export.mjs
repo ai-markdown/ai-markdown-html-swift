@@ -69,6 +69,11 @@ for (const outer of ['svg','math']) {
  add('unicode-attributes/'+outer, `<${outer} İ="İ" Σ="Σ" É="É" AΣ="x" aσ="y" viewBox="ÉΣİ"><xÉ É="Σİ">文</xÉ></${outer}>`);
  for (const encoding of ['TÉXT/HTML', 'text/htmİ', 'Σ', 'TEXT/HTML']) add('unicode-encoding/'+outer+'/'+encoding,`<${outer}><annotation-xml encoding="${encoding}"><p>文</p></annotation-xml></${outer}>`);
 }
+for (const outer of ['svg','math']) {
+ for (const [open, close] of [['xÉ','xÉ'],['xÉ','xé'],['xΣ','xΣ'],['xΣ','xσ'],['xΣ','xς'],['xΣa','xσa'],['xΣ\u0301a','xσ\u0301a'],['xİ','xİ'],['xİ','xi\u0307'],['xΣ\u0301','xς\u0301']]) {
+  add('unicode-end/'+outer+'/'+open+'/'+close, `<${outer}><${open}>one</${close}><g>two</g></${outer}>`);
+ }
+}
 const cases=inputs.map(({id,html})=>({id,html, tree:parse5.parseFragment(html,{scriptingEnabled:false}).childNodes.map(canonical),bodyTree:parse5.parseFragment(parse5.defaultTreeAdapter.createElement('body','http://www.w3.org/1999/xhtml',[]),html,{scriptingEnabled:false}).childNodes.map(canonical)}));
 // Passive capture proves the generated/raw sequence is the actual hast-util-raw parser, not a rewritten driver.
 const original=parse5.Parser.prototype.getFragment;

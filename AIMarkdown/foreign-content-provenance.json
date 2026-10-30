@@ -45,10 +45,10 @@
   },
   "oracle": {
     "path": "Tests/AIMarkdownHTMLTests/Fixtures/foreign-content.json",
-    "sha256": "4a7ecd8be3ada315cf310b78590ecec3a268f2563561fbf02f42d9ce387b2cbc",
-    "fragmentCases": 328,
+    "sha256": "3b2ca38406ce8dc5842bcd61b5cbe2288f1bfb74d0abb26643ec6137e0dabf15",
+    "fragmentCases": 348,
     "hastSequences": 196,
     "producer": "scripts/foreign-content-oracle/export.mjs",
-    "producerSHA256": "39bdcbbfd90b822278e02cb00f889ec7a0e1c587f3717f2f73661bffe6c80eae"
+    "producerSHA256": "6588608beeb49f1b39c1eb8fc1106dbc8ac81023dd8155e45ffef8f941bb02e8"
   }
 }

@@ -177,6 +177,24 @@ struct HTMLForeignContentTests {
         }
     }
 
+    @MainActor @Test func unicodeForeignEndTokensKeepJavaScriptMatchingAndRealSourceRanges() throws {
+        for (open, close, explicit) in [("xÉ", "xÉ", false), ("xÉ", "xé", true), ("xΣ", "xσ", false),
+                                        ("xΣ", "xς", true), ("xİ", "xİ", false), ("xİ", "xi\u{0307}", true)] {
+            let html = "<svg><\(open)>one</\(close)><g>two</g></svg>"
+            let input = [SourceInputEmission(id: "raw", kind: "raw", role: "author-raw", value: html, rawUTF8Start: 0, rawUTF8End: html.utf8.count)]
+            let parsed = try HTMLSourceParser.parseFragment(input, tracking: true, context: .template)
+            let trace = try #require(parsed.trace)
+            let node = try #require(trace.nodes.first { $0.name == open })
+            #expect(node.endTokens.count == (explicit ? 1 : 0), Comment(rawValue: html))
+            if explicit {
+                let id = try #require(node.endTokens.first)
+                let token = try #require(trace.tokens.first { $0.id == id })
+                let range = try #require(token.range)
+                #expect(String(decoding: Array(html.utf8)[range[0]..<range[1]], as: UTF8.self) == "</\(close)>")
+            }
+        }
+    }
+
     @MainActor @Test func clonedForeignTreesKeepMetadataAndSnapshotsDoNotRetainDOM() throws {
         weak var weakRoot: Node?
         var snapshot: HTMLSourceSnapshot?

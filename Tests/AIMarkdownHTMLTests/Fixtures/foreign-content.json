@@ -55239,6 +55239,2866 @@
           "quirksMode": false
         }
       }
+    },
+    {
+      "id": "unicode-end/svg/xÉ/xÉ",
+      "html": "<svg><xÉ>one</xÉ><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xé",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xÉ/xé",
+      "html": "<svg><xÉ>one</xé><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xé",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xΣ/xΣ",
+      "html": "<svg><xΣ>one</xΣ><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xΣ/xσ",
+      "html": "<svg><xΣ>one</xσ><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xΣ/xς",
+      "html": "<svg><xΣ>one</xς><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xΣa/xσa",
+      "html": "<svg><xΣa>one</xσa><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣa",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣa",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣa",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xσa",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xΣ́a/xσ́a",
+      "html": "<svg><xΣ́a>one</xσ́a><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́a",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́a",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́a",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xσ́a",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xİ/xİ",
+      "html": "<svg><xİ>one</xİ><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/2000/svg",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xi̇",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xİ/xi̇",
+      "html": "<svg><xİ>one</xi̇><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xi̇",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/svg/xΣ́/xς́",
+      "html": "<svg><xΣ́>one</xς́><g>two</g></svg>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "svg",
+          "namespace": "http://www.w3.org/2000/svg",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/2000/svg",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "svg",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς́",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xÉ/xÉ",
+      "html": "<math><xÉ>one</xÉ><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xé",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xÉ/xé",
+      "html": "<math><xÉ>one</xé><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xÉ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xé",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xΣ/xΣ",
+      "html": "<math><xΣ>one</xΣ><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xΣ/xσ",
+      "html": "<math><xΣ>one</xσ><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xΣ/xς",
+      "html": "<math><xΣ>one</xς><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xΣa/xσa",
+      "html": "<math><xΣa>one</xσa><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣa",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣa",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣa",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xσa",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xΣ́a/xσ́a",
+      "html": "<math><xΣ́a>one</xσ́a><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́a",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́a",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́a",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xσ́a",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xİ/xİ",
+      "html": "<math><xİ>one</xİ><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                },
+                {
+                  "type": "element",
+                  "name": "g",
+                  "namespace": "http://www.w3.org/1998/Math/MathML",
+                  "attributes": [],
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "two"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xi̇",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  },
+                  {
+                    "type": "element",
+                    "tagName": "g",
+                    "properties": {},
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xİ/xi̇",
+      "html": "<math><xİ>one</xi̇><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xİ",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xi̇",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
+    },
+    {
+      "id": "unicode-end/math/xΣ́/xς́",
+      "html": "<math><xΣ́>one</xς́><g>two</g></math>",
+      "tree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "bodyTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawTree": [
+        {
+          "type": "element",
+          "name": "math",
+          "namespace": "http://www.w3.org/1998/Math/MathML",
+          "attributes": [],
+          "children": [
+            {
+              "type": "element",
+              "name": "xΣ́",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "one"
+                }
+              ]
+            },
+            {
+              "type": "element",
+              "name": "g",
+              "namespace": "http://www.w3.org/1998/Math/MathML",
+              "attributes": [],
+              "children": [
+                {
+                  "type": "text",
+                  "value": "two"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "rawHAST": {
+        "type": "root",
+        "children": [
+          {
+            "type": "element",
+            "tagName": "math",
+            "properties": {},
+            "children": [
+              {
+                "type": "element",
+                "tagName": "xς́",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "one"
+                  }
+                ]
+              },
+              {
+                "type": "element",
+                "tagName": "g",
+                "properties": {},
+                "children": [
+                  {
+                    "type": "text",
+                    "value": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "data": {
+          "quirksMode": false
+        }
+      }
     }
   ],
   "sequences": [
