@@ -1099,23 +1099,37 @@ enum TokeniserState: TokeniserStateProtocol {
             break
         case .BogusComment:
             // todo: handle bogus comment starting from eof. when does that trigger?
-            // rewind to capture character that lead us here
-            r.unconsume()
-            let comment: Token.Comment = Token.Comment()
-            comment.bogus = true
+            let comment: Token.Comment
+            if let pending = t.bogusCommentPending { comment = pending }
+            else {
+                // Rewind only at actual entry; a consecutive raw write resumes the same pending comment.
+                r.unconsume()
+                comment = Token.Comment()
+                comment.bogus = true
+                t.bogusCommentPending = comment
+            }
             comment.data.append(r.consumeToSlice(UTF8Arrays.tagEnd))
-            // At EOF the comment is emitted; at an emission boundary `eofError` makes the state wait instead.
+            // At EOF the comment is emitted; an emission boundary suspends with its data intact.
             if r.isEmpty() { try t.eofError(self) }
-            // todo: replace nullChar with replaceChar
             try t.emit(comment)
+            t.bogusCommentPending = nil
             t.advanceTransition(.Data)
             break
         case .MarkupDeclarationOpen:
-            // parse5 suspends a CDATA lookahead at the raw-node boundary. hast-util-raw then replaces the
-            // preprocessor buffer; the partial declaration bytes do not reappear in the next raw node.
-            if t.hasEmissionBoundary, !r.isEmpty(), r.end - r.pos < TokeniserStateVars.cdataStartUTF8.count {
-                let remaining = Array(r.slice(r.pos, r.end))
-                if Array(TokeniserStateVars.cdataStartUTF8.prefix(remaining.count)) == remaining {
+            if t.hasEmissionBoundary {
+                // Seven UTF-16 code units need at most 28 UTF-8 bytes. Bound this probe independently
+                // of the raw-node size, including astral scalars in a mismatching lookahead.
+                let probe = r.slice(r.pos, min(r.end, r.pos + 28))
+                let units = String(decoding: probe, as: UTF8.self).utf16.prefix(7).count
+                let commentMatched = Array(probe.prefix(TokeniserStateVars.commentStartUTF8.count)) == TokeniserStateVars.commentStartUTF8
+                if !commentMatched && units < TokeniserStateVars.doctypeUTF8.count {
+                    // parse5 7.3 preprocessor.startsWith marks endOfChunkHit whenever the lookup length is
+                    // unavailable, even if the available prefix already differs. Comment's successful two-byte
+                    // lookup wins first; otherwise the seven-byte DOCTYPE / CDATA probes cause hibernation.
+                    // _ensureHibernation retreats the current character: r.pos is its actual UTF-8 start.
+                    t.recordSourceHibernationEnd(r.pos)
+                    // The next raw write replaces parse5's buffer. Discard this speculative prefix while
+                    // preserving declaration-open state, independently of whether source tracking is enabled.
                     r.pos = r.end
                     try t.eofError(self)
                 }
@@ -1444,6 +1458,12 @@ enum TokeniserState: TokeniserStateProtocol {
                 switch byte {
                 case TokeniserStateVars.tabByte, TokeniserStateVars.newLineByte, TokeniserStateVars.carriageReturnByte, TokeniserStateVars.formFeedByte, TokeniserStateVars.spaceByte:
                     break // ignore whitespace
+                case TokeniserStateVars.greaterThanByte:
+                    t.error(self)
+                    t.createDoctypePending()
+                    t.doctypePending.forceQuirks = true
+                    try t.emitDoctypePending()
+                    t.transition(.Data)
                 case TokeniserStateVars.nullByte:
                     t.error(self)
                     t.createDoctypePending()
@@ -2174,6 +2194,8 @@ enum TokeniserState: TokeniserStateProtocol {
             let start = r.pos
             switch r.currentByte()! {
             case 93: // ]
+                t.cdataFirstBracket = r.pos
+                t.cdataSecondBracket = nil
                 r.advanceAscii()
                 t.transition(.CdataSectionBracket)
             case 0:
@@ -2191,22 +2213,32 @@ enum TokeniserState: TokeniserStateProtocol {
         case .CdataSectionBracket:
             if r.isEmpty() { try t.eofError(self) }
             if r.currentByte() == 93 {
+                t.cdataSecondBracket = r.pos
                 r.advanceAscii()
                 t.transition(.CdataSectionEnd)
             } else {
-                t.emitRaw(r.slice(r.pos - 1, r.pos), start: r.pos - 1, end: r.pos)
+                t.emitCdataBracket(at: t.cdataFirstBracket, contiguous: t.cdataFirstBracket.map { $0 + 1 == r.pos } ?? false)
+                t.cdataFirstBracket = nil
                 t.transition(.CdataSection)
             }
         case .CdataSectionEnd:
             if r.isEmpty() { try t.eofError(self) }
+            let contiguous = t.cdataFirstBracket.flatMap { first in t.cdataSecondBracket.map { first + 1 == $0 && $0 + 1 == r.pos } } ?? false
             if r.currentByte() == 62 {
                 r.advanceAscii()
+                t.cdataFirstBracket = nil
+                t.cdataSecondBracket = nil
                 t.transition(.Data)
             } else if r.currentByte() == 93 {
-                t.emitRaw(r.slice(r.pos - 2, r.pos - 1), start: r.pos - 2, end: r.pos - 1)
+                t.emitCdataBracket(at: t.cdataFirstBracket, contiguous: contiguous)
+                t.cdataFirstBracket = t.cdataSecondBracket
+                t.cdataSecondBracket = r.pos
                 r.advanceAscii()
             } else {
-                t.emitRaw(r.slice(r.pos - 2, r.pos), start: r.pos - 2, end: r.pos)
+                t.emitCdataBracket(at: t.cdataFirstBracket, contiguous: contiguous)
+                t.emitCdataBracket(at: t.cdataSecondBracket, contiguous: contiguous)
+                t.cdataFirstBracket = nil
+                t.cdataSecondBracket = nil
                 t.transition(.CdataSection)
             }
             break

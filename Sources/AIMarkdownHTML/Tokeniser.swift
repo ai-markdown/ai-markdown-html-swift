@@ -215,6 +215,14 @@ final class Tokeniser {
     /// Whether pending characters are returned as a token when the boundary is reached (hast-util-raw flushes them in
     /// `resetTokenizer`, which runs before generated nodes and at the end, but not between consecutive raw nodes).
     private var flushesAtEmissionBoundary = true
+    /// Consumed-byte checkpoint before a partial declaration lookahead. parse5 retreats the speculative
+    /// current character when its sequence lookup hits an unwritten chunk boundary.
+    private(set) var sourceHibernationEnd: Int? = nil
+
+    func recordSourceHibernationEnd(_ offset: Int) {
+        guard sourceEvents != nil else { return }
+        sourceHibernationEnd = offset
+    }
     /// Set when pending characters must be returned as their own token before the tokenizer continues (parse5 emits
     /// U+0000 as a separate NULL_CHARACTER token that tree construction drops, so it must not merge with neighbors).
     private var charsBreakPending = false
@@ -226,6 +234,9 @@ final class Tokeniser {
     let charPending: Token.Char  = Token.Char()
     let doctypePending: Token.Doctype  = Token.Doctype() // doctype building up
     let commentPending: Token.Comment  = Token.Comment() // comment building up
+    var bogusCommentPending: Token.Comment?
+    var cdataFirstBracket: Int?
+    var cdataSecondBracket: Int?
     private let eofToken: Token.EOF = Token.EOF()
     private var lastStartTag: [UInt8]?  // the last start tag emitted, to test appropriate end tag
     private var lastStartTagId: Token.Tag.TagId = .none
@@ -446,6 +457,7 @@ final class Tokeniser {
         emissionBoundaryActive = true
         reachedEmissionBoundary = false
         flushesAtEmissionBoundary = flushing
+        sourceHibernationEnd = nil
     }
 
     /// Ends the current emission without touching tokenizer state: consecutive raw nodes share one tokenizer run.
@@ -455,13 +467,13 @@ final class Tokeniser {
 
     /// hast-util-raw `resetTokenizer` at the end of an author raw node: pending characters were already returned by
     /// `read()`, an unfinished tag, comment, doctype or character reference is dropped, and a state inside such a token
-    /// returns to data (parse5 keeps the state but the next text node resets it; the next generated tag is processed
-    /// directly, so the two are equivalent for serializer output).
+    /// retains its state exactly like parse5. A following generated text node resets tag-like states separately;
+    /// a generated element alone must not erase a declaration/comment state before the next raw write.
     func resetAtEmissionBoundary() {
         reachedEmissionBoundary = false
         pendingTagStartPos = nil
+        bogusCommentPending = nil
         selfClosingFlagAcknowledged = true
-        if !isCharacterDataState { transition(.Data) }
     }
 
     /// hast-util-raw `text`: a generated text node switches a tokenizer that is inside a tag-like state back to data.
@@ -749,6 +761,23 @@ final class Tokeniser {
     }
 
     @inline(__always)
+    /// CDATA retains one or two already-consumed brackets across raw writes and generated elements.
+    /// Their original offsets identify the actual bytes; a delayed emission after an intervening generated
+    /// node is deliberately not labeled as a reversible Web-position copy.
+    func emitCdataBracket(at offset: Int?, contiguous: Bool) {
+        guard let offset, offset >= 0, offset < reader.input.count, reader.input[offset] == 93 else {
+            emit("]")
+            return
+        }
+        let firstPiece = sourceEventPieces.count
+        emitRaw(reader.slice(offset, offset + 1), start: offset, end: offset + 1)
+        if sourceEventCapturesCharacters, !contiguous {
+            sourceEventPieces.removeSubrange(firstPiece...)
+            sourceEventPieces.append(SourceEventPiece(bytes: [93], range: nil, kind: "delayed-cdata-character",
+                                                     emissions: sourceEvents?.emissionIDs([offset, offset + 1]) ?? []))
+        }
+    }
+
     func emitRaw(_ str: ByteSlice, start: Int, end: Int) {
         if trackSourceRanges {
             if charsBuilder.isEmpty && charsSlice == nil && pendingSlices.isEmpty {

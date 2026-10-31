@@ -198,7 +198,12 @@ public class TreeBuilder {
                 else if index + 1 < emissionSegments.count, case .encodedText = emissionSegments[index + 1].kind { nextIsRaw = true }
                 else { nextIsRaw = false }
                 tokeniser.beginEmission(end: segment.end, flushing: !nextIsRaw)
+                let previousTokenCount = sourceEvents?.tokens.count ?? 0
                 try drainEmission()
+                if !nextIsRaw, let checkpoint = tokeniser.sourceHibernationEnd, checkpoint < segment.end {
+                    let pending = sourceEvents?.tokens.last.flatMap { $0.id > previousTokenCount && $0.kind == "Char" ? $0.id : nil }
+                    sourceEvents?.event("raw-hibernation-end", token: pending, note: "\(segment.end):\(checkpoint)")
+                }
                 if nextIsRaw { tokeniser.continueAfterEmission() } else { tokeniser.resetAtEmissionBoundary() }
             case .generatedMarkup:
                 try processGeneratedMarkup(end: segment.end)

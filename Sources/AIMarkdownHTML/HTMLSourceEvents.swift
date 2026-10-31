@@ -457,7 +457,13 @@ private struct HTMLRawInputNormalization {
             return node
         }
         let events = source.events.map { event in
-            let note = event.kind == "legacy-range-end" ? event.note.flatMap(Int.init).flatMap(boundary).map(String.init) : event.note
+            let note: String?
+            if event.kind == "raw-hibernation-end", let fields = event.note?.split(separator: ":"), fields.count == 2,
+               let rawEnd = Int(fields[0]).flatMap(boundary), let checkpoint = Int(fields[1]).flatMap(boundary) {
+                note = "\(rawEnd):\(checkpoint)"
+            } else if event.kind == "raw-hibernation-end" { note = nil }
+            else if event.kind == "legacy-range-end" { note = event.note.flatMap(Int.init).flatMap(boundary).map(String.init) }
+            else { note = event.note }
             return SourceEventRecord(sequence: event.sequence, kind: event.kind, node: event.node, token: event.token, triggerToken: event.triggerToken, parent: event.parent, related: event.related, note: note)
         }
         return HTMLSourceSnapshot(scope: source.scope, semantic: source.semantic, tokens: tokens, nodes: nodes, events: events, gaps: Array(Set(gaps)).sorted(), inputNormalizations: endings.map { ending in

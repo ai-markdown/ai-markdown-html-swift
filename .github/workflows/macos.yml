@@ -30,3 +30,8 @@ jobs:
       run: swift test -c release
     - name: Verify current source manifest
       run: python3 scripts/verify-source.py
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 24
+    - name: Replay fixed Web hibernation checkpoint controls
+      run: node scripts/hibernation-checkpoint-oracle/export.mjs --check

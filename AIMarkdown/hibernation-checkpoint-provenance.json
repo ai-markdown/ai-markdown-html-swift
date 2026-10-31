@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "webRepository": "https://github.com/ai-markdown/ai-markdown.git",
+  "webRevision": "e9ec1799fdc380d99ce0a6313023515895bbd7bf",
+  "parse5Version": "7.3.0",
+  "hastUtilRawVersion": "9.1.3",
+  "htmlForkBase": "2ac4327fc7438f54c42ca4b2c0073abef454e782",
+  "implementation": "Direct tokenizer / emission-driver changes; no generated runtime snapshot is used by the Swift library. The bundled JavaScript is frozen, test-only oracle evidence.",
+  "mapping": "The actual native declaration-open reader offset is recorded before speculative lookup. parse5 startsWith probes seven UTF-16 units and ensureHibernation retreats the speculative current character; normalization maps rawEnd and checkpoint back to original input UTF-8. Desired HAST coordinates are not returned as native evidence.",
+  "referenceSHA256": {
+    "scripts/hibernation-checkpoint-oracle/manifest.json": "a64171bdf0838683620e9b45ae7068396acd9b1bfbf6beb14d1f2a92ea4a682d",
+    "scripts/hibernation-checkpoint-oracle/README.md": "40310746a8e5dab28e56593b23e8ebac6be62affd37a9b4593f3ad76b66e9394",
+    "scripts/hibernation-checkpoint-oracle/upstream/parse5-preprocessor.js": "12199175a31eb461dcecefa10ce2536c69ab92cdd2a1f67da3ea20b214599ac1",
+    "scripts/foreign-content-oracle/upstream/parse5-dist-tokenizer-index.js": "738969a05c4e7d3c0ce566225e742d730d248db82972a84e517828cd97bc3bb4",
+    "scripts/foreign-content-oracle/upstream/hast-util-raw-lib-index.js": "73405cb084a435090393d8d108d68db1cf2be9667acecea7877b58b0951523a4",
+    "scripts/hibernation-checkpoint-oracle/verify.py": "f238e38469760509403bb8cbfaad2ed85f2c5d1d615a964a29daa99f36ee0b88",
+    "Tests/AIMarkdownHTMLTests/HTMLHibernationCheckpointTests.swift": "58467d9076ccdf8acac4032fd3fe53ef4f93ecda97c43704f336e2f5fac8bdab",
+    "Tests/AIMarkdownHTMLTests/HTMLRawEOLTests.swift": "c1937c971d68609e987f7b9a7d3ff7382dfdc5739f42d4855ae7abbafe01cca7",
+    ".github/workflows/macos.yml": "5aaaffc06fe9d84fcd6fe7162847b471f1d530974eb197193901b8569e2739d6",
+    ".github/workflows/ubuntu.yml": "cff1afcad927ee127ee0a852523a9be6ef9f5320c88cf093e751f163f3896208"
+  },
+  "validation": {
+    "Debug": {
+      "XCTest": 1562,
+      "skippedXCTest": 18,
+      "SwiftTesting": 34
+    },
+    "Release": {
+      "XCTest": 1562,
+      "skippedXCTest": 18,
+      "SwiftTesting": 34
+    },
+    "scope": "Parent-coordinated complete local package runs after the third focused iteration; standalone consumer and main-package integration are separate validation."
+  }
+}

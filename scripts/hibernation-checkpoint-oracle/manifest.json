@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "webCommit": "e9ec1799fdc380d99ce0a6313023515895bbd7bf",
+  "bundleSHA256": "e6abb5c7d631468cb08fd2b4e43c582d6cfa69296e6ebc831369d1977d1b9280",
+  "sourceHashes": {
+    "node_modules/.pnpm/@ai-markdown+hast-util-from-parse5@8.0.5/node_modules/@ai-markdown/hast-util-from-parse5/index.js": "df503bba0d1b98d4c0702ca74c6277369983ea29d5011ed32ae958bfc54f5e02",
+    "node_modules/.pnpm/@ai-markdown+hast-util-from-parse5@8.0.5/node_modules/@ai-markdown/hast-util-from-parse5/lib/index.js": "e50ad322458ffbe16f3f3f834baa5e8d2434ee57caac6d7fb914cd3e6f099dfc",
+    "node_modules/.pnpm/@ai-markdown+hast-util-raw@9.1.3/node_modules/@ai-markdown/hast-util-raw/index.js": "b75998ea1ee26d7120e444b43cf289c433c04a57f49c086c538cdf864cc1fc46",
+    "node_modules/.pnpm/@ai-markdown+hast-util-raw@9.1.3/node_modules/@ai-markdown/hast-util-raw/lib/index.js": "73405cb084a435090393d8d108d68db1cf2be9667acecea7877b58b0951523a4",
+    "node_modules/.pnpm/@ungap+structured-clone@1.3.0/node_modules/@ungap/structured-clone/esm/deserialize.js": "80f253017b684f20e2495db08d24d87cfa1a068bd55e01e3bd51bd40d87adac2",
+    "node_modules/.pnpm/@ungap+structured-clone@1.3.0/node_modules/@ungap/structured-clone/esm/index.js": "7ddb0560a1215343ca695210f659fb348ec5d93d0b0e76bbc5959f88cdc2036b",
+    "node_modules/.pnpm/@ungap+structured-clone@1.3.0/node_modules/@ungap/structured-clone/esm/serialize.js": "c5f4904eeba6e25d512c5ce836b5de962bd020acad87490d9c24fb10f0226f50",
+    "node_modules/.pnpm/@ungap+structured-clone@1.3.0/node_modules/@ungap/structured-clone/esm/types.js": "c0978dfc8d304b12d62aadc583977355f714ee8c1e4d1290620226fb78247800",
+    "node_modules/.pnpm/comma-separated-tokens@2.0.3/node_modules/comma-separated-tokens/index.js": "a62eb07c352878a940619595a2e2d11221bc02a16f9a64501612105fddbc2c0b",
+    "node_modules/.pnpm/devlop@1.1.0/node_modules/devlop/lib/default.js": "702fcb7d6bfdfe7b673b8bb7fa9d531d9b7d02693bed89f8dbb0a2c461604cf6",
+    "node_modules/.pnpm/entities@6.0.1/node_modules/entities/dist/esm/decode-codepoint.js": "5d8ee93923d609724c69c8c356147176af5226585d4f343c87a5eec6590ebca9",
+    "node_modules/.pnpm/entities@6.0.1/node_modules/entities/dist/esm/decode.js": "8af227bae5682a686bf9e9a6547af8c388274f41cb857ff39592fe74fc848d25",
+    "node_modules/.pnpm/entities@6.0.1/node_modules/entities/dist/esm/escape.js": "50528d67b2fb87687f0658cfab58eb640ebbcd7e3bcfe8e5e2863e8293ae65b7",
+    "node_modules/.pnpm/entities@6.0.1/node_modules/entities/dist/esm/generated/decode-data-html.js": "b035b71d6969983297e39df1a06d760f2a8000a0f98444c4fe845fe1155da451",
+    "node_modules/.pnpm/entities@6.0.1/node_modules/entities/dist/esm/generated/decode-data-xml.js": "e28599f48fddd869435e44e6ae8644e70a610450d97562e33c869c056e3b129f",
+    "node_modules/.pnpm/hast-util-parse-selector@4.0.0/node_modules/hast-util-parse-selector/index.js": "eeeefbd434261f5f3fb8e1d66cf3523cde05a0b3379352f735dcf3e3995dfb1b",
+    "node_modules/.pnpm/hast-util-parse-selector@4.0.0/node_modules/hast-util-parse-selector/lib/index.js": "76d02635547a5cbc5eb94c18c0010336b0dac306e4e39cfa48364c089f3919e4",
+    "node_modules/.pnpm/hast-util-to-parse5@8.0.1/node_modules/hast-util-to-parse5/index.js": "3eccd4db3c547b961b5cc9d18d814fa086ba516063d48fa832809c061e200e5c",
+    "node_modules/.pnpm/hast-util-to-parse5@8.0.1/node_modules/hast-util-to-parse5/lib/index.js": "b2f5275dd01eb42a400fcc515ef8a9cc410a92e1b462f09451feaa4ece20b8f2",
+    "node_modules/.pnpm/hastscript@9.0.1/node_modules/hastscript/index.js": "c4fbf2ca6ae755dd3821e5f1ebe3fdbcd5df7aae6ec2bd50447d96ffe36614f5",
+    "node_modules/.pnpm/hastscript@9.0.1/node_modules/hastscript/lib/create-h.js": "6496dd7cca2c50351ccdc474cb2c8d788ee89325dc8cde54de81e0df4a45267a",
+    "node_modules/.pnpm/hastscript@9.0.1/node_modules/hastscript/lib/index.js": "54e6abdaf206033fcff422b71e7c8087e27bd09f29f72bdd4ceabeb84e4ea647",
+    "node_modules/.pnpm/hastscript@9.0.1/node_modules/hastscript/lib/svg-case-sensitive-tag-names.js": "32f46483617509daf5cd801d1ceb732338d0fe2f418d3bb7ad05987fbbbb4c92",
+    "node_modules/.pnpm/html-void-elements@3.0.0/node_modules/html-void-elements/index.js": "f9211e17693f8dfdab3613ac49f83d2b16c6868354244a253ab87b870f7cb037",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/common/doctype.js": "855d8cd764782cdc73003a9847d03ed261c5158f6a6901e563ccd4d3b92c8b16",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/common/error-codes.js": "b38ae5ac4f2a31ce2e1cfeca35cf7b89cc66736cd5be068cc433a3ccaca78be2",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/common/foreign-content.js": "129a84a9d04b6050b6896de45a70e1ee468434e19bdd6486e3aef3405d137cac",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/common/html.js": "e6cf93f387be70ddcd4f2bec67fbeb53161094f6306d834de461ec888a9dab76",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/common/token.js": "52dac9efba3a637771818d633a5cf1df30c7913d05ff23235150c88319ea035a",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/common/unicode.js": "69a0a52be895d2bcf88850beead4a098c5305c0b5669d1e8a0fe26f621ea25c6",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/index.js": "b825162aced2e79be8d68d45efb1f89ec34ed4189467195a071a0d7b694a19d4",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/parser/formatting-element-list.js": "a6e04b000b228a0bf7eba4e5462b343ec1e13dbfbe40bce913ade646bbde4461",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/parser/index.js": "23eb8e0f6b45abc36132c08f067899e0e615acbe9069762ba7780a66db78e65d",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/parser/open-element-stack.js": "fe4b609a572c9aa06fbd45ac53632b3ad565168903f4126a6f98d5a9d1f42999",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/serializer/index.js": "bb11a62d05d463bf756814d89227ea889733d3808fe7ebe27cb4f607ed85a4c7",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/tokenizer/index.js": "738969a05c4e7d3c0ce566225e742d730d248db82972a84e517828cd97bc3bb4",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/tokenizer/preprocessor.js": "12199175a31eb461dcecefa10ce2536c69ab92cdd2a1f67da3ea20b214599ac1",
+    "node_modules/.pnpm/parse5@7.3.0/node_modules/parse5/dist/tree-adapters/default.js": "14b6408b0abb1c041e645644f977db34da280239be8a59a2eb3c9e282e89b7c4",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/index.js": "c70e5d2c76ea00116e87d0fabe961f6d260e94641ab76dfb0a73c9c9498a4a3d",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/aria.js": "e46d46194887fe65bfc84dac050b20c163f131f81f10e88f38b48925cf01602b",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/find.js": "0e7b3a54af5d32fe6b30648b420f82ccf0bf7e2d2af9460e3c173c2785084336",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/hast-to-react.js": "47ba04ebd32327cae23e50c70f218c17161722942616182d46ce0cde7a2d58a8",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/html.js": "c74538c9635a4068a94cc2d130115484290bc784bab1af1549b159d17beac3b2",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/normalize.js": "b682cd82e5383c9752b3fd9b354d4694150a1b70027337998bcd46e030ed3e93",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/svg.js": "281e1935c9456a1460bf5f40abd0dc0dde5c6a8c041bdaccf3cc085f502749dd",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/case-insensitive-transform.js": "ed53a57e86ad3153460b9aa558206d9781bb21ace54f825b3ff8ba26c708aa5e",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/case-sensitive-transform.js": "4935f8bbb39e31920d1efe1a1feb742678113f6355b4feb7b3060118a04c9eda",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/create.js": "e1da7557afffe2afa5ee8b582fa8e302578342e9ced8bc8410fc618968730137",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/defined-info.js": "abfc5c18f95ffe73105e336370b778d4d24eb539fe609428035f690e3ded73b2",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/info.js": "9cacb8f3711acde4ef79814c4f42d97a4923ccb37e5a6ddd550ebbffb452a1e5",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/merge.js": "4f9b3be6a66510d379a3096297da53f2a5a49eebeba6b8db17a5e7b044a90c33",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/schema.js": "d97aa20f271dd5e3ea798dff8cc1fa196a074081b92e60b9335824ce00d05ba6",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/util/types.js": "534ee498a7991c73556e49cf8031de26b193f4ffdf3da0aeac52add9d7b6ea1c",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/xlink.js": "9a92f5105b5f4558bf1b63cb43a11c57289fb4b638e9ad4f1d99716602b95a91",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/xml.js": "aa91faf152020c8be409ae8253d3ebaf85b2a9246c5a3ed96d9d5424c9e4064c",
+    "node_modules/.pnpm/property-information@7.1.0/node_modules/property-information/lib/xmlns.js": "5e3700fcaa7faf7542982e2657286be3a652744c0f3d0ee64c311ed158ef00d9",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/index.js": "c70e5d2c76ea00116e87d0fabe961f6d260e94641ab76dfb0a73c9c9498a4a3d",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/aria.js": "e46d46194887fe65bfc84dac050b20c163f131f81f10e88f38b48925cf01602b",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/find.js": "0e7b3a54af5d32fe6b30648b420f82ccf0bf7e2d2af9460e3c173c2785084336",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/hast-to-react.js": "47ba04ebd32327cae23e50c70f218c17161722942616182d46ce0cde7a2d58a8",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/html.js": "e204fcc00f9ba1c19049be6dbe1fa0c9378d8401482aead17cb0d0e47adff671",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/normalize.js": "b682cd82e5383c9752b3fd9b354d4694150a1b70027337998bcd46e030ed3e93",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/svg.js": "c12f46a6c616f46cf7d24f4979471402f78320d71e6642db88c3566f160f0356",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/case-insensitive-transform.js": "ed53a57e86ad3153460b9aa558206d9781bb21ace54f825b3ff8ba26c708aa5e",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/case-sensitive-transform.js": "4935f8bbb39e31920d1efe1a1feb742678113f6355b4feb7b3060118a04c9eda",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/create.js": "e1da7557afffe2afa5ee8b582fa8e302578342e9ced8bc8410fc618968730137",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/defined-info.js": "abfc5c18f95ffe73105e336370b778d4d24eb539fe609428035f690e3ded73b2",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/info.js": "9cacb8f3711acde4ef79814c4f42d97a4923ccb37e5a6ddd550ebbffb452a1e5",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/merge.js": "4f9b3be6a66510d379a3096297da53f2a5a49eebeba6b8db17a5e7b044a90c33",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/schema.js": "d97aa20f271dd5e3ea798dff8cc1fa196a074081b92e60b9335824ce00d05ba6",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/util/types.js": "534ee498a7991c73556e49cf8031de26b193f4ffdf3da0aeac52add9d7b6ea1c",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/xlink.js": "9a92f5105b5f4558bf1b63cb43a11c57289fb4b638e9ad4f1d99716602b95a91",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/xml.js": "aa91faf152020c8be409ae8253d3ebaf85b2a9246c5a3ed96d9d5424c9e4064c",
+    "node_modules/.pnpm/property-information@7.2.0/node_modules/property-information/lib/xmlns.js": "5e3700fcaa7faf7542982e2657286be3a652744c0f3d0ee64c311ed158ef00d9",
+    "node_modules/.pnpm/space-separated-tokens@2.0.2/node_modules/space-separated-tokens/index.js": "080bce26a6623cdb189d1cd62c6bdd27fe9984b40f19d81abe113a20dae3c379",
+    "node_modules/.pnpm/unist-util-is@6.0.1/node_modules/unist-util-is/index.js": "037c062d404356c6bbb8dad28d39445165d23e84ac35a63496a98d40aaa8d645",
+    "node_modules/.pnpm/unist-util-is@6.0.1/node_modules/unist-util-is/lib/index.js": "ce90bad6b772a7e1115d76e4cc53bfade1ee1fe8ac1b8880f48b0e1512ffba44",
+    "node_modules/.pnpm/unist-util-position@5.0.0/node_modules/unist-util-position/index.js": "0852ccb10e53cbe0d096e5598806e431af3c2a40ef272a56db87643b6f1f07b5",
+    "node_modules/.pnpm/unist-util-position@5.0.0/node_modules/unist-util-position/lib/index.js": "3a751e6977493112a744188be93f88005f89c6490a7ee88b2e50ff3756d79e44",
+    "node_modules/.pnpm/unist-util-visit-parents@6.0.2/node_modules/unist-util-visit-parents/index.js": "6e3e10026230a33197e56422a2d95fc1815528c0bde7c1c790fd1a733b04bd39",
+    "node_modules/.pnpm/unist-util-visit-parents@6.0.2/node_modules/unist-util-visit-parents/lib/color.node.js": "34b9001e424a12a5a436293affcd0cf92533e120b77144c2b1f1ea39fb8d6d3a",
+    "node_modules/.pnpm/unist-util-visit-parents@6.0.2/node_modules/unist-util-visit-parents/lib/index.js": "8789a4f20d3e3c82bcaeec9628697752d662461bf6237ecfba61cfcc00f30bf7",
+    "node_modules/.pnpm/unist-util-visit@5.1.0/node_modules/unist-util-visit/index.js": "0bd7a392932d4578d13e0ab49705ba1488ecaad56fa4cf865f85dac64d34de91",
+    "node_modules/.pnpm/unist-util-visit@5.1.0/node_modules/unist-util-visit/lib/index.js": "83779ce32216704c4a7593fd350c48a6570f445b1bb583cbe6d1da12d86cc4bd",
+    "node_modules/.pnpm/vfile-location@5.0.3/node_modules/vfile-location/index.js": "495394a48274d0e42d4d0533f462669aa2ebf11d153fd97c21eebf66ec9820a7",
+    "node_modules/.pnpm/vfile-location@5.0.3/node_modules/vfile-location/lib/index.js": "ad96f58fd35cb42e76f5085d18c17a09a7d28b3825bbeeaaad9e486d9a23a594",
+    "node_modules/.pnpm/web-namespaces@2.0.1/node_modules/web-namespaces/index.js": "8f72a63a66820c0e4656958f8ba33be2635a87a74ad5cc0734507eabf9770743",
+    "node_modules/.pnpm/zwitch@2.0.4/node_modules/zwitch/index.js": "81f592d700aff8042238e7cab8e03c002e689117ecf15844ed753e08825a2873"
+  },
+  "packages": {
+    "@ai-markdown/hast-util-from-parse5@8.0.5": {
+      "licenseSHA256": "dd1081884a92952802f4803110a6bb543acea9a814c786d58605b4c1219b5ebb",
+      "packageJSONSHA256": "6d54a32c350a21122ee325ff7e7a4b85725d987dc1d6b09f3f35d7aa12bcc90f",
+      "saved": "LICENSE-@ai-markdown-hast-util-from-parse5@8.0.5"
+    },
+    "@ai-markdown/hast-util-raw@9.1.3": {
+      "licenseSHA256": "dd1081884a92952802f4803110a6bb543acea9a814c786d58605b4c1219b5ebb",
+      "packageJSONSHA256": "26ccdb990ceb3d4fb7da68c9431456d900c0063b351ad17a67277ffe5165dfe6",
+      "saved": "LICENSE-@ai-markdown-hast-util-raw@9.1.3"
+    },
+    "@ungap/structured-clone@1.3.0": {
+      "licenseSHA256": "dc6d4961d8b6ee747231582ae9c53ce1d66bf76bc9f5a28f554c0e97210953bf",
+      "packageJSONSHA256": "d4549d78e3008edb04ec8bdf66170f9d159ee50451d05752e27e849d8f6d15b2",
+      "saved": "LICENSE-@ungap-structured-clone@1.3.0"
+    },
+    "comma-separated-tokens@2.0.3": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "c474231549263b0173a3d66f4fc1c4bac2c7517390b2a8e3f09ea1a1f401726b",
+      "saved": "LICENSE-comma-separated-tokens@2.0.3"
+    },
+    "devlop@1.1.0": {
+      "licenseSHA256": "6f296a5eccc1dc96714bb94ebaa9cac25b0a1467d74cc5263ac4d0646ab01f62",
+      "packageJSONSHA256": "fbb56102cf3bd0e07a8075bfda80825b3ccd78a37642c92cef54a55fbed709dd",
+      "saved": "LICENSE-devlop@1.1.0"
+    },
+    "entities@6.0.1": {
+      "licenseSHA256": "cb992345949ccd6e8394b2cd6c465f7b897c864f845937dbf64e8997f389e164",
+      "packageJSONSHA256": "2b110e5a5a7a7bcbc843b885105a952630299cb1a7817b4b321d69479cfa7086",
+      "saved": "LICENSE-entities@6.0.1"
+    },
+    "hast-util-parse-selector@4.0.0": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "be420c013af4af1d5df47e294f44af6d7151a2e580f5a1a844a1228d73ee0278",
+      "saved": "LICENSE-hast-util-parse-selector@4.0.0"
+    },
+    "hast-util-to-parse5@8.0.1": {
+      "licenseSHA256": "dd1081884a92952802f4803110a6bb543acea9a814c786d58605b4c1219b5ebb",
+      "packageJSONSHA256": "5124aa89a201b78ddc242dff5fb45cdf8086300858adb94fc957ecb5fa15a776",
+      "saved": "LICENSE-hast-util-to-parse5@8.0.1"
+    },
+    "hastscript@9.0.1": {
+      "licenseSHA256": "dd1081884a92952802f4803110a6bb543acea9a814c786d58605b4c1219b5ebb",
+      "packageJSONSHA256": "067789acd022900bdaa254db04244c5e86bb2e7a060396525025ef365e15baa6",
+      "saved": "LICENSE-hastscript@9.0.1"
+    },
+    "html-void-elements@3.0.0": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "d891d652c57b77d4a14970d348bf99cb483b8074b835a5a9382d2936330ce049",
+      "saved": "LICENSE-html-void-elements@3.0.0"
+    },
+    "parse5@7.3.0": {
+      "licenseSHA256": "8c535800331e1e4439835555b3f9edc7fe9dee2fab0d8bbbd5a982e8b8343d4d",
+      "packageJSONSHA256": "8196284780fe95c3245a40e3c17b45fc85ef709f1211775987d037e5e873fe95",
+      "saved": "LICENSE-parse5@7.3.0"
+    },
+    "property-information@7.1.0": {
+      "licenseSHA256": "5d0698266086f217bb11ea0499d33453e401fe479fb9126ad04e625e63d3557b",
+      "packageJSONSHA256": "57ba088ef9c148e405f18feffab23750704de09f095de74d20d0475e71b08948",
+      "saved": "LICENSE-property-information@7.1.0"
+    },
+    "property-information@7.2.0": {
+      "licenseSHA256": "5d0698266086f217bb11ea0499d33453e401fe479fb9126ad04e625e63d3557b",
+      "packageJSONSHA256": "6cacc66c65e31d11d9d4e5677c1375667faf334e585b69a9d319a0ca25676530",
+      "saved": "LICENSE-property-information@7.2.0"
+    },
+    "space-separated-tokens@2.0.2": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "ca188b0d34a0cfcfa025597058c3302401155788219f78682243a34f8e5092f1",
+      "saved": "LICENSE-space-separated-tokens@2.0.2"
+    },
+    "unist-util-is@6.0.1": {
+      "licenseSHA256": "82974dbf2639d13edab95c32ed9cb6c0867ede272cd2e07ce47ce8548fe55c05",
+      "packageJSONSHA256": "0838fa706c4cbda37f47ac4c915fab0b6be3c99aeeb81060d22ec6532fae6272",
+      "saved": "LICENSE-unist-util-is@6.0.1"
+    },
+    "unist-util-position@5.0.0": {
+      "licenseSHA256": "63cb98b3f6abfb3c3592c16f88253c1bdc834087bf52671e8ce5609e4eb693cf",
+      "packageJSONSHA256": "dc3ad29ef3bd19907cbeeda81cf6ea872f15cfff319b4663c7206d16a2a1cf40",
+      "saved": "LICENSE-unist-util-position@5.0.0"
+    },
+    "unist-util-visit-parents@6.0.2": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "6b00f27056337866d9206719b72a62c299a11903cdf622f307c92059723845e1",
+      "saved": "LICENSE-unist-util-visit-parents@6.0.2"
+    },
+    "unist-util-visit@5.1.0": {
+      "licenseSHA256": "63cb98b3f6abfb3c3592c16f88253c1bdc834087bf52671e8ce5609e4eb693cf",
+      "packageJSONSHA256": "98bf89a2331cae3cb26b4ad27a1cc78cb0f00edb9a7534491b111a34423e9a8a",
+      "saved": "LICENSE-unist-util-visit@5.1.0"
+    },
+    "vfile-location@5.0.3": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "b184de1be249393fe9c88056fca223ecc54fc94cbee4abf302a85f43eac6ccff",
+      "saved": "LICENSE-vfile-location@5.0.3"
+    },
+    "web-namespaces@2.0.1": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "01486c106b32b1780308c8a0410bffac280760e9377b54f9fee82c19f3c16d1d",
+      "saved": "LICENSE-web-namespaces@2.0.1"
+    },
+    "zwitch@2.0.4": {
+      "licenseSHA256": "ca4662cb5d1b738fbe5350c0d5485ba11773b4b7208974082ae6e129a52d631d",
+      "packageJSONSHA256": "01d215553746b3bd19ae5b31cab656830d38e40b6edea656b9b18256916cda0a",
+      "saved": "LICENSE-zwitch@2.0.4"
+    }
+  },
+  "controls": {
+    "scripts/hibernation-checkpoint-oracle/export.mjs": "99da307313ebddb8a6d5caf39a29296dea455c9b74a9ca3648bfd646da9bab04",
+    "scripts/hibernation-checkpoint-oracle/runtime-entry.mjs": "2161baee9e46b412ac3008c4f972a900cc6184cd9c916cfb585e09bcc64ad3a2"
+  },
+  "scope": "Actual parse5 7.3.0 tokenizer writes observed passively inside actual hast-util-raw 9.1.3; complete Web trees and consumed checkpoints are preserved. Native UTF-8 event endpoints are not inferred from expected HAST positions.",
+  "fixtureSHA256": "41ffc32434dc06ec98efe546ba704aa03e8f22247ea9bb10a29fbf43ab23662a",
+  "caseCount": 347
+}

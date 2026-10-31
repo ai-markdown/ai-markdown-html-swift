@@ -3,6 +3,8 @@
 import argparse
 import hashlib
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -28,6 +30,7 @@ def main():
         MANIFEST.write_text(json.dumps(actual, indent=2) + '\n')
     expected = json.loads(MANIFEST.read_text())
     assert actual == expected, 'Source, Package.swift, or license differs from the manifest; review and test changes before explicitly updating it'
+    subprocess.run([sys.executable, str(ROOT / 'scripts/hibernation-checkpoint-oracle/verify.py')], check=True)
     print(f"Source manifest verified: {len(actual['runtimeFiles'])} Swift files in the standalone AIMarkdownHTML package")
 
 if __name__ == '__main__':

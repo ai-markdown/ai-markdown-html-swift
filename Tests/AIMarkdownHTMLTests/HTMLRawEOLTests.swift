@@ -79,6 +79,15 @@ struct HTMLRawEOLTests {
             }
             var object = try #require(JSONSerialization.jsonObject(with: encoded(trace)) as? [String: Any])
             object.removeValue(forKey: "scope")
+            // This immutable historical diagnostic predates additive hibernation checkpoints. Keep every old
+            // token/node/event field exact; the new events have their own full 347-case real-Web matrix.
+            if let events = object["events"] as? [[String: Any]] {
+                object["events"] = events.filter { $0["kind"] as? String != "raw-hibernation-end" }.enumerated().map { index, event in
+                    var legacy = event
+                    legacy["sequence"] = index + 1
+                    return legacy
+                }
+            }
             traces.append(["id": item.id, "trace": object])
         }
         #expect(cases.count == 259)

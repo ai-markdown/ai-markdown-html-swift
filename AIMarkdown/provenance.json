@@ -14,6 +14,7 @@
   },
   "description": "Original implementation sources and SHA256 digests. Paths refer to the pinned source repository. Semantic changes are maintained directly in this fork, not reapplied during builds.",
   "additionalImplementationProvenance": [
-    "foreign-content-provenance.json"
+    "foreign-content-provenance.json",
+    "hibernation-checkpoint-provenance.json"
   ]
 }
