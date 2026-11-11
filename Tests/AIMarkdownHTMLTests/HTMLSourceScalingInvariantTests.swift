@@ -86,4 +86,38 @@ struct HTMLSourceScalingInvariantTests {
             #expect(try detachState(html, select: select, batched: true) == detachState(html, select: select, batched: false))
         }
     }
+
+    private func stackExitEvents(_ html: String, context: String, wholeStack: Bool) throws -> Data {
+        let recorder = SourceEventRecorder(bytes: Array(html.utf8), emissions: [])
+        let builder = HtmlTreeBuilder()
+        builder.sourceEvents = recorder
+        builder.comparesWholeStackForExits = wholeStack
+        defer { builder.sourceEvents = nil }
+        let roots = try builder.parseFragment(Array(html.utf8), try Element(Tag.valueOf(context), ""), [], ParseErrorList.noTracking(), ParseSettings(false, false, true))
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys]
+        let snapshot = recorder.result(roots)
+        return try encoder.encode([encoder.encode(snapshot.events), encoder.encode(snapshot.nodes)])
+    }
+
+    /// Stack exits are recorded from the mutation sites instead of a whole-stack snapshot per token (which copied the
+    /// stack on every push and made deep nesting quadratic); the events must match the snapshot comparison.
+    static let stackExitCorpus: [String] = [
+        "<b><i></b></i>x", "<a><p><a>x</a></p></a>", "<p><b><i><u>x</p>y", "<table><tr><td>a<b>b</td></tr>c</table>d",
+        "<table>foo<tr><td>x</table>", "<b>1<p>2</b>3</p>", "<a href=x>1<div>2<a>3</a></div>4</a>",
+        "<select><option>a<option>b</select>", "<template><td>x</td></template>", "<svg><g><foreignObject><p>x</svg>y",
+        "<ul><li>a<li>b<ul><li>c</ul></ul>", "<dl><dt>a<dd>b<dt>c</dl>", "<h1>a<h2>b</h1>c", "<form><form>x</form>",
+        "<nobr>a<nobr>b</nobr>", "<table><caption>x<table></caption></table>", "<button><button>x", "<li><p>x<li>y",
+        "<table><tbody><tr><th>x<td>y</tbody><tfoot><tr><td>z</table>", "<marquee><p>x</marquee>y", "<rb>x<rt>y<rp>z",
+        "<p>a\n\nb<pre>\nx</pre><textarea>\ny</textarea>",
+        "<div>" + String(repeating: "<span>", count: 40) + "x" + String(repeating: "</span>", count: 20) + "</div>",
+        String(repeating: "<b><i>", count: 15) + "x" + String(repeating: "</b>", count: 15),
+    ]
+
+    @Test(arguments: stackExitCorpus)
+    func incrementalStackExitsMatchWholeStackComparison(_ html: String) throws {
+        for context in ["body", "template", "table", "select"] {
+            #expect(try stackExitEvents(html, context: context, wholeStack: false) == stackExitEvents(html, context: context, wholeStack: true), "\(context)")
+        }
+    }
 }

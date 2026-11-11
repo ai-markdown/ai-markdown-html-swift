@@ -17,6 +17,16 @@ public class TreeBuilder {
     public var errors: ParseErrorList // null when not tracking errors
     public var settings: ParseSettings
     @usableFromInline var sourceEvents: SourceEventRecorder?
+    /// Source tracking only: stack changes of the token being processed. Elements below `stackTrackLow` have not
+    /// been touched since the token began; `stackTrackSaved` holds the original elements from `stackTrackLow` up to
+    /// the starting height in reverse order, saved lazily when a mutation first reaches below the mark. This replaces
+    /// a whole-stack snapshot per token, which forced a copy-on-write of the stack on every push and made deep
+    /// nesting quadratic.
+    @usableFromInline var stackTrackActive = false
+    @usableFromInline var stackTrackLow = 0
+    @usableFromInline var stackTrackSaved: [Element] = []
+    /// Test hook: report stack exits by comparing whole-stack snapshots, the reference the incremental tracking replaces.
+    var comparesWholeStackForExits = false
     /// hast-util-raw node sequence for `HTMLSourceParser`; empty for plain string parsing.
     var emissionSegments: [EmissionSegment] = []
     @usableFromInline var coalescesSourceCharacters = false
@@ -276,9 +286,43 @@ public class TreeBuilder {
     /// records the token as an injected generated text token.
     func receive(_ token: Token, synthetic: Bool, generatedCharacters: Bool = false) throws {
         sourceEvents?.token(token, generated: generatedCharacters)
-        let before = stack
+        try processTrackingStack(token)
+    }
+
+    /// Processes one token and, when source events are recorded, reports the elements that left the stack.
+    func processTrackingStack(_ token: Token) throws {
+        guard let events = sourceEvents else {
+            try process(token)
+            return
+        }
+        if comparesWholeStackForExits {
+            let before = stack
+            try process(token)
+            events.stackChanged(before: before, after: stack[...])
+            return
+        }
+        stackTrackActive = true
+        stackTrackLow = stack.count
+        stackTrackSaved.removeAll(keepingCapacity: true)
+        defer { stackTrackActive = false }
         try process(token)
-        sourceEvents?.stackChanged(before: before, after: stack)
+        // Elements below the mark are unchanged and stay on the stack; the open-elements stack never holds an element
+        // twice, so only the saved originals can have left, and only the part above the mark can still hold them.
+        guard !stackTrackSaved.isEmpty else { return }
+        events.stackChanged(before: stackTrackSaved.reversed(), after: stack[stackTrackLow...])
+    }
+
+    /// Call before any stack mutation that touches `index` or above (removal, insertion, replacement); pushes at the
+    /// top need no call.
+    @inlinable
+    func noteStackMutation(at index: Int) {
+        guard stackTrackActive, index < stackTrackLow else { return }
+        var position = stackTrackLow
+        while position > index {
+            position -= 1
+            stackTrackSaved.append(stack[position])
+        }
+        stackTrackLow = index
     }
 
     @discardableResult

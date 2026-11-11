@@ -243,6 +243,10 @@ public final class SourceEventRecorder {
         } else { event("implicit-close", node: identity, token: activeToken) }
     }
     public func stackChanged(before: [Element], after: [Element]) {
+        stackChanged(before: before, after: after[...])
+    }
+    /// Emits `stack-exit` for each element of `before`, in order, that is not in `after`.
+    func stackChanged<Before: Sequence<Element>>(before: Before, after: ArraySlice<Element>) {
         let remaining = Set(after.map(ObjectIdentifier.init))
         for element in before where !remaining.contains(ObjectIdentifier(element)) {
             event("stack-exit", node: id(element), token: activeToken)

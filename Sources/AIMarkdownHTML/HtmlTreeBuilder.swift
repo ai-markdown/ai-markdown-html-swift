@@ -212,9 +212,7 @@ class HtmlTreeBuilder: TreeBuilder {
                     character.dropLeadingByte()
                     sourceEvents?.token(token)
                     sourceEvents?.event("leading-newline-ignored", token: token.sourceEventID, note: dropped.map { "\($0[0])-\($0[1])" })
-                    let before = stack
-                    try process(token)
-                    sourceEvents?.stackChanged(before: before, after: stack)
+                    try processTrackingStack(token)
                     return
                 }
             case .EOF:
@@ -756,6 +754,7 @@ class HtmlTreeBuilder: TreeBuilder {
 
     @discardableResult
     func pop() -> Element {
+        noteStackMutation(at: stack.count - 1)
         let element = stack.removeLast()
         sourceEvents?.closed(element, token: currentToken)
         updateStackTrackingOnPop(element)
@@ -960,6 +959,7 @@ class HtmlTreeBuilder: TreeBuilder {
     @discardableResult
     func removeFromStack(_ el: Element) -> Bool {
         if let index = lastIndexOfStackElement(el) {
+            noteStackMutation(at: index)
             stack.remove(at: index)
             stackTrackingDirty = true
             return true
@@ -977,6 +977,7 @@ class HtmlTreeBuilder: TreeBuilder {
                 sourceEvents?.closed(stack[index], token: currentToken)
                 stack[index].setSourceRangeEnd(endRange.end)
             }
+            noteStackMutation(at: index)
             stack.removeSubrange(index..<stack.count)
             stackTrackingDirty = true
         }
@@ -985,6 +986,7 @@ class HtmlTreeBuilder: TreeBuilder {
     
     func popStackToClose(_ elName: ParsingStrings) {
         if let index = lastIndexOfStackName(in: elName) {
+            noteStackMutation(at: index)
             stack.removeSubrange(index..<stack.count)
             stackTrackingDirty = true
         }
@@ -996,6 +998,7 @@ class HtmlTreeBuilder: TreeBuilder {
     
     func popStackToClose(_ elNames: [[UInt8]]) {
         if let index = lastIndexOfStackName(in: elNames) {
+            noteStackMutation(at: index)
             stack.removeSubrange(index..<stack.count)
             stackTrackingDirty = true
         }
@@ -1003,6 +1006,7 @@ class HtmlTreeBuilder: TreeBuilder {
     
     func popStackToClose(_ elNames: Set<[UInt8]>) {
         if let index = lastIndexOfStackName(in: elNames) {
+            noteStackMutation(at: index)
             stack.removeSubrange(index..<stack.count)
             stackTrackingDirty = true
         }
@@ -1014,6 +1018,7 @@ class HtmlTreeBuilder: TreeBuilder {
             if (next.nodeNameUTF8() == elName) {
                 break
             } else {
+                noteStackMutation(at: pos)
                 stack.remove(at: pos)
                 stackTrackingDirty = true
             }
@@ -1051,11 +1056,13 @@ class HtmlTreeBuilder: TreeBuilder {
         }()
         
         guard let index else {
+            noteStackMutation(at: 0)
             stack.removeAll()
             stackTrackingDirty = true
             return
         }
         
+        noteStackMutation(at: stack.index(after: index))
         stack.removeSubrange(stack.index(after: index) ..< stack.endIndex)
         stackTrackingDirty = true
     }
@@ -1078,11 +1085,13 @@ class HtmlTreeBuilder: TreeBuilder {
         }()
         
         guard let index else {
+            noteStackMutation(at: 0)
             stack.removeAll()
             stackTrackingDirty = true
             return
         }
         
+        noteStackMutation(at: stack.index(after: index))
         stack.removeSubrange(stack.index(after: index) ..< stack.endIndex)
         stackTrackingDirty = true
     }
@@ -1109,11 +1118,20 @@ class HtmlTreeBuilder: TreeBuilder {
             return
         }
         
+        noteStackMutation(at: stack.index(after: index))
         stack.insert(input, at: stack.index(after: index))
         stackTrackingDirty = true
     }
     
     func replaceOnStack(_ out: Element, _ input: Element)throws {
+        var position = stack.count
+        while position > 0 {
+            position -= 1
+            if stack[position] == out {
+                noteStackMutation(at: position)
+                break
+            }
+        }
         try stack = replaceInQueue(stack, out, input)
         stackTrackingDirty = true
     }
